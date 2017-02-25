@@ -1,0 +1,14 @@
+version: 0.1.{build}
+before_build:
+- cmd: >-
+    nuget restore
+
+    nuget install xunit.runner.console -ExcludeVersion -OutputDirectory packages
+
+    nuget install xunit.runner.msbuild -ExcludeVersion -OutputDirectory packages
+build:
+  publish_nuget: true
+  publish_nuget_symbols: true
+  verbosity: minimal
+test:
+  assemblies: '**\*.Tests.dll'
