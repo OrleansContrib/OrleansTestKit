@@ -7,8 +7,15 @@ namespace Orleans.TestKit.Streams
 {
     public class TestStreamProviderManager : IStreamProviderManager
     {
+        private readonly TestKitOptions _options;
+
         private readonly Dictionary<string, TestStreamProvider> _streamProviders =
             new Dictionary<string, TestStreamProvider>();
+
+        public TestStreamProviderManager(TestKitOptions options)
+        {
+            _options = options;
+        }
 
         public IProvider GetProvider(string name)
         {
@@ -25,11 +32,11 @@ namespace Orleans.TestKit.Streams
             return _streamProviders.Values;
         }
 
-        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace,string providerName)
+        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace, string providerName)
         {
             var provider = GetOrAdd(providerName);
 
-           return provider.AddStreamProbe<T>(streamId, streamNamespace, providerName);
+            return provider.AddStreamProbe<T>(streamId, streamNamespace);
         }
 
         private TestStreamProvider GetOrAdd(string name)
@@ -39,7 +46,8 @@ namespace Orleans.TestKit.Streams
             if (_streamProviders.TryGetValue(name, out provider))
                 return provider;
 
-            provider = new TestStreamProvider();
+            provider = new TestStreamProvider(_options);
+            provider.Init(name, null, null).Wait();
             _streamProviders.Add(name, provider);
 
             return provider;

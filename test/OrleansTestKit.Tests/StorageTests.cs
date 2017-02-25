@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Orleans.TestKit.Tests.TestGrains;
+using TestGrains;
 using Xunit;
 
-namespace Orleans.TestKit.Tests.Tests
+namespace Orleans.TestKit.Tests
 {
     public class StorageTests : TestKitBase
     {

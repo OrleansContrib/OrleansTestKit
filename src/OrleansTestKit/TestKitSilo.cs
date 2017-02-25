@@ -22,16 +22,18 @@ namespace Orleans.TestKit
         private readonly TestGrainFactory _grainFactory;
 
         private readonly TestStreamProviderManager _streamProviderManager;
-        
+
         private readonly GrainStateManager _grainStateManager = new GrainStateManager();
 
         private readonly StorageManager _storageManager = new StorageManager();
 
+        public TestKitOptions Options { get; } = new TestKitOptions();
+
         public TestKitSilo()
         {
-            _grainFactory = new TestGrainFactory();
+            _grainFactory = new TestGrainFactory(Options);
 
-            _streamProviderManager = new TestStreamProviderManager();
+            _streamProviderManager = new TestStreamProviderManager(Options);
 
             var grainRuntime = new TestGrainRuntime(_grainFactory, _streamProviderManager);
 

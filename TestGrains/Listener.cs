@@ -1,9 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using Orleans;
 using Orleans.Streams;
-using Orleans.TestKit.Tests.TestGrainInterfaces;
+using TestInterfaces;
 
-namespace Orleans.TestKit.Tests.TestGrains
+namespace TestGrains
 {
     public class Listener : Grain, IListener
     {

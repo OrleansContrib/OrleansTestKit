@@ -3,14 +3,20 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Orleans.TestKit;
-using Orleans.TestKit.Tests.TestGrainInterfaces;
-using Orleans.TestKit.Tests.TestGrains;
+using TestGrains;
+using TestInterfaces;
 using Xunit;
 
 namespace Orleans.TestKit.Tests
 {
-    public class ProbeTests : TestKitBase
+    public class StrictGrainProbeTests : TestKitBase
     {
+        public StrictGrainProbeTests()
+        {
+            //Enables strict grain checking for all tests
+            Silo.Options.StrictGrainProbes = true;
+        }
+
         [Fact]
         public async Task SetupProbe()
         {
@@ -49,7 +55,7 @@ namespace Orleans.TestKit.Tests
         {
             IPing grain = Silo.CreateGrain<PingGrain>(1);
 
-            //This uses the wrong id for the IPong since this is hard coded within PingGrain
+            //This uses the correct id, but the wrong grain type
             var pong = Silo.AddProbe<IPong2>(22);
 
             grain.Invoking(p => p.Ping()).ShouldThrowExactly<Exception>();

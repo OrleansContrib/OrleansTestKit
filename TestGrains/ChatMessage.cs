@@ -1,4 +1,4 @@
-﻿namespace Orleans.TestKit.Tests.TestGrains
+﻿namespace TestGrains
 {
     public class ChatMessage
     {

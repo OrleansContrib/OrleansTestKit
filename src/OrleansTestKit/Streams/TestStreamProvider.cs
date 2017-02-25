@@ -8,7 +8,13 @@ namespace Orleans.TestKit.Streams
 {
     public class TestStreamProvider : IStreamProviderImpl
     {
-        private readonly Dictionary<TestStreamId, object> _streams = new Dictionary<TestStreamId, object>();
+        private readonly TestKitOptions _options;
+        private readonly Dictionary<TestStreamId, IStreamIdentity> _streams = new Dictionary<TestStreamId, IStreamIdentity>();
+
+        public TestStreamProvider(TestKitOptions options)
+        {
+            _options = options;
+        }
 
         public string Name { get; private set; }
 
@@ -16,15 +22,20 @@ namespace Orleans.TestKit.Streams
 
         public IAsyncStream<T> GetStream<T>(Guid streamId, string streamNamespace)
         {
-            object stream;
+            IStreamIdentity stream;
 
-            if (!_streams.TryGetValue(new TestStreamId(streamId, streamNamespace), out stream))
-            {
+            if (_streams.TryGetValue(new TestStreamId(streamId, streamNamespace), out stream))
+                return stream as IAsyncStream<T>;
+
+            if (_options.StrictStreamProbes)
+
                 throw new Exception(
                     $"Unable to find stream {streamId}-{streamNamespace}. Ensure a stream probe was added");
-            }
 
-            return stream as IAsyncStream<T>;
+            else
+                stream = AddStreamProbe<T>(streamId, streamNamespace);
+
+            return (IAsyncStream<T>) stream;
         }
 
         public Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
@@ -38,11 +49,11 @@ namespace Orleans.TestKit.Streams
 
         public Task Start() => TaskDone.Done;
 
-        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace, string providerName)
+        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace)
         {
             var id = new TestStreamId(streamId, streamNamespace);
 
-            var stream = new TestStream<T>(streamId, streamNamespace, providerName);
+            var stream = new TestStream<T>(streamId, streamNamespace, Name);
 
             _streams.Add(id, stream);
 
