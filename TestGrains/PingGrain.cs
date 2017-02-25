@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Orleans.TestKit.Tests.TestGrainInterfaces;
+using Orleans;
+using TestInterfaces;
 
-namespace Orleans.TestKit.Tests.TestGrains
+namespace TestGrains
 {
     public class PingGrain : Grain, IPing
     {

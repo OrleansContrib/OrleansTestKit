@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Orleans;
 
-namespace Orleans.TestKit.Tests.TestGrainInterfaces
+namespace TestInterfaces
 {
     /// <summary>
     /// Orleans grain communication interface that will save all greetings

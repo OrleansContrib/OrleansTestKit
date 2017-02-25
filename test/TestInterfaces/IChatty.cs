@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Orleans;
 
-namespace Orleans.TestKit.Tests.TestGrainInterfaces
+namespace TestInterfaces
 {
     public interface IChatty : IGrainWithIntegerKey
     {

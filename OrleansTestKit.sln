@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit.Tests", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit", "src\OrleansTestKit\OrleansTestKit.csproj", "{0E2CB8B5-1CBC-4786-9C95-B75317E3C311}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInterfaces", "test\TestInterfaces\TestInterfaces.csproj", "{C6D2816C-804F-439C-83AA-802612FE33CB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGrains", "TestGrains\TestGrains.csproj", "{99CA8A65-C761-4381-BB72-0D9F66128C45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,14 @@ Global
 		{0E2CB8B5-1CBC-4786-9C95-B75317E3C311}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E2CB8B5-1CBC-4786-9C95-B75317E3C311}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E2CB8B5-1CBC-4786-9C95-B75317E3C311}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6D2816C-804F-439C-83AA-802612FE33CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6D2816C-804F-439C-83AA-802612FE33CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6D2816C-804F-439C-83AA-802612FE33CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6D2816C-804F-439C-83AA-802612FE33CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99CA8A65-C761-4381-BB72-0D9F66128C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99CA8A65-C761-4381-BB72-0D9F66128C45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99CA8A65-C761-4381-BB72-0D9F66128C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99CA8A65-C761-4381-BB72-0D9F66128C45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,5 +44,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{1DBA9447-3F61-4F00-8DDF-2CA22D531D27} = {677DD212-4A95-45D9-9AFC-09AC505CAA43}
 		{0E2CB8B5-1CBC-4786-9C95-B75317E3C311} = {54C04CF7-7044-46E0-BC24-2A992F028557}
+		{C6D2816C-804F-439C-83AA-802612FE33CB} = {677DD212-4A95-45D9-9AFC-09AC505CAA43}
+		{99CA8A65-C761-4381-BB72-0D9F66128C45} = {677DD212-4A95-45D9-9AFC-09AC505CAA43}
 	EndGlobalSection
 EndGlobal

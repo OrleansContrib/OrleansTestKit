@@ -8,7 +8,13 @@ namespace Orleans.TestKit
 {
     internal class TestGrainFactory : IGrainFactory
     {
+        private readonly TestKitOptions _options;
         private readonly Dictionary<string, IGrain> _probes = new Dictionary<string, IGrain>();
+
+        public TestGrainFactory(TestKitOptions options)
+        {
+            _options = options;
+        }
 
         public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string grainClassNamePrefix = null)
             where TGrainInterface : IGrainWithGuidKey
@@ -65,22 +71,35 @@ namespace Orleans.TestKit
 
             IGrain grain;
 
-            if (!_probes.TryGetValue(key, out grain))
-            {
+            if (_probes.TryGetValue(key, out grain))
+                return (T) grain;
+
+            //If using strict grain probes, throw the exception
+            if (_options.StrictGrainProbes)
                 throw new Exception(
                     $"Probe {identity.IdentityString} does not exist for type {typeof(T).Name}. Ensure that it is added before the grain is tested.");
+            else
+            {
+                //Create a new mock
+                var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
+                
+                grain = mock?.Object;
+
+                //Save the newly created grain for the next call
+                _probes.Add(key, grain);
             }
 
             return (T) grain;
         }
 
+
         internal Mock<T> AddProbe<T>(IGrainIdentity identity) where T : class, IGrain
         {
-            var str = GetKey(identity, typeof(T));
+            var key = GetKey(identity, typeof(T));
 
             var mock = new Mock<T>();
 
-            _probes.Add(str, mock.Object);
+            _probes.Add(key, mock.Object);
 
             return mock;
         }

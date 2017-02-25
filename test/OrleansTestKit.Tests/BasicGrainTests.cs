@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Orleans.TestKit.Tests.TestGrainInterfaces;
-using Orleans.TestKit.Tests.TestGrains;
+using TestGrains;
+using TestInterfaces;
 using Xunit;
 
-namespace Orleans.TestKit.Tests.Tests
+namespace Orleans.TestKit.Tests
 {
     public class BasicGrainTests : TestKitBase
     {

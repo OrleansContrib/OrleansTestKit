@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Orleans.TestKit.Tests.TestGrains;
+using TestGrains;
 using Xunit;
 
-namespace Orleans.TestKit.Tests.Tests
+namespace Orleans.TestKit.Tests
 {
     public class StreamTests : TestKitBase
     {
@@ -46,7 +46,7 @@ namespace Orleans.TestKit.Tests.Tests
 
             const string msg = "Hello Chat";
 
-            chatty.Invoking(p => p.SendChat(msg)).ShouldThrowExactly<Exception>();
+            chatty.Invoking(p => p.SendChat(msg)).ShouldNotThrow();
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace Orleans.TestKit.Tests.Tests
 
             const string msg = "Hello Chat";
 
-            chatty.Invoking(p => p.SendChat(msg)).ShouldThrowExactly<Exception>();
+            chatty.Invoking(p => p.SendChat(msg)).ShouldNotThrow();
         }
 
         [Fact]

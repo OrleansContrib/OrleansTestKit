@@ -90,25 +90,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestGrains\HelloGrain.cs" />
-    <Compile Include="TestGrainInterfaces\IHello.cs" />
-    <Compile Include="TestGrainInterfaces\IPing.cs" />
-    <Compile Include="TestGrainInterfaces\IPong.cs" />
-    <Compile Include="TestGrainInterfaces\IPong2.cs" />
-    <Compile Include="TestGrains\HelloArchiveGrain.cs" />
-    <Compile Include="TestGrainInterfaces\IHelloArchive.cs" />
-    <Compile Include="TestGrains\ChatMessage.cs" />
-    <Compile Include="TestGrains\Chatty.cs" />
-    <Compile Include="TestGrainInterfaces\IChatty.cs" />
-    <Compile Include="TestGrainInterfaces\IListener.cs" />
-    <Compile Include="TestGrains\Listener.cs" />
-    <Compile Include="Tests\LoggerTests.cs" />
-    <Compile Include="TestGrains\PingGrain.cs" />
-    <Compile Include="Tests\StorageTests.cs" />
-    <Compile Include="Tests\BasicGrainTests.cs" />
-    <Compile Include="Tests\ProbeTests.cs" />
+    <Compile Include="LoggerTests.cs" />
+    <Compile Include="StrictStreamTests.cs" />
+    <Compile Include="StrictGrainProbeTests.cs" />
+    <Compile Include="StorageTests.cs" />
+    <Compile Include="BasicGrainTests.cs" />
+    <Compile Include="GrainProbeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests\StreamTests.cs" />
+    <Compile Include="StreamTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -118,6 +107,14 @@
     <ProjectReference Include="..\..\src\OrleansTestKit\OrleansTestKit.csproj">
       <Project>{0e2cb8b5-1cbc-4786-9c95-b75317e3c311}</Project>
       <Name>OrleansTestKit</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\TestGrains\TestGrains.csproj">
+      <Project>{99ca8a65-c761-4381-bb72-0d9f66128c45}</Project>
+      <Name>TestGrains</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestInterfaces\TestInterfaces.csproj">
+      <Project>{c6d2816c-804f-439c-83aa-802612fe33cb}</Project>
+      <Name>TestInterfaces</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
