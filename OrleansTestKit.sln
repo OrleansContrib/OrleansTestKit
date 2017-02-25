@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit", "src\Orlea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInterfaces", "test\TestInterfaces\TestInterfaces.csproj", "{C6D2816C-804F-439C-83AA-802612FE33CB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGrains", "TestGrains\TestGrains.csproj", "{99CA8A65-C761-4381-BB72-0D9F66128C45}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGrains", "test\TestGrains\TestGrains.csproj", "{99CA8A65-C761-4381-BB72-0D9F66128C45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

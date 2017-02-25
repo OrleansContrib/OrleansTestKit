@@ -66,7 +66,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\test\TestInterfaces\TestInterfaces.csproj">
+    <ProjectReference Include="..\TestInterfaces\TestInterfaces.csproj">
       <Project>{C6D2816C-804F-439C-83AA-802612FE33CB}</Project>
       <Name>TestInterfaces</Name>
     </ProjectReference>
