@@ -1,8 +1,10 @@
 using System;
+using System.Diagnostics;
 using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
 {
+    [DebuggerStepThrough]
     internal sealed class TestStreamId : IStreamIdentity
     {
         public Guid Guid { get; }

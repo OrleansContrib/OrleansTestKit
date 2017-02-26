@@ -59,8 +59,10 @@
   <ItemGroup>
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Chatty.cs" />
+    <Compile Include="BasicGrains.cs" />
     <Compile Include="HelloArchiveGrain.cs" />
     <Compile Include="HelloGrain.cs" />
+    <Compile Include="LifecycleGrain.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="PingGrain.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

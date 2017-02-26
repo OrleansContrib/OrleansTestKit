@@ -9,6 +9,7 @@ namespace Orleans.TestKit
     internal class TestGrainFactory : IGrainFactory
     {
         private readonly TestKitOptions _options;
+
         private readonly Dictionary<string, IGrain> _probes = new Dictionary<string, IGrain>();
 
         public TestGrainFactory(TestKitOptions options)

@@ -57,5 +57,38 @@ namespace Orleans.TestKit.Tests
 
             pong.Verify(p => p.Pong2(), Times.Never);
         }
+
+        [Fact]
+        public async Task GuidKeyProbe()
+        {
+            var probe = Silo.AddProbe<IGuidKeyGrain>(Guid.NewGuid());
+
+            var key = await probe.Object.GetKey();
+
+            probe.Should().NotBeNull();
+            key.Should().Be(Guid.Empty);
+        }
+
+        [Fact]
+        public async Task IntKeyProbe()
+        {
+            var probe = Silo.AddProbe<IIntegerKeyGrain>(2);
+
+            var key = await probe.Object.GetKey();
+
+            probe.Should().NotBeNull();
+            key.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task StringKeyProbe()
+        {
+            var probe = Silo.AddProbe<IStringKeyGrain>("ABC");
+
+            var key = await probe.Object.GetKey();
+
+            probe.Should().NotBeNull();
+            key.Should().BeNull();
+        }
     }
 }
