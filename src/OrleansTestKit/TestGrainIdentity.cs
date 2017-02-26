@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using Orleans.Core;
 
 namespace Orleans.TestKit
 {
+    [DebuggerStepThrough]
     public sealed class TestGrainIdentity : IGrainIdentity
     {
         private enum KeyType

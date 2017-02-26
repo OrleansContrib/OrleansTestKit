@@ -58,8 +58,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IChatty.cs" />
+    <Compile Include="IBasicGrains.cs" />
     <Compile Include="IHello.cs" />
     <Compile Include="IHelloArchive.cs" />
+    <Compile Include="ILifecycleGrain.cs" />
     <Compile Include="IListener.cs" />
     <Compile Include="IPing.cs" />
     <Compile Include="IPong.cs" />
