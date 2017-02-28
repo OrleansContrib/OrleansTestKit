@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("OrleansNonSiloTesting")]
+[assembly: AssemblyTitle("OrleansTestKit")]
 [assembly: AssemblyDescription("An testing framework for Microsoft Orleans that does not use a real silo")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OrleansContrib")]
-[assembly: AssemblyProduct("OrleansNonSiloTesting")]
+[assembly: AssemblyProduct("OrleansTestKit")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
