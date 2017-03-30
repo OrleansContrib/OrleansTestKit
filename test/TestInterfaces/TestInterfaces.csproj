@@ -61,6 +61,7 @@
     <Compile Include="IBasicGrains.cs" />
     <Compile Include="IHello.cs" />
     <Compile Include="IHelloArchive.cs" />
+    <Compile Include="IDateTimeService.cs" />
     <Compile Include="ILifecycleGrain.cs" />
     <Compile Include="IListener.cs" />
     <Compile Include="IPing.cs" />

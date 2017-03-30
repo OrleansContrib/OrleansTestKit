@@ -90,6 +90,7 @@
     <Compile Include="Loggers\TestLogger.cs" />
     <Compile Include="Streams\TestStreamProvider.cs" />
     <Compile Include="Streams\TestStreamProviderManager.cs" />
+    <Compile Include="TestServiceProvider.cs" />
     <Compile Include="Timers\TestTimer.cs" />
     <Compile Include="Timers\TestTimerRegistry.cs" />
     <Compile Include="TypeHelper.cs" />
