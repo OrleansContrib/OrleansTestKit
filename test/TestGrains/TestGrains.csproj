@@ -62,6 +62,7 @@
     <Compile Include="BasicGrains.cs" />
     <Compile Include="HelloArchiveGrain.cs" />
     <Compile Include="HelloGrain.cs" />
+    <Compile Include="HelloGrainWithServiceDependency.cs" />
     <Compile Include="LifecycleGrain.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="PingGrain.cs" />
