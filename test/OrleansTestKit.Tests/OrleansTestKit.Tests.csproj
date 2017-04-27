@@ -90,6 +90,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeactivationGrainTests.cs" />
     <Compile Include="ServiceProbeTests.cs" />
     <Compile Include="LoggerTests.cs" />
     <Compile Include="StrictStreamTests.cs" />
