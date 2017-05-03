@@ -5,6 +5,7 @@ using Orleans.Core;
 using Orleans.Runtime;
 using Orleans.TestKit.Storage;
 using Orleans.TestKit.Streams;
+using Orleans.TestKit.Timers;
 
 namespace Orleans.TestKit
 {
@@ -23,6 +24,8 @@ namespace Orleans.TestKit
 
         private readonly TestGrainFactory _grainFactory;
 
+        private readonly TestTimerRegistry _timerRegistry;
+
         private readonly TestStreamProviderManager _streamProviderManager;
 
         private readonly GrainStateManager _grainStateManager = new GrainStateManager();
@@ -37,9 +40,11 @@ namespace Orleans.TestKit
 
             _serviceProvider = new TestServiceProvider(Options);
 
+            _timerRegistry = new TestTimerRegistry();
+
             _streamProviderManager = new TestStreamProviderManager(Options);
 
-            var grainRuntime = new TestGrainRuntime(_grainFactory, _streamProviderManager);
+            var grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
 
             _grainCreator = new GrainCreator(_serviceProvider, () => grainRuntime);
         }
@@ -119,11 +124,15 @@ namespace Orleans.TestKit
 
         #region Timers
 
-        //        protected void FireAllTimers()
-        //        {
-        //           _grainRuntime.FireAllTimers();
-        //        }
+        public void FireTimer(int index)
+        {
+            _timerRegistry.Fire(index);
+        }
 
+        public void FireAllTimers()
+        {
+            _timerRegistry.FireAll();
+        }
 
         #endregion
 

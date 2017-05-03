@@ -24,10 +24,10 @@ namespace Orleans.TestKit
 
         public IServiceProvider ServiceProvider { get; }
 
-        public TestGrainRuntime(IGrainFactory grainFactory,
-            IStreamProviderManager streamProviderManager)
+        public TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IStreamProviderManager streamProviderManager)
         {
             GrainFactory = grainFactory;
+            TimerRegistry = timerRegistry;
             StreamProviderManager = streamProviderManager;
         }
 
