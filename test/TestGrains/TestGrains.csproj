@@ -64,6 +64,7 @@
     <Compile Include="HelloGrain.cs" />
     <Compile Include="HelloGrainWithServiceDependency.cs" />
     <Compile Include="DeactivationGrain.cs" />
+    <Compile Include="HelloTimers.cs" />
     <Compile Include="LifecycleGrain.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="PingGrain.cs" />
