@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using Moq;
 using Orleans.Core;
@@ -19,6 +20,8 @@ namespace Orleans.TestKit
         private bool _isGrainCreated;
 
         private readonly GrainCreator _grainCreator;
+
+        private readonly TestGrainRuntime _grainRuntime;
 
         private readonly TestServiceProvider _serviceProvider;
 
@@ -44,9 +47,9 @@ namespace Orleans.TestKit
 
             _streamProviderManager = new TestStreamProviderManager(Options);
 
-            var grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
+            _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
 
-            _grainCreator = new GrainCreator(_serviceProvider, () => grainRuntime);
+            _grainCreator = new GrainCreator(_serviceProvider, () => _grainRuntime);
         }
 
         #region CreateGrains
@@ -175,6 +178,15 @@ namespace Orleans.TestKit
 
         public Mock<T> AddServiceProbe<T>() where T : class
             => _serviceProvider.AddServiceProbe<T>();
+
+        #endregion
+
+        #region Verifies
+
+        public void VerifyRuntime(Expression<Action<IGrainRuntime>> expression, Func<Times> times)
+        {
+            _grainRuntime.Mock.Verify(expression, times);
+        }
 
         #endregion
 

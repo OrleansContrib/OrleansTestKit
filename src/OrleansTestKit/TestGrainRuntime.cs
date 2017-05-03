@@ -1,4 +1,5 @@
 using System;
+using Moq;
 using Orleans.Runtime;
 using Orleans.Streams;
 using Orleans.TestKit.Loggers;
@@ -9,6 +10,8 @@ namespace Orleans.TestKit
     internal class TestGrainRuntime : IGrainRuntime
     {
         private readonly TestLogManager _logManager = new TestLogManager();
+
+        public readonly Mock<IGrainRuntime> Mock = new Mock<IGrainRuntime>();
 
         public Guid ServiceId { get; } = Guid.NewGuid();
 
@@ -35,12 +38,12 @@ namespace Orleans.TestKit
 
         public void DeactivateOnIdle(Grain grain)
         {
-            throw new NotImplementedException();
+            Mock.Object.DeactivateOnIdle(grain);
         }
 
         public void DelayDeactivation(Grain grain, TimeSpan timeSpan)
         {
-            throw new NotImplementedException();
+            Mock.Object.DelayDeactivation(grain, timeSpan);
         }
     }
 }
