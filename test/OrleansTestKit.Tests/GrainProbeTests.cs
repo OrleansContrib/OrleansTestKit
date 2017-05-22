@@ -90,5 +90,20 @@ namespace Orleans.TestKit.Tests
             probe.Should().NotBeNull();
             key.Should().BeNull();
         }
+
+        [Fact]
+        public async Task FactoryProbe() 
+        {
+
+            var pong = new Mock<IPong>();
+
+            this.Silo.AddProbeFactory<IPong>(identity => pong);
+
+            var grain = this.Silo.CreateGrain<PingGrain>(1);
+
+            await grain.Ping();
+
+            pong.Verify(p => p.Pong(), Times.Once);
+        }
     }
 }

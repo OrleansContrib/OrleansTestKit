@@ -185,6 +185,9 @@ namespace Orleans.TestKit
         public Mock<T> AddProbe<T>(string id) where T : class, IGrain
             => _grainFactory.AddProbe<T>(new TestGrainIdentity(id));
 
+        public void AddProbeFactory<T>(Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain
+            => _grainFactory.AddProbeFactory<T>(factory);
+
         #endregion
 
         #region Storage & State
