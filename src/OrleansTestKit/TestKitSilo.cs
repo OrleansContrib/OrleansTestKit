@@ -143,11 +143,16 @@ namespace Orleans.TestKit
 
         public TestStream<T> AddStreamProbe<T>() where T : class => AddStreamProbe<T>(Guid.Empty);
 
-        public TestStream<T> AddStreamProbe<T>(Guid id, string streamNamespace) where T : class
-            => _streamProviderManager.AddStreamProbe<T>(id, streamNamespace, "Default");
-
         public TestStream<T> AddStreamProbe<T>(Guid id) where T : class
             => AddStreamProbe<T>(id, typeof(T).Name);
+
+        public TestStream<T> AddStreamProbe<T>(Guid id, string streamNamespace) where T : class
+            => AddStreamProbe<T>(id, streamNamespace, "Default");
+
+        public TestStream<T> AddStreamProbe<T>(Guid id, string streamNamespace, string providerName) where T : class
+            => _streamProviderManager.AddStreamProbe<T>(id, streamNamespace, providerName);
+
+        
 
         #endregion
 
