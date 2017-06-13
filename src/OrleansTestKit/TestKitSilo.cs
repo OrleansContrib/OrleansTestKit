@@ -49,7 +49,7 @@ namespace Orleans.TestKit
 
             _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
 
-            _grainCreator = new GrainCreator(_serviceProvider, () => _grainRuntime);
+            _grainCreator = new GrainCreator(new DefaultGrainActivator(), () => _grainRuntime);
         }
 
         #region CreateGrains
@@ -73,6 +73,13 @@ namespace Orleans.TestKit
 
             Grain grain;
 
+            var grainContext = new TestGrainActivationContext() 
+            {
+                ActivationServices = _serviceProvider,
+                GrainIdentity = identity,
+                GrainType = typeof(T)
+            };
+
             //Check to see if the grain is stateful
             if (typeof(T).IsSubclassOfRawGeneric(typeof(Grain<>)))
             {
@@ -87,7 +94,7 @@ namespace Orleans.TestKit
                 var storage = _storageManager.AddStorage<T>(identity);
 
                 //Create a new stateful grain
-                grain = _grainCreator.CreateGrainInstance(typeof(T), identity, stateType, storage);
+                grain = _grainCreator.CreateGrainInstance(grainContext, stateType, storage);
 
                 if (grain == null)
                     throw new Exception($"Unable to instantiate stateful grain {typeof(T)} properly");
@@ -101,7 +108,7 @@ namespace Orleans.TestKit
             else
             {
                 //Create a stateless grain
-                grain = _grainCreator.CreateGrainInstance(typeof(T), identity) as T;
+                grain = _grainCreator.CreateGrainInstance(grainContext) as T;
 
                 if (grain == null)
                     throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
