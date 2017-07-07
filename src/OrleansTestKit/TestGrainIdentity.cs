@@ -40,9 +40,9 @@ namespace Orleans.TestKit
             }
         }
 
-        public bool IsClient => throw new NotImplementedException();
+        public bool IsClient { get { throw new NotImplementedException(); } }
 
-        public int TypeCode => throw new NotImplementedException();
+        public int TypeCode { get { throw new NotImplementedException(); } }
 
         public TestGrainIdentity(Guid id)
         {
