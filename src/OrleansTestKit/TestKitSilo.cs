@@ -19,7 +19,7 @@ namespace Orleans.TestKit
         /// </summary>
         private bool _isGrainCreated;
 
-        private readonly GrainCreator _grainCreator;
+        private readonly TestGrainCreator _grainCreator;
 
         private readonly TestGrainRuntime _grainRuntime;
 
@@ -49,7 +49,7 @@ namespace Orleans.TestKit
 
             _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
 
-            _grainCreator = new GrainCreator(new DefaultGrainActivator(), () => _grainRuntime);
+            _grainCreator = new TestGrainCreator(_grainRuntime);
         }
 
         #region CreateGrains

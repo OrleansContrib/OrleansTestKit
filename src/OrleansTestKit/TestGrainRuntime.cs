@@ -27,6 +27,8 @@ namespace Orleans.TestKit
 
         public IServiceProvider ServiceProvider { get; }
 
+        public SiloAddress SiloAddress { get { return SiloAddress.Zero; } }
+
         public TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IStreamProviderManager streamProviderManager)
         {
             GrainFactory = grainFactory;

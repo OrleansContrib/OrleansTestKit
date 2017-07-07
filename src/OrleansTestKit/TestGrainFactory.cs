@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Orleans.Core;
+using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
@@ -103,6 +104,10 @@ namespace Orleans.TestKit
             _probes.Add(key, mock.Object);
 
             return mock;
+        }
+
+        public void BindGrainReference(IAddressable grain) {
+            throw new NotImplementedException();
         }
     }
 }
