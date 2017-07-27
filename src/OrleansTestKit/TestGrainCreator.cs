@@ -42,13 +42,12 @@ namespace Orleans.TestKit
 
         public Grain CreateGrainInstance(IGrainActivationContext context, Type stateType, IStorage storage)
         {
-            var grain = CreateGrainInstance(context);
-            var baseType = context.GrainType.BaseType;
+            var grain = CreateGrainInstance(context);            
 
-            if(baseType.IsGenericType && baseType.GetGenericTypeDefinition() == typeof(Grain<>))
+            if(TypeHelper.IsSubclassOfRawGeneric(context.GrainType, typeof(Grain<>)))
             {
                 //Set the state value
-                var stateProperty = baseType.GetProperty("State", BindingFlags.Instance | BindingFlags.NonPublic);
+                var stateProperty = TypeHelper.GetProperty(context.GrainType, "State");
                 var stateValue = Activator.CreateInstance(stateType);
 
                 stateProperty.SetValue(grain, stateValue);
