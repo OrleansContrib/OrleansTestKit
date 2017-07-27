@@ -99,7 +99,7 @@ namespace Orleans.TestKit
                 if (grain == null)
                     throw new Exception($"Unable to instantiate stateful grain {typeof(T)} properly");
 
-                var stateProperty = GetProperty(typeof(T), "State");
+                var stateProperty = TypeHelper.GetProperty(typeof(T), "State");
 
                 var state = stateProperty?.GetValue(grain);
 
@@ -118,17 +118,7 @@ namespace Orleans.TestKit
             grain.OnActivateAsync().Wait(1000);
 
             return grain as T;
-        }
-
-        private static PropertyInfo GetProperty(Type t, string name)
-        {
-            var info = t.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (info == null && t.BaseType != null)
-                return GetProperty(t.BaseType, name);
-
-            return info;
-        }
+        }        
 
         #endregion
 
