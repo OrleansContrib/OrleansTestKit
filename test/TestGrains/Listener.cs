@@ -18,7 +18,7 @@ namespace TestGrains
             {
                 _receivedCount++;
 
-                return TaskDone.Done;
+                return Task.CompletedTask;
             });
 
             return base.OnActivateAsync();

@@ -1,0 +1,30 @@
+root = true
+
+[*]
+indent_style = space
+
+[*.cs]
+indent_size = 4
+insert_final_newline = true
+
+[*.{csproj,json}]
+indent_size = 2
+
+[*.cs]
+dotnet_sort_system_directives_first = true
+
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_elsewhere = true:warning
+
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning

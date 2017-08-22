@@ -12,6 +12,8 @@ namespace Orleans.TestKit.Streams
 
         public override Guid HandleId { get {throw new NotImplementedException();} }
 
+        public override string ProviderName { get { throw new NotImplementedException(); } }
+
         public TestStreamSubscriptionHandle(Action unsubscribe)
         {
             _unsubscribe = unsubscribe;
@@ -20,7 +22,7 @@ namespace Orleans.TestKit.Streams
         public override Task UnsubscribeAsync()
         {
             _unsubscribe();
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
         public override Task<StreamSubscriptionHandle<T>> ResumeAsync(IAsyncObserver<T> observer,

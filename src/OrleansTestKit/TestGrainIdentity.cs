@@ -40,6 +40,10 @@ namespace Orleans.TestKit
             }
         }
 
+        public bool IsClient { get { throw new NotImplementedException(); } }
+
+        public int TypeCode { get { throw new NotImplementedException(); } }
+
         public TestGrainIdentity(Guid id)
         {
             PrimaryKey = id;
@@ -64,6 +68,11 @@ namespace Orleans.TestKit
         }
 
         public Guid GetPrimaryKey(out string keyExt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public uint GetUniformHashCode() 
         {
             throw new NotImplementedException();
         }

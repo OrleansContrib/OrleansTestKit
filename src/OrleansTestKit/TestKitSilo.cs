@@ -19,7 +19,7 @@ namespace Orleans.TestKit
         /// </summary>
         private bool _isGrainCreated;
 
-        private readonly GrainCreator _grainCreator;
+        private readonly TestGrainCreator _grainCreator;
 
         private readonly TestGrainRuntime _grainRuntime;
 
@@ -49,7 +49,7 @@ namespace Orleans.TestKit
 
             _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
 
-            _grainCreator = new GrainCreator(_serviceProvider, () => _grainRuntime);
+            _grainCreator = new TestGrainCreator(_grainRuntime);
         }
 
         #region CreateGrains
@@ -73,6 +73,13 @@ namespace Orleans.TestKit
 
             Grain grain;
 
+            var grainContext = new TestGrainActivationContext() 
+            {
+                ActivationServices = _serviceProvider,
+                GrainIdentity = identity,
+                GrainType = typeof(T)
+            };
+
             //Check to see if the grain is stateful
             if (typeof(T).IsSubclassOfRawGeneric(typeof(Grain<>)))
             {
@@ -87,12 +94,12 @@ namespace Orleans.TestKit
                 var storage = _storageManager.AddStorage<T>(identity);
 
                 //Create a new stateful grain
-                grain = _grainCreator.CreateGrainInstance(typeof(T), identity, stateType, storage);
+                grain = _grainCreator.CreateGrainInstance(grainContext, stateType, storage);
 
                 if (grain == null)
                     throw new Exception($"Unable to instantiate stateful grain {typeof(T)} properly");
 
-                var stateProperty = GetProperty(typeof(T), "State");
+                var stateProperty = TypeHelper.GetProperty(typeof(T), "State");
 
                 var state = stateProperty?.GetValue(grain);
 
@@ -101,7 +108,7 @@ namespace Orleans.TestKit
             else
             {
                 //Create a stateless grain
-                grain = _grainCreator.CreateGrainInstance(typeof(T), identity) as T;
+                grain = _grainCreator.CreateGrainInstance(grainContext) as T;
 
                 if (grain == null)
                     throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
@@ -111,17 +118,7 @@ namespace Orleans.TestKit
             grain.OnActivateAsync().Wait(1000);
 
             return grain as T;
-        }
-
-        private static PropertyInfo GetProperty(Type t, string name)
-        {
-            var info = t.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (info == null && t.BaseType != null)
-                return GetProperty(t.BaseType, name);
-
-            return info;
-        }
+        }        
 
         #endregion
 

@@ -17,7 +17,7 @@ namespace TestGrains
         {
             Deactivated = true;
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
     }
 }

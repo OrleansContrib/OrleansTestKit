@@ -11,14 +11,14 @@ namespace TestGrains
         {
             base.DeactivateOnIdle();
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
         public new Task DelayDeactivation(TimeSpan timeSpan)
         {
             base.DelayDeactivation(timeSpan);
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
     }
 }

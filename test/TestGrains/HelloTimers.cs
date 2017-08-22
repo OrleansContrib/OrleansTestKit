@@ -28,13 +28,13 @@ namespace TestGrains
         private Task OnTimer0()
         {
             State.Timer0Fired = true;
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
         private Task OnTimer1()
         {
             State.Timer1Fired = true;
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
     }
 

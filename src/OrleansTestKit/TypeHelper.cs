@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 namespace Orleans.TestKit
 {
@@ -24,6 +25,16 @@ namespace Orleans.TestKit
             }
 
             return false;
+        }
+
+        public static PropertyInfo GetProperty(Type t, string name)
+        {
+            var info = t.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (info == null && t.BaseType != null)
+                return GetProperty(t.BaseType, name);
+
+            return info;
         }
     }
 }
