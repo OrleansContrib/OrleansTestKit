@@ -122,6 +122,7 @@
     <Compile Include="HelloGrain.cs" />
     <Compile Include="HelloGrainWithServiceDependency.cs" />
     <Compile Include="DeactivationGrain.cs" />
+    <Compile Include="HelloReminders.cs" />
     <Compile Include="HelloTimers.cs" />
     <Compile Include="LifecycleGrain.cs" />
     <Compile Include="Listener.cs" />

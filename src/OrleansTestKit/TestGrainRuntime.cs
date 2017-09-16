@@ -29,11 +29,12 @@ namespace Orleans.TestKit
 
         public SiloAddress SiloAddress { get { return SiloAddress.Zero; } }
 
-        public TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IStreamProviderManager streamProviderManager)
+        public TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IStreamProviderManager streamProviderManager, IReminderRegistry reminderRegistry)
         {
             GrainFactory = grainFactory;
             TimerRegistry = timerRegistry;
             StreamProviderManager = streamProviderManager;
+            ReminderRegistry = reminderRegistry;
         }
 
         public Orleans.Runtime.Logger GetLogger(string loggerName) => _logManager.GetLogger(loggerName);

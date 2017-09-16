@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using Moq;
 using Orleans.Core;
 using Orleans.Runtime;
+using Orleans.TestKit.Reminders;
 using Orleans.TestKit.Storage;
 using Orleans.TestKit.Streams;
 using Orleans.TestKit.Timers;
@@ -29,6 +31,8 @@ namespace Orleans.TestKit
 
         private readonly TestTimerRegistry _timerRegistry;
 
+        public TestReminderRegistry ReminderRegistry { get; }
+
         private readonly TestStreamProviderManager _streamProviderManager;
 
         private readonly GrainStateManager _grainStateManager = new GrainStateManager();
@@ -45,9 +49,11 @@ namespace Orleans.TestKit
 
             _timerRegistry = new TestTimerRegistry();
 
+            ReminderRegistry = new TestReminderRegistry();
+
             _streamProviderManager = new TestStreamProviderManager(Options);
 
-            _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager);
+            _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager, ReminderRegistry);
 
             _grainCreator = new TestGrainCreator(_grainRuntime);
         }
@@ -114,6 +120,13 @@ namespace Orleans.TestKit
                     throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
             }
 
+            //Check if there are any reminders for this grain
+            var remindable = grain as IRemindable;
+
+            //Set the reminder target
+            if (remindable != null)
+                ReminderRegistry.SetGrainTarget(remindable);
+
             //Emulate the grain's lifecycle
             grain.OnActivateAsync().Wait(1000);
 
@@ -133,6 +146,14 @@ namespace Orleans.TestKit
         {
             _timerRegistry.FireAll();
         }
+
+        #endregion
+
+        #region Reminders
+
+        public Task FireReminder(string reminderName, TickStatus tickStatus = new TickStatus()) => ReminderRegistry.FireReminder(reminderName, tickStatus);
+
+        public Task FireAllReminders(TickStatus tickStatus = new TickStatus()) => ReminderRegistry.FireAllReminders(tickStatus);
 
         #endregion
 
