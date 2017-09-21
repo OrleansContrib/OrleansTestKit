@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeactivationGrainTests.cs" />
+    <Compile Include="DIGrainTests.cs" />
     <Compile Include="ReminderTests.cs" />
     <Compile Include="ServiceProbeTests.cs" />
     <Compile Include="LoggerTests.cs" />

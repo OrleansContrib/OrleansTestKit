@@ -115,9 +115,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicGrains.cs" />
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Chatty.cs" />
-    <Compile Include="BasicGrains.cs" />
+    <Compile Include="DIGrain.cs" />
     <Compile Include="HelloArchiveGrain.cs" />
     <Compile Include="HelloGrain.cs" />
     <Compile Include="HelloGrainWithServiceDependency.cs" />

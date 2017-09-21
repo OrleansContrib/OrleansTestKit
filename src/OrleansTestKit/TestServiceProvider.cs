@@ -41,7 +41,14 @@ namespace Orleans.TestKit
             }
         }
 
-        internal Mock<T> AddServiceProbe<T>() where T : class
+        public Mock<T> AddServiceProbe<T>(Mock<T> mock) where T : class
+        {
+            _services.Add(typeof(T), mock);
+
+            return mock;
+        }
+
+        public Mock<T> AddServiceProbe<T>() where T : class
         {
             var mock = new Mock<T>();
 
