@@ -25,7 +25,7 @@ namespace Orleans.TestKit
 
         private readonly TestGrainRuntime _grainRuntime;
 
-        private readonly TestServiceProvider _serviceProvider;
+        public TestServiceProvider ServiceProvider { get; }
 
         private readonly TestGrainFactory _grainFactory;
 
@@ -45,7 +45,7 @@ namespace Orleans.TestKit
         {
             _grainFactory = new TestGrainFactory(Options);
 
-            _serviceProvider = new TestServiceProvider(Options);
+            ServiceProvider = new TestServiceProvider(Options);
 
             _timerRegistry = new TestTimerRegistry();
 
@@ -53,7 +53,7 @@ namespace Orleans.TestKit
 
             _streamProviderManager = new TestStreamProviderManager(Options);
 
-            _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager, ReminderRegistry);
+            _grainRuntime = new TestGrainRuntime(_grainFactory, _timerRegistry, _streamProviderManager, ReminderRegistry, ServiceProvider);
 
             _grainCreator = new TestGrainCreator(_grainRuntime);
         }
@@ -81,9 +81,9 @@ namespace Orleans.TestKit
 
             var grainContext = new TestGrainActivationContext() 
             {
-                ActivationServices = _serviceProvider,
+                ActivationServices = ServiceProvider,
                 GrainIdentity = identity,
-                GrainType = typeof(T)
+                GrainType = typeof(T),
             };
 
             //Check to see if the grain is stateful
@@ -200,7 +200,7 @@ namespace Orleans.TestKit
         #region Services
 
         public Mock<T> AddServiceProbe<T>() where T : class
-            => _serviceProvider.AddServiceProbe<T>();
+            => ServiceProvider.AddServiceProbe<T>();
 
         #endregion
 
