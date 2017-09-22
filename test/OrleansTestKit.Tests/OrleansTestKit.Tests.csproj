@@ -1,14 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk"> 
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
-    <AssemblyName>OrleansTestKit.Tests</AssemblyName>
     <RootNamespace>Orleans.TestKit.Tests</RootNamespace>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Company>OrleansContrib</Company>
-    <Product>OrleansTestKit</Product>
-    <Description>A testing framework for Microsoft Orleans that does not use a real silo</Description>
-    <Copyright>Copyright ©  2017</Copyright>
-    <Version>0.1.3</Version>
   </PropertyGroup> 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
