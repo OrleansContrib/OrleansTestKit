@@ -15,7 +15,7 @@ namespace Orleans.TestKit.Tests
             _output = output;
         }
 
-        [Fact(Skip = "This isn't a real test since we can't assert anything")]
+        [Fact]
         public void ConsoleLog()
         {
             const string greeting = "Bonjour";
@@ -25,7 +25,7 @@ namespace Orleans.TestKit.Tests
             grain.Invoking(g => g.SayHello(greeting)).ShouldNotThrow();
         }
 
-        [Fact(Skip = "This isn't a real test since we can't assert anything")]
+        [Fact]
         public void XUnitLog()
         {
             const string greeting = "Bonjour";
