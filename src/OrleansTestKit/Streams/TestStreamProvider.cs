@@ -43,12 +43,12 @@ namespace Orleans.TestKit.Streams
         {
             Name = name;
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
-        public Task Close() => TaskDone.Done;
+        public Task Close() => Task.CompletedTask;
 
-        public Task Start() => TaskDone.Done;
+        public Task Start() => Task.CompletedTask;
 
         public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace)
         {
