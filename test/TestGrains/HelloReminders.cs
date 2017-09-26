@@ -13,9 +13,10 @@ namespace TestGrains
         public Task RegisterReminder(string reminderName,TimeSpan dueTime, TimeSpan period) =>
             this.RegisterOrUpdateReminder(reminderName, dueTime, period);
 
-        async Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
+        Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
         {
             FiredReminders.Add(reminderName);
+            return Task.CompletedTask;
         }
 
         public async Task UnregisterReminder(string reminderName)

@@ -16,21 +16,21 @@ namespace Orleans.TestKit.Storage
         {
             Stats.Clears++;
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
         public Task WriteStateAsync()
         {
             Stats.Writes++;
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
 
         public Task ReadStateAsync()
         {
             Stats.Reads++;
 
-            return TaskDone.Done;
+            return Task.CompletedTask;
         }
     }
 }

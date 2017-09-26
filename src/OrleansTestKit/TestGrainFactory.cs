@@ -13,6 +13,8 @@ namespace Orleans.TestKit
 
         private readonly Dictionary<string, IGrain> _probes = new Dictionary<string, IGrain>();
 
+        private readonly Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>> _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>>();
+
         public TestGrainFactory(TestKitOptions options)
         {
             _options = options;
@@ -82,8 +84,17 @@ namespace Orleans.TestKit
                     $"Probe {identity.IdentityString} does not exist for type {typeof(T).Name}. Ensure that it is added before the grain is tested.");
             else
             {
-                //Create a new mock
-                var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
+                IMock<IGrain> mock;
+                Func<IGrainIdentity, IMock<IGrain>> factory;
+
+                if(_probeFactories.TryGetValue(typeof(T), out factory)) 
+                {
+                    mock = factory(identity);
+                }
+                else 
+                {
+                    mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
+                }
                 
                 grain = mock?.Object;
 
@@ -104,6 +115,11 @@ namespace Orleans.TestKit
             _probes.Add(key, mock.Object);
 
             return mock;
+        }
+
+        internal void AddProbeFactory<T>(Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain 
+        {
+            _probeFactories.Add(typeof(T), factory);
         }
 
         public void BindGrainReference(IAddressable grain) {
