@@ -20,11 +20,13 @@ namespace Orleans.TestKit.Streams
         public IProvider GetProvider(string name)
         {
             TestStreamProvider provider;
+            if (_streamProviders.TryGetValue(name, out provider))
+                return provider;
 
-            if (!_streamProviders.TryGetValue(name, out provider))
+            if (_options.StrictGrainProbes)
                 throw new Exception($"Could not find stream provider {name}");
 
-            return provider;
+            return Add(name);
         }
 
         public IEnumerable<IStreamProvider> GetStreamProviders()
@@ -42,11 +44,16 @@ namespace Orleans.TestKit.Streams
         private TestStreamProvider GetOrAdd(string name)
         {
             TestStreamProvider provider;
-
             if (_streamProviders.TryGetValue(name, out provider))
                 return provider;
+            
+            return Add(name);
+        }
 
-            provider = new TestStreamProvider(_options);
+        private TestStreamProvider Add(string name)
+        {
+            var provider = new TestStreamProvider(_options);
+            
             provider.Init(name, null, null).Wait();
             _streamProviders.Add(name, provider);
 
