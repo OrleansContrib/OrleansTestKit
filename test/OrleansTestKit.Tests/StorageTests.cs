@@ -28,7 +28,7 @@ namespace Orleans.TestKit.Tests
             greetings.Should().Contain(greeting2);
 
             Silo.Storage(grain).Writes.Should().Be(2);
-            Silo.State<GreetingArchive>(grain).Greetings.ShouldAllBeEquivalentTo(greetings);
+            Silo.State(grain).Greetings.ShouldAllBeEquivalentTo(greetings);
         }
     }
 }
