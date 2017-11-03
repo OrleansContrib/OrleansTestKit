@@ -176,14 +176,14 @@ namespace Orleans.TestKit
 
         #region Probes
 
-        public Mock<T> AddProbe<T>(long id) where T : class, IGrain
-            => _grainFactory.AddProbe<T>(new TestGrainIdentity(id));
+        public Mock<T> AddProbe<T>(long id, string classPrefix = null) where T : class, IGrain
+            => _grainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
 
-        public Mock<T> AddProbe<T>(Guid id) where T : class, IGrain
-            => _grainFactory.AddProbe<T>(new TestGrainIdentity(id));
+        public Mock<T> AddProbe<T>(Guid id, string classPrefix = null) where T : class, IGrain
+            => _grainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
 
-        public Mock<T> AddProbe<T>(string id) where T : class, IGrain
-            => _grainFactory.AddProbe<T>(new TestGrainIdentity(id));
+        public Mock<T> AddProbe<T>(string id, string classPrefix = null) where T : class, IGrain
+            => _grainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
 
         public void AddProbeFactory<T>(Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain
             => _grainFactory.AddProbeFactory<T>(factory);

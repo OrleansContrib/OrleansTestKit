@@ -105,5 +105,21 @@ namespace Orleans.TestKit.Tests
 
             pong.Verify(p => p.Pong(), Times.Once);
         }
+
+        [Fact]
+        public async Task ProbeWithClassPrefix()
+        {
+            Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
+            Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
+
+            var managerGrain = this.Silo.CreateGrain<DeviceManagerGrain>(0);
+            var iosGrain = await managerGrain.GetDeviceGrain("IOS");
+            var androidGrain = await managerGrain.GetDeviceGrain("Android");
+
+
+            (await iosGrain.GetDeviceType()).Should().Equals("IOS");
+            (await iosGrain.GetDeviceType()).Should().Equals("Android");
+
+        }
     }
 }

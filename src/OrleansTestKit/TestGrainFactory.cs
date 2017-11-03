@@ -62,16 +62,17 @@ namespace Orleans.TestKit
             throw new NotImplementedException();
         }
 
-        private static string GetKey(IGrainIdentity identity, Type stateType)
-            => $"{stateType.FullName}-{identity.IdentityString}";
+        private static string GetKey(IGrainIdentity identity, Type stateType, string classPrefix = null)
+        {
+            if (classPrefix == null)
+                return $"{stateType.FullName}-{identity.IdentityString}";
+            else
+                return $"{stateType.FullName}-{classPrefix}-{identity.IdentityString}";
+        }
 
         private T GetProbe<T>(IGrainIdentity identity, string grainClassNamePrefix) where T : IGrain
         {
-            if (grainClassNamePrefix != null)
-                throw new ArgumentException($"Class prefix not supported in {nameof(TestGrainFactory)}",
-                    $"{nameof(grainClassNamePrefix)}");
-
-            var key = GetKey(identity, typeof(T));
+            var key = GetKey(identity, typeof(T), grainClassNamePrefix);
 
             IGrain grain;
 
@@ -106,9 +107,9 @@ namespace Orleans.TestKit
         }
 
 
-        internal Mock<T> AddProbe<T>(IGrainIdentity identity) where T : class, IGrain
+        internal Mock<T> AddProbe<T>(IGrainIdentity identity, string classPrefix = null) where T : class, IGrain
         {
-            var key = GetKey(identity, typeof(T));
+            var key = GetKey(identity, typeof(T), classPrefix);
 
             var mock = new Mock<T>();
 
