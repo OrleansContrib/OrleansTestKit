@@ -1,13 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk"> 
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <RootNamespace>Orleans.TestKit.Tests</RootNamespace>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-  </PropertyGroup> 
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="xunit" Version="2.3.1" />
-  </ItemGroup> 
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\OrleansTestKit\OrleansTestKit.csproj" />
     <ProjectReference Include="..\TestGrains\TestGrains.csproj" />

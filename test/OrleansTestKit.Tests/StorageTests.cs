@@ -28,7 +28,27 @@ namespace Orleans.TestKit.Tests
             greetings.Should().Contain(greeting2);
 
             Silo.Storage(grain).Writes.Should().Be(2);
-            Silo.State<GreetingArchive>(grain).Greetings.ShouldAllBeEquivalentTo(greetings);
+            Silo.State(grain).Greetings.ShouldAllBeEquivalentTo(greetings);
+        }
+
+        [Fact]
+        public async Task SiloSayHelloResetStorageCountsTest()
+        {
+            long id = new Random().Next();
+            const string greeting = "Bonjour";
+
+            var grain = Silo.CreateGrain<HelloArchiveGrain>(id);
+
+            // This will directly call the grain under test.
+            await grain.SayHello(greeting);
+
+            var greetings = (await grain.GetGreetings()).ToList();
+
+            greetings.Should().Contain(greeting);
+
+            Silo.Storage(grain).ResetCounts();
+
+            Silo.Storage(grain).Writes.Should().Be(0);
         }
     }
 }
