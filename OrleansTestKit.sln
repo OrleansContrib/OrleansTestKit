@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{54C04CF7-7044-46E0-BC24-2A992F028557}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{677DD212-4A95-45D9-9AFC-09AC505CAA43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit.Tests", "test\OrleansTestKit.Tests\OrleansTestKit.Tests.csproj", "{1DBA9447-3F61-4F00-8DDF-2CA22D531D27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrleansTestKit.Tests", "test\OrleansTestKit.Tests\OrleansTestKit.Tests.csproj", "{1DBA9447-3F61-4F00-8DDF-2CA22D531D27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansTestKit", "src\OrleansTestKit\OrleansTestKit.csproj", "{0E2CB8B5-1CBC-4786-9C95-B75317E3C311}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrleansTestKit", "src\OrleansTestKit\OrleansTestKit.csproj", "{0E2CB8B5-1CBC-4786-9C95-B75317E3C311}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestInterfaces", "test\TestInterfaces\TestInterfaces.csproj", "{C6D2816C-804F-439C-83AA-802612FE33CB}"
 EndProject

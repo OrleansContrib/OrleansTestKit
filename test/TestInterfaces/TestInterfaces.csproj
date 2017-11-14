@@ -117,6 +117,7 @@
   <ItemGroup>
     <Compile Include="IChatty.cs" />
     <Compile Include="IBasicGrains.cs" />
+    <Compile Include="IDeviceManager.cs" />
     <Compile Include="IHello.cs" />
     <Compile Include="IHelloArchive.cs" />
     <Compile Include="IDateTimeService.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="IPing.cs" />
     <Compile Include="IPong.cs" />
     <Compile Include="IPong2.cs" />
+    <Compile Include="IDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

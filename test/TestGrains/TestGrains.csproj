@@ -118,6 +118,9 @@
     <Compile Include="BasicGrains.cs" />
     <Compile Include="ChatMessage.cs" />
     <Compile Include="Chatty.cs" />
+    <Compile Include="DeviceAndroidGrain.cs" />
+    <Compile Include="DeviceManagerGrain.cs" />
+    <Compile Include="DeviceIosGrain.cs" />
     <Compile Include="DIGrain.cs" />
     <Compile Include="HelloArchiveGrain.cs" />
     <Compile Include="HelloGrain.cs" />
