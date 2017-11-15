@@ -7,7 +7,7 @@ namespace Orleans.TestKit
     public class TestServiceProvider : IServiceProvider
     {
         private readonly TestKitOptions _options;
-        private readonly Dictionary<Type, IMock<object>> _services;
+        private readonly Dictionary<Type, object> _services;
 
         public TestServiceProvider(TestKitOptions options)
         {
@@ -15,15 +15,15 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(options));
 
             _options = options;
-            _services = new Dictionary<Type, IMock<object>>();
+            _services = new Dictionary<Type, object>();
         }
 
         public object GetService(Type serviceType)
         {
-            IMock<object> service;
+            object service;
 
             if (_services.TryGetValue(serviceType, out service))
-                return service.Object;
+                return service;
 
             //If using strict service probes, throw the exception
             if (_options.StrictServiceProbes)
@@ -32,18 +32,19 @@ namespace Orleans.TestKit
             else
             {
                 //Create a new mock
-                service = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(serviceType)) as IMock<object>;
+                var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(serviceType)) as IMock<object>;
+                service = mock.Object;
 
                 //Save the newly created grain for the next call
                 _services.Add(serviceType, service);
 
-                return service.Object;
+                return service;
             }
         }
 
         public Mock<T> AddServiceProbe<T>(Mock<T> mock) where T : class
         {
-            _services.Add(typeof(T), mock);
+            _services.Add(typeof(T), mock.Object);
 
             return mock;
         }
@@ -52,9 +53,16 @@ namespace Orleans.TestKit
         {
             var mock = new Mock<T>();
 
-            _services.Add(typeof(T), mock);
+            _services.Add(typeof(T), mock.Object);
 
             return mock;
+        }
+
+        public T AddService<T>(T instance)
+        {
+            _services.Add(typeof(T), instance);
+           
+            return instance;
         }
     }
 }
