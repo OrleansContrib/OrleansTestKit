@@ -59,7 +59,7 @@ namespace Orleans.TestKit.Tests
             dateServiceMock.Setup(i => i.GetCurrentDate())
                 .ReturnsAsync(() => date);
 
-            Silo.ServiceProvider.AddService(dateServiceMock.Object);
+            Silo.AddService(dateServiceMock.Object);
 
             var grain = Silo.CreateGrain<HelloGrainWithServiceDependency>(10);
 
