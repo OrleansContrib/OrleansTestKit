@@ -47,5 +47,30 @@ namespace Orleans.TestKit.Tests
             Assert.NotNull(reply);
             Assert.Equal($"[{default(DateTime).Date}]: You said: '{greeting}', I say: Hello!", reply);
         }
+        
+        [Fact]
+        public async Task SayHelloTestShouldPrintDateWhenServiceProvided()
+        {
+            // Arrange
+            const string greeting = "Bonjour";
+            var date = DateTime.UtcNow.Date;
+
+            var dateServiceMock = new Mock<IDateTimeService>();
+            dateServiceMock.Setup(i => i.GetCurrentDate())
+                .ReturnsAsync(() => date);
+
+            Silo.AddService(dateServiceMock.Object);
+
+            var grain = Silo.CreateGrain<HelloGrainWithServiceDependency>(10);
+
+            // Act
+            var reply = await grain.SayHello(greeting);
+
+            // Assert
+            Assert.NotNull(reply);
+            Assert.Equal($"[{date}]: You said: '{greeting}', I say: Hello!", reply);
+
+            dateServiceMock.Verify(i => i.GetCurrentDate(), Times.Once);
+        }
     }
 }
