@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using TestGrains;
+using Orleans.TestKit.Storage;
 using Xunit;
 
 namespace Orleans.TestKit.Tests
@@ -27,7 +28,7 @@ namespace Orleans.TestKit.Tests
             greetings.Should().Contain(greeting1);
             greetings.Should().Contain(greeting2);
 
-            Silo.Storage(grain).Writes.Should().Be(2);
+            Silo.StorageStats().Writes.Should().Be(2);
             Silo.State(grain).Greetings.ShouldAllBeEquivalentTo(greetings);
         }
 
@@ -46,9 +47,9 @@ namespace Orleans.TestKit.Tests
 
             greetings.Should().Contain(greeting);
 
-            Silo.Storage(grain).ResetCounts();
+            Silo.StorageStats().ResetCounts();
 
-            Silo.Storage(grain).Writes.Should().Be(0);
+            Silo.StorageStats().Writes.Should().Be(0);
         }
     }
 }

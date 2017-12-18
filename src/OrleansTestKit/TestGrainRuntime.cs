@@ -1,8 +1,10 @@
 using System;
 using Moq;
+using Orleans.Core;
 using Orleans.Runtime;
 using Orleans.Streams;
 using Orleans.TestKit.Loggers;
+using Orleans.TestKit.Storage;
 using Orleans.Timers;
 
 namespace Orleans.TestKit
@@ -13,13 +15,13 @@ namespace Orleans.TestKit
 
         public readonly Mock<IGrainRuntime> Mock = new Mock<IGrainRuntime>();
 
+        private readonly StorageManager _storageManager;
+
         public Guid ServiceId { get; } = Guid.NewGuid();
 
         public string SiloIdentity { get; } = "TestSilo";
 
         public IGrainFactory GrainFactory { get; }
-
-        public IStreamProviderManager StreamProviderManager { get; }
 
         public ITimerRegistry TimerRegistry { get; }
 
@@ -29,13 +31,17 @@ namespace Orleans.TestKit
 
         public SiloAddress SiloAddress { get { return SiloAddress.Zero; } }
 
-        public TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IStreamProviderManager streamProviderManager, IReminderRegistry reminderRegistry, IServiceProvider serviceProvider)
+        public TestGrainRuntime(IGrainFactory grainFactory,
+            ITimerRegistry timerRegistry,
+            IReminderRegistry reminderRegistry,
+            IServiceProvider serviceProvider,
+            StorageManager storageManager)
         {
             GrainFactory = grainFactory;
             TimerRegistry = timerRegistry;
-            StreamProviderManager = streamProviderManager;
             ReminderRegistry = reminderRegistry;
             ServiceProvider = serviceProvider;
+            _storageManager = storageManager;
         }
 
         public Orleans.Runtime.Logger GetLogger(string loggerName) => _logManager.GetLogger(loggerName);
@@ -49,5 +55,8 @@ namespace Orleans.TestKit
         {
             Mock.Object.DelayDeactivation(grain, timeSpan);
         }
+
+        public IStorage<TGrainState> GetStorage<TGrainState>(Grain grain) where TGrainState : new() =>
+            _storageManager.GetStorage<TGrainState>();
     }
 }
