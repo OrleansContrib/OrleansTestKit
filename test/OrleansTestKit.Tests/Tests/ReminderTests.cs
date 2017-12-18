@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using Orleans.Runtime;
+using Orleans.TestKit.Reminders;
 using TestGrains;
 using Xunit;
 

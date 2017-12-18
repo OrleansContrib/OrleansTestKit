@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Orleans.TestKit.Streams;
 using TestGrains;
 using Xunit;
 
 namespace Orleans.TestKit.Tests
 {
-    public class StreamTests : TestKitBase
+    public class StrictStreamTests : TestKitBase
     {
+        public StrictStreamTests()
+        {
+            Silo.Options.StrictStreamProbes = true;
+        }
+
         [Fact]
         public async Task GrainSentMessages()
         {
@@ -46,7 +52,7 @@ namespace Orleans.TestKit.Tests
 
             const string msg = "Hello Chat";
 
-            chatty.Invoking(p => p.SendChat(msg)).ShouldNotThrow();
+            chatty.Invoking(p => p.SendChat(msg).Wait()).ShouldThrow<Exception>();
         }
 
         [Fact]
@@ -58,7 +64,7 @@ namespace Orleans.TestKit.Tests
 
             const string msg = "Hello Chat";
 
-            chatty.Invoking(p => p.SendChat(msg)).ShouldNotThrow();
+            chatty.Invoking(p => p.SendChat(msg).Wait()).ShouldThrow<Exception>();
         }
 
         [Fact]

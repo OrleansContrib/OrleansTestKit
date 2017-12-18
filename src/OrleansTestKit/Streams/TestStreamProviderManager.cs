@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Orleans.Providers;
+using Orleans.Runtime;
 using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
 {
-    public class TestStreamProviderManager : IStreamProviderManager
+    public class TestStreamProviderManager : IKeyedServiceCollection<string, IStreamProvider>
     {
         private readonly TestKitOptions _options;
 
@@ -29,11 +31,6 @@ namespace Orleans.TestKit.Streams
             return Add(name);
         }
 
-        public IEnumerable<IStreamProvider> GetStreamProviders()
-        {
-            return _streamProviders.Values;
-        }
-
         public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace, string providerName)
         {
             var provider = GetOrAdd(providerName);
@@ -46,18 +43,20 @@ namespace Orleans.TestKit.Streams
             TestStreamProvider provider;
             if (_streamProviders.TryGetValue(name, out provider))
                 return provider;
-            
+
             return Add(name);
         }
 
         private TestStreamProvider Add(string name)
         {
             var provider = new TestStreamProvider(_options);
-            
+
             provider.Init(name, null, null).Wait();
             _streamProviders.Add(name, provider);
 
             return provider;
         }
+
+        IStreamProvider IKeyedServiceCollection<string, IStreamProvider>.GetService(IServiceProvider services, string key) => _streamProviders[key];
     }
 }

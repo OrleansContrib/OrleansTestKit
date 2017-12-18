@@ -7,7 +7,7 @@ using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
-    internal class TestGrainFactory : IGrainFactory
+    public class TestGrainFactory : IGrainFactory
     {
         private readonly TestKitOptions _options;
 
@@ -15,7 +15,7 @@ namespace Orleans.TestKit
 
         private readonly Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>> _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>>();
 
-        public TestGrainFactory(TestKitOptions options)
+        internal TestGrainFactory(TestKitOptions options)
         {
             _options = options;
         }
@@ -77,7 +77,7 @@ namespace Orleans.TestKit
             IGrain grain;
 
             if (_probes.TryGetValue(key, out grain))
-                return (T) grain;
+                return (T)grain;
 
             //If using strict grain probes, throw the exception
             if (_options.StrictGrainProbes)
@@ -88,22 +88,22 @@ namespace Orleans.TestKit
                 IMock<IGrain> mock;
                 Func<IGrainIdentity, IMock<IGrain>> factory;
 
-                if(_probeFactories.TryGetValue(typeof(T), out factory)) 
+                if (_probeFactories.TryGetValue(typeof(T), out factory))
                 {
                     mock = factory(identity);
                 }
-                else 
+                else
                 {
                     mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
                 }
-                
+
                 grain = mock?.Object;
 
                 //Save the newly created grain for the next call
                 _probes.Add(key, grain);
             }
 
-            return (T) grain;
+            return (T)grain;
         }
 
 
@@ -118,12 +118,13 @@ namespace Orleans.TestKit
             return mock;
         }
 
-        internal void AddProbeFactory<T>(Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain 
+        internal void AddProbe<T>(Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain
         {
             _probeFactories.Add(typeof(T), factory);
         }
 
-        public void BindGrainReference(IAddressable grain) {
+        public void BindGrainReference(IAddressable grain)
+        {
             throw new NotImplementedException();
         }
     }

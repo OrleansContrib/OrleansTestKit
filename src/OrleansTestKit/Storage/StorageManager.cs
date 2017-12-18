@@ -1,34 +1,30 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Orleans.Core;
 
 namespace Orleans.TestKit.Storage
 {
-    internal sealed class StorageManager
+    public sealed class StorageManager
     {
-        private readonly Dictionary<string, object> _storages = new Dictionary<string, object>();
+        private object _storage;
 
-        private static string GetKey(string identityString, Type stateType)
-            => $"{stateType.FullName}-{identityString}";
-
-        public IStorage AddStorage<T>(IGrainIdentity identity) where T : Grain
+        public IStorage<TState> GetStorage<TState>() where TState : new()
         {
-            var key = GetKey(identity.IdentityString, typeof(T));
+            if (_storage == null)
+            {
+                _storage = new TestStorage<TState>();
+            }
 
-            var storage = new TestStorage();
-
-            _storages.Add(key, storage);
-
-            return storage;
+            return _storage as IStorage<TState>;
         }
 
-        public TestStorageStats GetStorageStats<T>(T grain) where T : Grain
+        public TestStorageStats GetStorageStats()
         {
-            var key = GetKey(grain.IdentityString, grain.GetType());
+            //There should only be one state in here since there is only 1 grain under test
+            var stats = _storage as IStorageStats;
 
-            var storage = _storages[key] as TestStorage;
-
-            return storage?.Stats;
+            return stats?.Stats;
         }
     }
 }

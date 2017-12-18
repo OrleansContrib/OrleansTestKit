@@ -92,12 +92,12 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public async Task FactoryProbe() 
+        public async Task FactoryProbe()
         {
 
             var pong = new Mock<IPong>();
 
-            this.Silo.AddProbeFactory<IPong>(identity => pong);
+            this.Silo.AddProbe<IPong>(identity => pong);
 
             var grain = this.Silo.CreateGrain<PingGrain>(1);
 

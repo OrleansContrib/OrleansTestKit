@@ -6,19 +6,19 @@ namespace TestGrains
 {
     public sealed class LifecycleGrain : Grain, ILifecycleGrain
     {
-        public bool IsActivated { get; set; }
+        public int ActivateCount { get; set; }
 
-        public bool IsDeactivated { get; set; }
+        public int DeactivateCount { get; set; }
 
         public override Task OnActivateAsync()
         {
-            IsActivated = true;
+            ActivateCount++;
             return base.OnActivateAsync();
         }
 
         public override Task OnDeactivateAsync()
         {
-            IsDeactivated = true;
+            DeactivateCount++;
             return base.OnDeactivateAsync();
         }
     }

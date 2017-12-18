@@ -29,7 +29,7 @@ namespace Orleans.TestKit.Tests
         {
             var grain = Silo.CreateGrain<LifecycleGrain>(new Random().Next());
 
-            grain.IsActivated.Should().BeTrue();
+            grain.ActivateCount.Should().Be(1);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Orleans.TestKit.Tests
         {
             Silo.CreateGrain<LifecycleGrain>(new Random().Next());
 
-            Silo.Invoking(s=>s.CreateGrain<LifecycleGrain>(new Random().Next())).ShouldThrow<Exception>();
+            Silo.Invoking(s => s.CreateGrain<LifecycleGrain>(new Random().Next())).ShouldThrow<Exception>();
         }
 
         [Fact]
@@ -45,11 +45,11 @@ namespace Orleans.TestKit.Tests
         {
             var grain = Silo.CreateGrain<LifecycleGrain>(new Random().Next());
 
-            grain.IsDeactivated.Should().BeFalse();
+            grain.DeactivateCount.Should().Be(0);
 
             Silo.Deactivate(grain);
 
-            grain.IsDeactivated.Should().BeTrue();
+            grain.DeactivateCount.Should().Be(1);
         }
 
         [Fact]

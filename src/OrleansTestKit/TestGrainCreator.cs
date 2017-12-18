@@ -17,44 +17,26 @@ namespace Orleans.TestKit
         private readonly FieldInfo _identityField;
         private readonly MethodInfo _setStorageMethod;
 
-        public TestGrainCreator(IGrainRuntime runtime)
+        public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
         {
             _runtime = runtime;
-            _activator = new DefaultGrainActivator();
+            _activator = new DefaultGrainActivator(serviceProvider);
             _runtimeProperty = typeof(Grain).GetProperty("Runtime", BindingFlags.Instance | BindingFlags.NonPublic);
             _identityField = typeof(Grain).GetField("Identity", BindingFlags.Instance | BindingFlags.NonPublic);
-            _setStorageMethod = typeof(Grain<>).GetInterfaces().First(i => i.Name == "IStatefulGrain").GetMethod("SetStorage");
         }
 
         public Grain CreateGrainInstance(IGrainActivationContext context)
         {
             var grain = (Grain)_activator.Create(context);
 
+            var participant = grain as ILifecycleParticipant<IGrainLifecycle>;
+            participant?.Participate(context.ObservableLifecycle);
+
             //Set the runtime and identity. This is equivalent to what Orleans' GrainCreator does
             //when creating new grains. It is messier but easier than trying to wrangle the values
             //in via a constructor which may or may exist on types inheriting from Grain.
-
             _runtimeProperty.SetValue(grain, _runtime);
             _identityField.SetValue(grain, context.GrainIdentity);
-
-            return grain;
-        }
-
-        public Grain CreateGrainInstance(IGrainActivationContext context, Type stateType, IStorage storage)
-        {
-            var grain = CreateGrainInstance(context);            
-
-            if(TypeHelper.IsSubclassOfRawGeneric(context.GrainType, typeof(Grain<>)))
-            {
-                //Set the state value
-                var stateProperty = TypeHelper.GetProperty(context.GrainType, "State");
-                var stateValue = Activator.CreateInstance(stateType);
-
-                stateProperty.SetValue(grain, stateValue);
-
-                //Set the storage provider
-                _setStorageMethod.Invoke(grain, new object[] { storage });
-            }
 
             return grain;
         }

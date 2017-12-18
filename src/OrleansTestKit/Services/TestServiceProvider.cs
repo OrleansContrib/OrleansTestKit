@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Orleans.Streams;
 
-namespace Orleans.TestKit
+namespace Orleans.TestKit.Services
 {
     public class TestServiceProvider : IServiceProvider
     {
         private readonly TestKitOptions _options;
+
         private readonly Dictionary<Type, object> _services;
+
+        private IStreamProviderManager _streamProviderManager;
 
         public TestServiceProvider(TestKitOptions options)
         {
@@ -42,6 +47,11 @@ namespace Orleans.TestKit
             }
         }
 
+        internal void AddStreamProvider(IStreamProviderManager streamProviderManager)
+        {
+            _streamProviderManager = streamProviderManager;
+        }
+
         public Mock<T> AddServiceProbe<T>(Mock<T> mock) where T : class
         {
             _services.Add(typeof(T), mock.Object);
@@ -61,7 +71,7 @@ namespace Orleans.TestKit
         public T AddService<T>(T instance)
         {
             _services.Add(typeof(T), instance);
-           
+
             return instance;
         }
     }
