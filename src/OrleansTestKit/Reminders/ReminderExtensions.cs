@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Orleans.Runtime;
 
-namespace Orleans.TestKit.Reminders
+namespace Orleans.TestKit
 {
     public static class ReminderExtensions
     {

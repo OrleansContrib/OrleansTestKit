@@ -1,6 +1,6 @@
 using Orleans.TestKit;
 
-namespace Orleans.TestKit.Timers
+namespace Orleans.TestKit
 {
     public static class TimerExtensions
     {
