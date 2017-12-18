@@ -1,6 +1,7 @@
 using System;
+using Orleans.TestKit.Streams;
 
-namespace Orleans.TestKit.Streams
+namespace Orleans.TestKit
 {
     public static class StreamExtensions
     {

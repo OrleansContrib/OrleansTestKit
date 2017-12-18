@@ -15,7 +15,6 @@ namespace Orleans.TestKit
         private readonly IGrainRuntime _runtime;
         private readonly PropertyInfo _runtimeProperty;
         private readonly FieldInfo _identityField;
-        private readonly MethodInfo _setStorageMethod;
 
         public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
         {

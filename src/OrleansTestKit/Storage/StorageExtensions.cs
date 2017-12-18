@@ -2,7 +2,7 @@ using Orleans;
 using Orleans.TestKit;
 using Orleans.TestKit.Storage;
 
-namespace Orleans.TestKit.Storage
+namespace Orleans.TestKit
 {
     public static class StorageExtensions
     {

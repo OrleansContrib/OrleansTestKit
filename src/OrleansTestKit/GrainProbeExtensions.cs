@@ -19,6 +19,7 @@ namespace Orleans.TestKit
 
         public static void AddProbe<T>(this TestKitSilo silo, Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain
             => silo.GrainFactory.AddProbe<T>(factory);
+            
 
         #endregion Probes
     }

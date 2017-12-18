@@ -1,6 +1,6 @@
 using Moq;
 
-namespace Orleans.TestKit.Services
+namespace Orleans.TestKit
 {
     public static class TestServicesExtensions
     {
