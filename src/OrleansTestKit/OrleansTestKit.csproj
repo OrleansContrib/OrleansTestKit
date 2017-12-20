@@ -8,7 +8,7 @@
     <Product>OrleansTestKit</Product>
     <Description>A testing framework for Microsoft Orleans that does not use a real silo</Description>
     <Copyright>Copyright ©  2017</Copyright>
-    <Version>0.1.4-beta2</Version>
+    <Version>0.1.4-beta3</Version>
   </PropertyGroup>
   
   <ItemGroup>
