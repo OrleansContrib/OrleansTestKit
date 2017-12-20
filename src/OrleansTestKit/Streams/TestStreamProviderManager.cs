@@ -19,7 +19,7 @@ namespace Orleans.TestKit.Streams
             _options = options;
         }
 
-        public IProvider GetProvider(string name)
+        public IStreamProvider GetProvider(string name)
         {
             TestStreamProvider provider;
             if (_streamProviders.TryGetValue(name, out provider))
@@ -57,6 +57,6 @@ namespace Orleans.TestKit.Streams
             return provider;
         }
 
-        IStreamProvider IKeyedServiceCollection<string, IStreamProvider>.GetService(IServiceProvider services, string key) => _streamProviders[key];
+        IStreamProvider IKeyedServiceCollection<string, IStreamProvider>.GetService(IServiceProvider services, string key) => GetProvider(key);
     }
 }
