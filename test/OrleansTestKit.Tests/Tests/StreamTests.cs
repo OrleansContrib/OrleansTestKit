@@ -25,6 +25,30 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
+        public void LazyStreamProvider()
+        {
+            var chatty = Silo.CreateGrain<Chatty>(4);
+
+            const string msg = "Hello Chat";
+
+            //Send a message without creating a stream probe
+            chatty.Invoking(p => p.SendChat(msg).Wait()).ShouldNotThrow();
+        }
+
+        [Fact]
+        public void LazyStreamProviderStrict()
+        {
+            Silo.Options.StrictStreamProbes = true;
+
+            var chatty = Silo.CreateGrain<Chatty>(4);
+
+            const string msg = "Hello Chat";
+
+            //This should throw an exception since the provider was not created
+            chatty.Invoking(p => p.SendChat(msg).Wait()).ShouldThrow<Exception>();
+        }
+
+        [Fact]
         public async Task IncorrectVerifyMessage()
         {
             var chatty = Silo.CreateGrain<Chatty>(4);
