@@ -10,28 +10,30 @@ namespace Orleans.TestKit
 {
     internal sealed class TestGrainLifecycle : IGrainLifecycle
     {
-        private readonly List<ILifecycleObserver> observers = new List<ILifecycleObserver>();
+        private readonly List<(int, ILifecycleObserver)> observers = new List<(int, ILifecycleObserver)>();
 
         public IDisposable Subscribe(int stage, ILifecycleObserver observer)
         {
-            observers.Add(observer);
+            var item = (stage, observer);
+
+            observers.Add(item);
 
             return new LambdaDisposable(() =>
             {
-                observers.Remove(observer);
+                observers.Remove(item);
             });
         }
 
         public void TriggerStart()
         {
-            var tasks = observers.Select(x => x.OnStart(CancellationToken.None));
+            var tasks = observers.OrderBy(x => x.Item1).Select(x => x.Item2.OnStart(CancellationToken.None));
 
             Task.WaitAll(tasks.ToArray(), 1000);
         }
 
         public void TriggerStop()
         {
-            var tasks = observers.Select(x => x.OnStop(CancellationToken.None));
+            var tasks = observers.Select(x => x.Item2.OnStop(CancellationToken.None));
 
             Task.WaitAll(tasks.ToArray(), 1000);
         }
