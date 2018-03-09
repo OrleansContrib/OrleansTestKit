@@ -9,6 +9,16 @@ namespace TestInterfaces
         Task<Guid> GetKey();
     }
 
+    public interface IGuidCompoundKeyGrain : IGrainWithGuidCompoundKey
+    {
+        Task<(Guid, string)> GetKey();
+    }
+
+    public interface IIntegerCompoundKeyGrain : IGrainWithIntegerCompoundKey
+    {
+        Task<(long, string)> GetKey();
+    }
+
     public interface IIntegerKeyGrain : IGrainWithIntegerKey
     {
         Task<long> GetKey();

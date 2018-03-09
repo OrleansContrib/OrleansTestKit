@@ -103,6 +103,12 @@ namespace Orleans.TestKit
         public T CreateGrain<T>(string id) where T : Grain, IGrainWithStringKey
             => CreateGrain<T>(new TestGrainIdentity(id));
 
+        public T CreateGrain<T>(Guid id, string keyExtension) where T : Grain, IGrainWithGuidCompoundKey
+            => CreateGrain<T>(new TestGrainIdentity(id, keyExtension));
+
+        public T CreateGrain<T>(long id, string keyExtension) where T : Grain, IGrainWithIntegerCompoundKey
+            => CreateGrain<T>(new TestGrainIdentity(id, keyExtension));
+
         private T CreateGrain<T>(IGrainIdentity identity) where T : Grain
         {
             if (_isGrainCreated)
