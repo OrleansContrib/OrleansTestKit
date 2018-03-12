@@ -55,14 +55,14 @@ namespace Orleans.TestKit
         public TestGrainIdentity(Guid id, string keyExtension = null)
         {
             PrimaryKey = id;
-            _keyType = KeyType.Guid;
+            _keyType = keyExtension != null ? KeyType.GuidCompound : KeyType.Guid;
             KeyExtension = keyExtension;
         }
 
         public TestGrainIdentity(long id, string keyExtension = null)
         {
             PrimaryKeyLong = id;
-            _keyType = KeyType.Long;
+            _keyType = keyExtension != null ? KeyType.LongCompound : KeyType.Long;
             KeyExtension = keyExtension;
         }
 
