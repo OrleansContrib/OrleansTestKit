@@ -65,6 +65,20 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
+        public async Task IntegerCompoundKeyGrain()
+        {
+            const int id = int.MaxValue;
+            var ext = "Thing";
+
+            var grain = Silo.CreateGrain<IntegerCompoundKeyGrain>(id, ext);
+
+            var key = await grain.GetKey();
+
+            key.Item1.Should().Be(id);
+            key.Item2.Should().Be(ext);
+        }
+
+        [Fact]
         public async Task GuidKeyGrain()
         {
             var id = Guid.NewGuid();
@@ -74,6 +88,20 @@ namespace Orleans.TestKit.Tests
             var key = await grain.GetKey();
 
             key.Should().Be(id);
+        }
+
+        [Fact]
+        public async Task GuidCompoundKeyGrain()
+        {
+            var id = Guid.NewGuid();
+            var ext = "Thing";
+
+            var grain = Silo.CreateGrain<GuidCompoundKeyGrain>(id, ext);
+
+            var key = await grain.GetKey();
+
+            key.Item1.Should().Be(id);
+            key.Item2.Should().Be(ext);
         }
 
         [Fact]

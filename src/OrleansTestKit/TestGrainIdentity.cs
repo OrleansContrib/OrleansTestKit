@@ -11,7 +11,9 @@ namespace Orleans.TestKit
         {
             String,
             Guid,
-            Long
+            Long,
+            GuidCompound,
+            LongCompound
         }
 
         private readonly KeyType _keyType;
@@ -21,6 +23,8 @@ namespace Orleans.TestKit
         public long PrimaryKeyLong { get; }
 
         public string PrimaryKeyString { get; }
+
+        public string KeyExtension { get; }
 
         public string IdentityString
         {
@@ -34,6 +38,10 @@ namespace Orleans.TestKit
                         return PrimaryKey.ToString();
                     case KeyType.Long:
                         return PrimaryKeyLong.ToString();
+                    case KeyType.GuidCompound:
+                        return $"{PrimaryKey}|{KeyExtension}";
+                    case KeyType.LongCompound:
+                        return $"{PrimaryKeyLong}|{KeyExtension}";
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -44,16 +52,18 @@ namespace Orleans.TestKit
 
         public int TypeCode { get { throw new NotImplementedException(); } }
 
-        public TestGrainIdentity(Guid id)
+        public TestGrainIdentity(Guid id, string keyExtension = null)
         {
             PrimaryKey = id;
-            _keyType = KeyType.Guid;
+            _keyType = keyExtension != null ? KeyType.GuidCompound : KeyType.Guid;
+            KeyExtension = keyExtension;
         }
 
-        public TestGrainIdentity(long id)
+        public TestGrainIdentity(long id, string keyExtension = null)
         {
             PrimaryKeyLong = id;
-            _keyType = KeyType.Long;
+            _keyType = keyExtension != null ? KeyType.LongCompound : KeyType.Long;
+            KeyExtension = keyExtension;
         }
 
         public TestGrainIdentity(string id)
@@ -64,12 +74,14 @@ namespace Orleans.TestKit
 
         public long GetPrimaryKeyLong(out string keyExt)
         {
-            throw new NotImplementedException();
+            keyExt = KeyExtension;
+            return PrimaryKeyLong;
         }
 
         public Guid GetPrimaryKey(out string keyExt)
         {
-            throw new NotImplementedException();
+            keyExt = KeyExtension;
+            return PrimaryKey;
         }
 
         public uint GetUniformHashCode() 
