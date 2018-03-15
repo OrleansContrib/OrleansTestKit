@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Providers;
 using Orleans.Runtime;
 using Orleans.Streams;
 
@@ -58,5 +56,7 @@ namespace Orleans.TestKit.Streams
         }
 
         IStreamProvider IKeyedServiceCollection<string, IStreamProvider>.GetService(IServiceProvider services, string key) => GetProvider(key);
+
+        IEnumerable<IKeyedService<string, IStreamProvider>> IKeyedServiceCollection<string, IStreamProvider>.GetServices(IServiceProvider services) => _streamProviders as IEnumerable<IKeyedService<string, IStreamProvider>>;
     }
 }

@@ -12,7 +12,7 @@ namespace Orleans.TestKit
     {
         private readonly List<(int, ILifecycleObserver)> observers = new List<(int, ILifecycleObserver)>();
 
-        public IDisposable Subscribe(int stage, ILifecycleObserver observer)
+        public IDisposable Subscribe(string observerName, int stage, ILifecycleObserver observer)
         {
             var item = (stage, observer);
 

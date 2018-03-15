@@ -6,7 +6,7 @@ using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
 {
-    public class TestStreamProvider : IStreamProviderImpl
+    public class TestStreamProvider : IStreamProvider
     {
         private readonly TestKitOptions _options;
 
