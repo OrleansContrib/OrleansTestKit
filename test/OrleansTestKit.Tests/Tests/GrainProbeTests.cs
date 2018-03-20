@@ -24,6 +24,18 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
+        public async Task SetupCompoundProbe()
+        {
+            IPing grain = Silo.CreateGrain<PingGrain>(1);
+
+            var pong = Silo.AddProbe<IPongCompound>(44, keyExtension: "Test");
+
+            await grain.PingCompound();
+
+            pong.Verify(p => p.Pong(), Times.Once);
+        }
+
+        [Fact]
         public void MissingProbe()
         {
             IPing grain = Silo.CreateGrain<PingGrain>(1);
@@ -78,6 +90,30 @@ namespace Orleans.TestKit.Tests
 
             probe.Should().NotBeNull();
             key.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task GuidCompoundKeyProbe()
+        {
+            var probe = Silo.AddProbe<IGuidCompoundKeyGrain>(Guid.NewGuid(), keyExtension: "Test");
+
+            var key = await probe.Object.GetKey();
+
+            probe.Should().NotBeNull();
+            key.Item1.Should().Be(Guid.Empty);
+            key.Item2.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task IntCompoundKeyProbe()
+        {
+            var probe = Silo.AddProbe<IIntegerCompoundKeyGrain>(2, keyExtension: "Test");
+
+            var key = await probe.Object.GetKey();
+
+            probe.Should().NotBeNull();
+            key.Item1.Should().Be(0);
+            key.Item2.Should().BeNull();
         }
 
         [Fact]
