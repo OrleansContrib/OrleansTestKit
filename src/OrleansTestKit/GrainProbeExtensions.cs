@@ -12,6 +12,12 @@ namespace Orleans.TestKit
         public static Mock<T> AddProbe<T>(this TestKitSilo silo, Guid id, string classPrefix = null) where T : class, IGrainWithGuidKey
             => silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
 
+        public static Mock<T> AddProbe<T>(this TestKitSilo silo, long id, string keyExtension, string classPrefix = null) where T : class, IGrainWithIntegerCompoundKey
+            => silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id, keyExtension), classPrefix);
+
+        public static Mock<T> AddProbe<T>(this TestKitSilo silo, Guid id, string keyExtension, string classPrefix = null) where T : class, IGrainWithGuidCompoundKey
+            => silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id, keyExtension), classPrefix);
+
         public static Mock<T> AddProbe<T>(this TestKitSilo silo, string id, string classPrefix = null) where T : class, IGrainWithStringKey
             => silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
 

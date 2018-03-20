@@ -41,13 +41,13 @@ namespace Orleans.TestKit
         public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string keyExtension,
             string grainClassNamePrefix = null) where TGrainInterface : IGrainWithGuidCompoundKey
         {
-            throw new NotImplementedException();
+            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
         }
 
         public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string keyExtension,
             string grainClassNamePrefix = null) where TGrainInterface : IGrainWithIntegerCompoundKey
         {
-            throw new NotImplementedException();
+            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
         }
 
         public Task<TGrainObserverInterface> CreateObjectReference<TGrainObserverInterface>(IGrainObserver obj)

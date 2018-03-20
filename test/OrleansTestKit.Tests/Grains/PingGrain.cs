@@ -12,5 +12,12 @@ namespace TestGrains
 
             return pong.Pong();
         }
+
+        public Task PingCompound()
+        {
+            var pong = GrainFactory.GetGrain<IPongCompound>(44, keyExtension: "Test");
+
+            return pong.Pong();
+        }
     }
 }
