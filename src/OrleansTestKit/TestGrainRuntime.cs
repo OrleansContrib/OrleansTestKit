@@ -17,7 +17,7 @@ namespace Orleans.TestKit
 
         private readonly StorageManager _storageManager;
 
-        public Guid ServiceId { get; } = Guid.NewGuid();
+        public string ServiceId { get; } = "TestService";
 
         public string SiloIdentity { get; } = "TestSilo";
 
