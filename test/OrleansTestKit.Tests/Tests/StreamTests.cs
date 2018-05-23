@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Orleans.TestKit.Streams;
 using TestGrains;
 using Xunit;
 
@@ -22,6 +21,28 @@ namespace Orleans.TestKit.Tests
 
             stream.Sends.Should().Be(1);
             stream.VerifySend(m => m.Msg == msg);
+        }
+
+        [Fact]
+        public async Task AddNonReferenceTypeStreamProbe()
+        {
+            var stream = Silo.AddStreamProbe<(string Message, int Id)>(Guid.Empty, null);
+
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+            await chatty.Subscribe();
+
+            const string msg = "Hello Chat";
+            const int id = 2;
+            await stream.OnNextAsync((msg , id));
+
+            stream.Sends.Should().Be(1);
+            stream.VerifySend(m => m.Message == msg);
+            stream.VerifySend(m => m.Id == id);
+
+            var message = await chatty.GetMessage();
+            Assert.NotEqual(default((string Message, int Id)), message);
+            Assert.Equal(msg, message.Message);
+            Assert.Equal(id, message.Id);
         }
 
         [Fact]
