@@ -148,6 +148,60 @@ namespace Orleans.TestKit
 
         #endregion CreateGrains
 
+        #region CreateGrainAsyncs
+        public Task<T> CreateGrainAsync<T>(long id) where T : Grain, IGrainWithIntegerKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id));
+
+        public Task<T> CreateGrainAsync<T>(Guid id) where T : Grain, IGrainWithGuidKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id));
+
+        public Task<T> CreateGrainAsync<T>(string id) where T : Grain, IGrainWithStringKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id));
+
+        public Task<T> CreateGrainAsync<T>(Guid id, string keyExtension) where T : Grain, IGrainWithGuidCompoundKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id, keyExtension));
+
+        public Task<T> CreateGrainAsync<T>(long id, string keyExtension) where T : Grain, IGrainWithIntegerCompoundKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id, keyExtension));
+
+        private async Task<T> CreateGrainAsync<T>(IGrainIdentity identity) where T : Grain
+        {
+            if (_isGrainCreated)
+                throw new Exception(
+                    "A grain has already been created in this silo. Only 1 grain per test silo should every be created. Add grain probes for supporting grains.");
+
+            _isGrainCreated = true;
+
+            Grain grain;
+
+            var grainContext = new TestGrainActivationContext
+            {
+                ActivationServices = ServiceProvider,
+                GrainIdentity = identity,
+                GrainType = typeof(T),
+                ObservableLifecycle = _grainLifecycle,
+            };
+
+            //Create a stateless grain
+            grain = _grainCreator.CreateGrainInstance(grainContext) as T;
+
+            if (grain == null)
+                throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
+
+            //Check if there are any reminders for this grain
+            var remindable = grain as IRemindable;
+
+            //Set the reminder target
+            if (remindable != null)
+                ReminderRegistry.SetGrainTarget(remindable);
+
+            //Trigger the lifecycle hook that will get the grain's state from the runtime
+            await _grainLifecycle.TriggerStartAsync();
+
+            return grain as T;
+        }
+        #endregion
+
         #region Verifies
 
         public void VerifyRuntime(Expression<Action<IGrainRuntime>> expression, Func<Times> times)
@@ -164,6 +218,15 @@ namespace Orleans.TestKit
         public void Deactivate(Grain grain)
         {
             _grainLifecycle.TriggerStop();
+        }
+
+        /// <summary>
+        /// Deactivate the given <see cref="Grain"/>
+        /// </summary>
+        /// <param name="grain">Grain to Deactivate</param>
+        public Task DeactivateAsync(Grain grain)
+        {
+            return _grainLifecycle.TriggerStopAsync();
         }
     }
 }
