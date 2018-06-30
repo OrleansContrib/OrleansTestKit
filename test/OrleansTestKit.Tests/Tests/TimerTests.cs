@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using Orleans.TestKit.Storage;
 using Orleans.TestKit.Timers;
 using TestGrains;
@@ -9,10 +10,10 @@ namespace Orleans.TestKit.Tests
     public class TimerTests : TestKitBase
     {
         [Fact]
-        public void ShouldFireAllTimers()
+        public async Task ShouldFireAllTimers()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloTimers>(0);
+            var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
 
             // Act
             Silo.FireAllTimers();
@@ -24,10 +25,10 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void ShouldFireFirstTimer()
+        public async Task ShouldFireFirstTimer()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloTimers>(0);
+            var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
 
             // Act
             Silo.FireTimer(0);
@@ -39,10 +40,10 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void ShouldFireSecondTimer()
+        public async Task ShouldFireSecondTimer()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloTimers>(0);
+            var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
 
             // Act
             Silo.FireTimer(1);

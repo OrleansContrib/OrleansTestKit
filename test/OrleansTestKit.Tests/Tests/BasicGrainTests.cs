@@ -15,7 +15,7 @@ namespace Orleans.TestKit.Tests
             long id = new Random().Next();
             const string greeting = "Bonjour";
 
-            IHello grain = Silo.CreateGrain<HelloGrain>(id);
+            IHello grain = await Silo.CreateGrainAsync<HelloGrain>(id);
 
             // This will create and call a Hello grain with specified 'id' in one of the test silos.
             string reply = await grain.SayHello(greeting);
@@ -25,29 +25,30 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void GrainActivation()
+        public async Task GrainActivation()
         {
-            var grain = Silo.CreateGrain<LifecycleGrain>(new Random().Next());
+            var grain = await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
             grain.ActivateCount.Should().Be(1);
         }
 
         [Fact]
-        public void SecondGrainCreated()
+        public async Task SecondGrainCreated()
         {
-            Silo.CreateGrain<LifecycleGrain>(new Random().Next());
+            await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
-            Silo.Invoking(s => s.CreateGrain<LifecycleGrain>(new Random().Next())).ShouldThrow<Exception>();
+            Func<Task> creatingSecondGrainAsync = async () => await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
+            creatingSecondGrainAsync.ShouldThrow<Exception>();
         }
 
         [Fact]
-        public void GrainDeactivation()
+        public async Task GrainDeactivation()
         {
-            var grain = Silo.CreateGrain<LifecycleGrain>(new Random().Next());
+            var grain = await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
             grain.DeactivateCount.Should().Be(0);
 
-            Silo.Deactivate(grain);
+            await Silo.DeactivateAsync(grain);
 
             grain.DeactivateCount.Should().Be(1);
         }
@@ -57,7 +58,7 @@ namespace Orleans.TestKit.Tests
         {
             const int id = int.MaxValue;
 
-            var grain = Silo.CreateGrain<IntegerKeyGrain>(id);
+            var grain = await Silo.CreateGrainAsync<IntegerKeyGrain>(id);
 
             var key = await grain.GetKey();
 
@@ -70,7 +71,7 @@ namespace Orleans.TestKit.Tests
             const int id = int.MaxValue;
             var ext = "Thing";
 
-            var grain = Silo.CreateGrain<IntegerCompoundKeyGrain>(id, ext);
+            var grain = await Silo.CreateGrainAsync<IntegerCompoundKeyGrain>(id, ext);
 
             var key = await grain.GetKey();
 
@@ -83,7 +84,7 @@ namespace Orleans.TestKit.Tests
         {
             var id = Guid.NewGuid();
 
-            var grain = Silo.CreateGrain<GuidKeyGrain>(id);
+            var grain = await Silo.CreateGrainAsync<GuidKeyGrain>(id);
 
             var key = await grain.GetKey();
 
@@ -96,7 +97,7 @@ namespace Orleans.TestKit.Tests
             var id = Guid.NewGuid();
             var ext = "Thing";
 
-            var grain = Silo.CreateGrain<GuidCompoundKeyGrain>(id, ext);
+            var grain = await Silo.CreateGrainAsync<GuidCompoundKeyGrain>(id, ext);
 
             var key = await grain.GetKey();
 
@@ -109,7 +110,7 @@ namespace Orleans.TestKit.Tests
         {
             const string id = "TestId";
 
-            var grain = Silo.CreateGrain<StringKeyGrain>(id);
+            var grain = await Silo.CreateGrainAsync<StringKeyGrain>(id);
 
             var key = await grain.GetKey();
 
@@ -121,7 +122,7 @@ namespace Orleans.TestKit.Tests
         {
             const int id = int.MaxValue;
 
-            var grain = Silo.CreateGrain<StatefulIntegerKeyGrain>(id);
+            var grain = await Silo.CreateGrainAsync<StatefulIntegerKeyGrain>(id);
 
             var key = await grain.GetKey();
 
@@ -133,7 +134,7 @@ namespace Orleans.TestKit.Tests
         {
             var id = Guid.NewGuid();
 
-            var grain = Silo.CreateGrain<StatefulGuidKeyGrain>(id);
+            var grain = await Silo.CreateGrainAsync<StatefulGuidKeyGrain>(id);
 
             var key = await grain.GetKey();
 
@@ -145,7 +146,7 @@ namespace Orleans.TestKit.Tests
         {
             const string id = "TestId";
 
-            var grain = Silo.CreateGrain<StatefulStringKeyGrain>(id);
+            var grain = await Silo.CreateGrainAsync<StatefulStringKeyGrain>(id);
 
             var key = await grain.GetKey();
 

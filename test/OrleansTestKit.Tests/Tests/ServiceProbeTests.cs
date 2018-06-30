@@ -21,7 +21,7 @@ namespace Orleans.TestKit.Tests
             dateServiceMock.Setup(i => i.GetCurrentDate())
                     .ReturnsAsync(() => date);
 
-            var grain = Silo.CreateGrain<HelloGrainWithServiceDependency>(10);
+            var grain = await Silo.CreateGrainAsync<HelloGrainWithServiceDependency>(10);
 
             // Act
             var reply = await grain.SayHello(greeting);
@@ -39,7 +39,7 @@ namespace Orleans.TestKit.Tests
             // Arrange
             const string greeting = "Bonjour";
 
-            var grain = Silo.CreateGrain<HelloGrainWithServiceDependency>(10);
+            var grain = await Silo.CreateGrainAsync<HelloGrainWithServiceDependency>(10);
 
             // Act
             var reply = await grain.SayHello(greeting);
@@ -62,7 +62,7 @@ namespace Orleans.TestKit.Tests
 
             Silo.AddService(dateServiceMock.Object);
 
-            var grain = Silo.CreateGrain<HelloGrainWithServiceDependency>(10);
+            var grain = await Silo.CreateGrainAsync<HelloGrainWithServiceDependency>(10);
 
             // Act
             var reply = await grain.SayHello(greeting);

@@ -24,18 +24,16 @@ namespace Orleans.TestKit
             });
         }
 
-        public void TriggerStart()
+        public Task TriggerStartAsync()
         {
             var tasks = observers.OrderBy(x => x.Item1).Select(x => x.Item2.OnStart(CancellationToken.None));
-
-            Task.WaitAll(tasks.ToArray(), 1000);
+            return Task.WhenAll(tasks.ToArray());
         }
 
-        public void TriggerStop()
+        public Task TriggerStopAsync()
         {
             var tasks = observers.Select(x => x.Item2.OnStop(CancellationToken.None));
-
-            Task.WaitAll(tasks.ToArray(), 1000);
+            return Task.WhenAll(tasks.ToArray());
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Orleans.TestKit.Tests
         [Fact]
         public async Task SetupProbe()
         {
-            var grain = Silo.CreateGrain<PingGrain>(1);
+            var grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             var pong = Silo.AddProbe<IPong>(22);
 
@@ -30,17 +30,17 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void MissingProbe()
+        public async Task MissingProbe()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             grain.Invoking(p => p.Ping()).ShouldThrowExactly<Exception>();
         }
 
         [Fact]
-        public void InvalidProbe()
+        public async Task InvalidProbe()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //This uses the wrong id for the IPong since this is hard coded within PingGrain
             var pong = Silo.AddProbe<IPong>(0);
@@ -51,9 +51,9 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void InvalidProbeType()
+        public async Task InvalidProbeType()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //This uses the correct id, but the wrong grain type
             var pong = Silo.AddProbe<IPong2>(22);

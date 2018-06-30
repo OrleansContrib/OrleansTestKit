@@ -17,7 +17,7 @@ namespace Orleans.TestKit.Tests
             const string greeting1 = "Bonjour";
             const string greeting2 = "Hei";
 
-            var grain = Silo.CreateGrain<HelloArchiveGrain>(id);
+            var grain = await Silo.CreateGrainAsync<HelloArchiveGrain>(id);
 
             // This will directly call the grain under test.
             await grain.SayHello(greeting1);
@@ -38,7 +38,7 @@ namespace Orleans.TestKit.Tests
             long id = new Random().Next();
             const string greeting = "Bonjour";
 
-            var grain = Silo.CreateGrain<HelloArchiveGrain>(id);
+            var grain = await Silo.CreateGrainAsync<HelloArchiveGrain>(id);
 
             // This will directly call the grain under test.
             await grain.SayHello(greeting);

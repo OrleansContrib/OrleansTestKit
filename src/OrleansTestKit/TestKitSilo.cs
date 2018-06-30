@@ -92,24 +92,23 @@ namespace Orleans.TestKit
             _grainCreator = new TestGrainCreator(_grainRuntime, ServiceProvider);
         }
 
-        #region CreateGrains 
+        #region CreateGrains
+        public Task<T> CreateGrainAsync<T>(long id) where T : Grain, IGrainWithIntegerKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id));
 
-        public T CreateGrain<T>(long id) where T : Grain, IGrainWithIntegerKey
-            => CreateGrain<T>(new TestGrainIdentity(id));
+        public Task<T> CreateGrainAsync<T>(Guid id) where T : Grain, IGrainWithGuidKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id));
 
-        public T CreateGrain<T>(Guid id) where T : Grain, IGrainWithGuidKey
-            => CreateGrain<T>(new TestGrainIdentity(id));
+        public Task<T> CreateGrainAsync<T>(string id) where T : Grain, IGrainWithStringKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id));
 
-        public T CreateGrain<T>(string id) where T : Grain, IGrainWithStringKey
-            => CreateGrain<T>(new TestGrainIdentity(id));
+        public Task<T> CreateGrainAsync<T>(Guid id, string keyExtension) where T : Grain, IGrainWithGuidCompoundKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id, keyExtension));
 
-        public T CreateGrain<T>(Guid id, string keyExtension) where T : Grain, IGrainWithGuidCompoundKey
-            => CreateGrain<T>(new TestGrainIdentity(id, keyExtension));
+        public Task<T> CreateGrainAsync<T>(long id, string keyExtension) where T : Grain, IGrainWithIntegerCompoundKey
+            => CreateGrainAsync<T>(new TestGrainIdentity(id, keyExtension));
 
-        public T CreateGrain<T>(long id, string keyExtension) where T : Grain, IGrainWithIntegerCompoundKey
-            => CreateGrain<T>(new TestGrainIdentity(id, keyExtension));
-
-        private T CreateGrain<T>(IGrainIdentity identity) where T : Grain
+        private async Task<T> CreateGrainAsync<T>(IGrainIdentity identity) where T : Grain
         {
             if (_isGrainCreated)
                 throw new Exception(
@@ -141,12 +140,11 @@ namespace Orleans.TestKit
                 ReminderRegistry.SetGrainTarget(remindable);
 
             //Trigger the lifecycle hook that will get the grain's state from the runtime
-            _grainLifecycle.TriggerStart();
+            await _grainLifecycle.TriggerStartAsync();
 
             return grain as T;
         }
-
-        #endregion CreateGrains
+        #endregion
 
         #region Verifies
 
@@ -161,9 +159,9 @@ namespace Orleans.TestKit
         /// Deactivate the given <see cref="Grain"/>
         /// </summary>
         /// <param name="grain">Grain to Deactivate</param>
-        public void Deactivate(Grain grain)
+        public Task DeactivateAsync(Grain grain)
         {
-            _grainLifecycle.TriggerStop();
+            return _grainLifecycle.TriggerStopAsync();
         }
     }
 }

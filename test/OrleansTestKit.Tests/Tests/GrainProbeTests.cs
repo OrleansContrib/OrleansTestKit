@@ -14,7 +14,7 @@ namespace Orleans.TestKit.Tests
         [Fact]
         public async Task SetupProbe()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             var pong = Silo.AddProbe<IPong>(22);
 
@@ -26,7 +26,7 @@ namespace Orleans.TestKit.Tests
         [Fact]
         public async Task SetupCompoundProbe()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             var pong = Silo.AddProbe<IPongCompound>(44, keyExtension: "Test");
 
@@ -36,18 +36,18 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void MissingProbe()
+        public async Task MissingProbe()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //There should not be an exception, since we are using loose grain generation
             grain.Invoking(p => p.Ping()).ShouldNotThrow();
         }
 
         [Fact]
-        public void InvalidProbe()
+        public async Task InvalidProbe()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //This uses the wrong id for the IPong since this is hard coded within PingGrain
             var pong = Silo.AddProbe<IPong>(0);
@@ -58,9 +58,9 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void InvalidProbeType()
+        public async Task InvalidProbeType()
         {
-            IPing grain = Silo.CreateGrain<PingGrain>(1);
+            IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //This correct id, but a different grain type
             var pong = Silo.AddProbe<IPong2>(22);
@@ -135,7 +135,7 @@ namespace Orleans.TestKit.Tests
 
             this.Silo.AddProbe<IPong>(identity => pong);
 
-            var grain = this.Silo.CreateGrain<PingGrain>(1);
+            var grain = await this.Silo.CreateGrainAsync<PingGrain>(1);
 
             await grain.Ping();
 
@@ -148,7 +148,7 @@ namespace Orleans.TestKit.Tests
             Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
             Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
 
-            var managerGrain = this.Silo.CreateGrain<DeviceManagerGrain>(0);
+            var managerGrain = await this.Silo.CreateGrainAsync<DeviceManagerGrain>(0);
             var iosGrain = await managerGrain.GetDeviceGrain("IOS");
             var androidGrain = await managerGrain.GetDeviceGrain("Android");
 

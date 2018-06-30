@@ -15,9 +15,10 @@ namespace TestGrains
     {
         private int _activationValue;
 
-        public override async Task OnActivateAsync()
+        public override Task OnActivateAsync()
         {
             _activationValue = this.State.Value;
+            return Task.CompletedTask;
         }
 
         public Task<int> GetStateValue() => Task.FromResult(State.Value);

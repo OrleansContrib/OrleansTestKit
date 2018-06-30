@@ -15,7 +15,7 @@ namespace Orleans.TestKit.Tests
 
 
             // Act
-            var grain = Silo.CreateGrain<StatefulActivationGrain>(0);
+            var grain = await Silo.CreateGrainAsync<StatefulActivationGrain>(0);
             var value = await grain.GetActivationValue();
 
             // Assert
