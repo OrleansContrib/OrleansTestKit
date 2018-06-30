@@ -15,7 +15,7 @@ namespace Orleans.TestKit.Tests
         public async Task RegisterReminder()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             const string reminderName = "abc123";
             var due = TimeSpan.Zero;
@@ -32,7 +32,7 @@ namespace Orleans.TestKit.Tests
         public async Task UnRegisterReminder()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             const string reminderName = "abc123";
             var due = TimeSpan.Zero;
@@ -50,7 +50,7 @@ namespace Orleans.TestKit.Tests
         public async Task TriggerUnRegisterReminder()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             const string reminderName = "abc123";
             var due = TimeSpan.Zero;
@@ -69,7 +69,7 @@ namespace Orleans.TestKit.Tests
         public async Task TriggerAllReminders()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             const string reminderName1 = "abc123";
             const string reminderName2 = "123";
@@ -90,7 +90,7 @@ namespace Orleans.TestKit.Tests
         public async Task TriggerSingleReminderOnce()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             const string reminderName = "abc123";
 
@@ -108,7 +108,7 @@ namespace Orleans.TestKit.Tests
         public async Task TriggerSingleReminderMultiple()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             const string reminderName = "abc123";
 
@@ -127,7 +127,7 @@ namespace Orleans.TestKit.Tests
         public async Task TriggerUnknownReminder()
         {
             // Arrange
-            var grain = Silo.CreateGrain<HelloReminders>(0);
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             await grain.RegisterReminder("a", TimeSpan.Zero, TimeSpan.MaxValue);
 

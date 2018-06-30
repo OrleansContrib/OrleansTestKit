@@ -17,7 +17,7 @@ namespace Orleans.TestKit.Tests
         [Fact]
         public async Task GrainSentMessages()
         {
-            var chatty = Silo.CreateGrain<Chatty>(4);
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
             var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
@@ -32,7 +32,7 @@ namespace Orleans.TestKit.Tests
         [Fact]
         public async Task IncorrectVerifyMessage()
         {
-            var chatty = Silo.CreateGrain<Chatty>(4);
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
             var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
@@ -44,9 +44,9 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void IncorrectProbeId()
+        public async Task IncorrectProbeId()
         {
-            var chatty = Silo.CreateGrain<Chatty>(4);
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
             Silo.AddStreamProbe<ChatMessage>(Guid.NewGuid(), null);
 
@@ -56,9 +56,9 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void IncorrectProbeNamespace()
+        public async Task IncorrectProbeNamespace()
         {
-            var chatty = Silo.CreateGrain<Chatty>(4);
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
             Silo.AddStreamProbe<ChatMessage>(Guid.Empty, "Wrong");
 
@@ -68,11 +68,11 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void GrainIsSubscribed()
+        public async Task GrainIsSubscribed()
         {
             var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
-            Silo.CreateGrain<Listener>(1);
+            await Silo.CreateGrainAsync<Listener>(1);
 
             stream.Subscribed.Should().Be(1);
         }
@@ -82,7 +82,7 @@ namespace Orleans.TestKit.Tests
         {
             var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
-            var grain = Silo.CreateGrain<Listener>(1);
+            var grain = await Silo.CreateGrainAsync<Listener>(1);
 
             await stream.OnNextAsync(new ChatMessage("Ding"));
 

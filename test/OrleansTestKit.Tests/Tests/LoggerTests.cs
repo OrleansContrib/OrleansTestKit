@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Threading.Tasks;
+using FluentAssertions;
 using TestGrains;
 using TestInterfaces;
 using Xunit;
@@ -16,21 +17,21 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public void ConsoleLog()
+        public async Task ConsoleLog()
         {
             const string greeting = "Bonjour";
 
-            IHello grain = Silo.CreateGrain<HelloGrain>(1);
+            IHello grain = await Silo.CreateGrainAsync<HelloGrain>(1);
 
             grain.Invoking(g => g.SayHello(greeting)).ShouldNotThrow();
         }
 
         [Fact]
-        public void XUnitLog()
+        public async Task XUnitLog()
         {
             const string greeting = "Bonjour";
 
-            IHello grain = Silo.CreateGrain<HelloGrain>(2);
+            IHello grain = await Silo.CreateGrainAsync<HelloGrain>(2);
 
             grain.Invoking(g => g.SayHello(greeting)).ShouldNotThrow();
         }

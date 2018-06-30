@@ -12,7 +12,7 @@ namespace Orleans.TestKit.Tests
         public async Task ShouldCallDeactivateOnIdle()
         {
             // Arrange
-            var grain = Silo.CreateGrain<DeactivationGrain>(0);
+            var grain = await Silo.CreateGrainAsync<DeactivationGrain>(0);
 
             // Act
             await grain.DeactivateOnIdle();
@@ -25,7 +25,7 @@ namespace Orleans.TestKit.Tests
         public async Task ShouldCallDelayDeactivation()
         {
             // Arrange
-            var grain = Silo.CreateGrain<DeactivationGrain>(0);
+            var grain = await Silo.CreateGrainAsync<DeactivationGrain>(0);
             var timeSpan = TimeSpan.FromSeconds(5);
 
             // Act
