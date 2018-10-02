@@ -23,7 +23,10 @@ namespace TestGrains
         {
             var reminder = await this.GetReminder(reminderName);
 
-            await this.UnregisterReminder(reminder);
+            if (reminder != null)
+            {
+                await this.UnregisterReminder(reminder);
+            }
         }
     }
 }
