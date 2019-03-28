@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
     <RootNamespace>Orleans.TestKit.Tests</RootNamespace>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IsTestProject>true</IsTestProject>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
@@ -12,7 +13,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\OrleansTestKit\OrleansTestKit.csproj" />
   </ItemGroup>
+
 </Project>

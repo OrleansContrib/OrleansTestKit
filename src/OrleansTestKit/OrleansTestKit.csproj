@@ -1,20 +1,25 @@
-﻿<Project Sdk="Microsoft.NET.Sdk"> 
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <Company>OrleansContrib</Company>
+    <Copyright>Copyright © 2018-2019 Orleans Contributors</Copyright>
+    <Description>A testing framework for Microsoft Orleans that does not use a real silo</Description>
+    <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET</PackageTags>
+    <Product>OrleansTestKit</Product>
+    <Version>2.3.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AssemblyName>OrleansTestKit</AssemblyName>
     <RootNamespace>Orleans.TestKit</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Company>OrleansContrib</Company>
-    <Product>OrleansTestKit</Product>
-    <Description>A testing framework for Microsoft Orleans that does not use a real silo</Description>
-    <Copyright>Copyright © 2018</Copyright>
-    <Version>2.1.0</Version>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.Core.Legacy" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.Core" Version="2.3.0" />
     <PackageReference Include="Moq" Version="4.7.145" />
   </ItemGroup>
+
 </Project>
