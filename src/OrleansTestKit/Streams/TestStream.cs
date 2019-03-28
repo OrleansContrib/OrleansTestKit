@@ -61,6 +61,16 @@ namespace Orleans.TestKit.Streams
             throw new NotImplementedException();
         }
 
+        public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T> observer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T> observer, StreamSequenceToken token)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task OnNextAsync(T item, StreamSequenceToken token = null)
         {
             Sends++;

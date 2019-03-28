@@ -31,6 +31,12 @@ namespace Orleans.TestKit.Streams
             throw new NotImplementedException();
         }
 
+        public override Task<StreamSubscriptionHandle<T>> ResumeAsync(IAsyncBatchObserver<T> observer,
+            StreamSequenceToken token = null)
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool Equals(StreamSubscriptionHandle<T> other)
         {
             throw new NotImplementedException();
