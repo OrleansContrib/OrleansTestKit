@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Company>OrleansContrib</Company>
-    <Copyright>Copyright © 2018-2019 Orleans Contributors</Copyright>
+    <Copyright>Copyright © 2017-2019 Daniel Sarfati</Copyright>
     <Description>A testing framework for Microsoft Orleans that does not use a real silo</Description>
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET</PackageTags>
     <Product>OrleansTestKit</Product>
