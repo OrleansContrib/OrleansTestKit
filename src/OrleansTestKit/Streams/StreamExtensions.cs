@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Orleans.TestKit.Streams;
 
 namespace Orleans.TestKit

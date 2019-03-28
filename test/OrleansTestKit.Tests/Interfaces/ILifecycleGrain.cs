@@ -1,9 +1,9 @@
-using Orleans;
+﻿using Orleans;
 
 namespace TestInterfaces
 {
     public interface ILifecycleGrain : IGrainWithIntegerKey
     {
-        
+
     }
 }

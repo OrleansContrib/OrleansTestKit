@@ -1,4 +1,4 @@
-namespace Orleans.TestKit.Storage
+﻿namespace Orleans.TestKit.Storage
 {
     public sealed class TestStorageStats
     {
