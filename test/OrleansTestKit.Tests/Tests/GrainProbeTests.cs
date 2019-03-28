@@ -41,7 +41,7 @@ namespace Orleans.TestKit.Tests
             IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //There should not be an exception, since we are using loose grain generation
-            grain.Invoking(p => p.Ping()).ShouldNotThrow();
+            grain.Invoking(p => p.Ping()).Should().NotThrow();
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Orleans.TestKit.Tests
             //This uses the wrong id for the IPong since this is hard coded within PingGrain
             var pong = Silo.AddProbe<IPong>(0);
 
-            grain.Invoking(p => p.Ping()).ShouldNotThrow();
+            grain.Invoking(p => p.Ping()).Should().NotThrow();
 
             pong.Verify(p => p.Pong(), Times.Never);
         }
@@ -65,7 +65,7 @@ namespace Orleans.TestKit.Tests
             //This correct id, but a different grain type
             var pong = Silo.AddProbe<IPong2>(22);
 
-            grain.Invoking(p => p.Ping()).ShouldNotThrow();
+            grain.Invoking(p => p.Ping()).Should().NotThrow();
 
             pong.Verify(p => p.Pong2(), Times.Never);
         }

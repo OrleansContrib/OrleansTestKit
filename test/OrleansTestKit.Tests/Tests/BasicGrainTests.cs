@@ -38,7 +38,7 @@ namespace Orleans.TestKit.Tests
             await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
             Func<Task> creatingSecondGrainAsync = async () => await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
-            creatingSecondGrainAsync.ShouldThrow<Exception>();
+            creatingSecondGrainAsync.Should().Throw<Exception>();
         }
 
         [Fact]

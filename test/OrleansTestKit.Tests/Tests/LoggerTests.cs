@@ -23,7 +23,7 @@ namespace Orleans.TestKit.Tests
 
             IHello grain = await Silo.CreateGrainAsync<HelloGrain>(1);
 
-            grain.Invoking(g => g.SayHello(greeting)).ShouldNotThrow();
+            grain.Invoking(g => g.SayHello(greeting)).Should().NotThrow();
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Orleans.TestKit.Tests
 
             IHello grain = await Silo.CreateGrainAsync<HelloGrain>(2);
 
-            grain.Invoking(g => g.SayHello(greeting)).ShouldNotThrow();
+            grain.Invoking(g => g.SayHello(greeting)).Should().NotThrow();
         }
     }
 }

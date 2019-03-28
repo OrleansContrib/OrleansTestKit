@@ -40,7 +40,7 @@ namespace Orleans.TestKit.Tests
 
             await chatty.SendChat(msg);
 
-            stream.Invoking(s => s.VerifySend(m => m.Msg == "This is not right")).ShouldThrow<Exception>();
+            stream.Invoking(s => s.VerifySend(m => m.Msg == "This is not right")).Should().Throw<Exception>();
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Orleans.TestKit.Tests
 
             const string msg = "Hello Chat";
 
-            chatty.Invoking(p => p.SendChat(msg).Wait()).ShouldThrow<Exception>();
+            chatty.Invoking(p => p.SendChat(msg).Wait()).Should().Throw<Exception>();
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace Orleans.TestKit.Tests
 
             const string msg = "Hello Chat";
 
-            chatty.Invoking(p => p.SendChat(msg).Wait()).ShouldThrow<Exception>();
+            chatty.Invoking(p => p.SendChat(msg).Wait()).Should().Throw<Exception>();
         }
 
         [Fact]

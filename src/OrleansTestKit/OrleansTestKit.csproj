@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.Orleans.Core.Legacy" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="2.3.0" />
     <PackageReference Include="Microsoft.Orleans.Core" Version="2.3.0" />
-    <PackageReference Include="Moq" Version="4.7.145" />
+    <PackageReference Include="Moq" Version="4.10.1" />
   </ItemGroup>
 
 </Project>
