@@ -1,14 +1,48 @@
 image: Visual Studio 2017
+
+artifacts:
+  - path: artifacts\*.nupkg
+    type: NuGetPackage
+  - path: artifacts\*.snupkg
+    type: NuGetPackage
+branches:
+  only:
+    - master
+environment:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+nuget:
+  disable_publish_on_pr: true
+pull_requests:
+  do_not_increment_build_number: true
+
+install:
+  - cmd: appveyor-retry python -m pip install --upgrade pip
+  - cmd: appveyor-retry python -m pip install codecov
 before_build:
-- cmd: >-
-    nuget restore
+  - cmd: dotnet --version
+  - cmd: appveyor-retry dotnet restore --force --packages "%appveyor_build_folder%\packages" --verbosity minimal
+build_script:
+  - cmd: dotnet build --configuration Release --no-restore --verbosity minimal -l:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.V14.dll"
+after_build:
+  - cmd: dotnet pack --configuration Release --no-build --no-restore --output "%appveyor_build_folder%\artifacts" --verbosity minimal
+test_script:
+  - cmd: dotnet test --configuration Release --no-build --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutput="%appveyor_build_folder%\test-results\coverage.xml" /p:CoverletOutputFormat=cobertura /p:Include="[OrleansTestKit]*"
+after_test:
+  - cmd: appveyor-retry codecov -X gcov -f "%appveyor_build_folder%\test-results\coverage.xml"
 
-    nuget install xunit.runner.console -ExcludeVersion -OutputDirectory packages
-
-    nuget install xunit.runner.msbuild -ExcludeVersion -OutputDirectory packages
-build:
-  publish_nuget: true
-  publish_nuget_symbols: true
-  verbosity: minimal
-test:
-  assemblies: '**\*.Tests.dll'
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: dZIKGV8t1PiU1V0FXg1OLNFX2HA4ow2w1K8sN6H/sVaAmEWX8ZHWgG0aSphGeBCt
+    tag: $(appveyor_repo_tag_name)
+    artifact: /.*\.s?nupkg/
+    description: Release Notes
+    on:
+      appveyor_repo_tag: true
+  - provider: NuGet
+    api_key:
+      secure: TgQZ7jXy3J1TixFQuqjHZvWwDxKt8QZCxGvRafOgfMDEgKmMyjvrxQmsc8Hyd15B
+    artifact: /.*\.s?nupkg/
+    on:
+      appveyor_repo_tag: true

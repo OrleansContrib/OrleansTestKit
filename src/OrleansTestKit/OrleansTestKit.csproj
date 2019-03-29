@@ -1,17 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Company>OrleansContrib</Company>
+    <Authors>Daniel Sarfati,Kyle Dodson</Authors>
     <Copyright>Copyright © 2017-2019 Daniel Sarfati</Copyright>
-    <Description>A testing framework for Microsoft Orleans that does not use a real silo</Description>
-    <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET</PackageTags>
-    <Product>OrleansTestKit</Product>
+    <Description>A unit test toolkit for Microsoft Orleans that does not require a real silo. Instead, tests are run with a mock silo.</Description>
+    <PackageIconUrl>https://raw.githubusercontent.com/dotnet/orleans/gh-pages/assets/logo_128.png</PackageIconUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/OrleansContrib/OrleansTestKit</PackageProjectUrl>
+    <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/OrleansContrib/OrleansTestKit</RepositoryUrl>
+    <Title>OrleansTestKit - Orleans unit test toolkit based on mock silo</Title>
     <Version>2.3.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyName>OrleansTestKit</AssemblyName>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IsTestProject>false</IsTestProject>
     <RootNamespace>Orleans.TestKit</RootNamespace>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
