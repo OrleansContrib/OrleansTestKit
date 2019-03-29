@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -45,7 +46,14 @@ namespace Orleans.TestKit
         /// <summary>
         /// Manages all test silo timers.
         /// </summary>
-        public TestTimerRegistry TimerReistry { get; }
+        public TestTimerRegistry TimerRegistry { get; }
+
+        /// <summary>
+        /// Manages all test silo timers.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use TestKitSilo.TimerRegistry")]
+        public TestTimerRegistry TimerReistry => this.TimerRegistry;
 
         /// <summary>
         /// Manages all test silo reminders
@@ -79,7 +87,7 @@ namespace Orleans.TestKit
 
             StorageManager = new StorageManager();
 
-            TimerReistry = new TestTimerRegistry();
+            TimerRegistry = new TestTimerRegistry();
 
             ReminderRegistry = new TestReminderRegistry();
 
@@ -87,7 +95,7 @@ namespace Orleans.TestKit
 
             ServiceProvider.AddService<IKeyedServiceCollection<string, IStreamProvider>>(StreamProviderManager);
 
-            _grainRuntime = new TestGrainRuntime(GrainFactory, TimerReistry, ReminderRegistry, ServiceProvider, StorageManager);
+            _grainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
 
             _grainCreator = new TestGrainCreator(_grainRuntime, ServiceProvider);
         }
