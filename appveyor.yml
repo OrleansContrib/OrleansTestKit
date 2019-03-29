@@ -34,7 +34,7 @@ after_test:
 deploy:
   - provider: GitHub
     auth_token:
-      secure: dZIKGV8t1PiU1V0FXg1OLNFX2HA4ow2w1K8sN6H/sVaAmEWX8ZHWgG0aSphGeBCt
+      secure: Jvffsb67YYmAVuPQk1g6sfqmJto+zoI9C9hGT9rfOM3M8SQatJUQupX7TXjC9GTV
     tag: $(appveyor_repo_tag_name)
     artifact: /.*\.s?nupkg/
     description: Release Notes
@@ -42,7 +42,7 @@ deploy:
       appveyor_repo_tag: true
   - provider: NuGet
     api_key:
-      secure: TgQZ7jXy3J1TixFQuqjHZvWwDxKt8QZCxGvRafOgfMDEgKmMyjvrxQmsc8Hyd15B
+      secure: DWUE24PKEGW0giJPUGZY76rVzFo5MgosfRR0IPMSIuXZlruaEFwC97g5iKJ7MU4E
     artifact: /.*\.s?nupkg/
     on:
       appveyor_repo_tag: true
