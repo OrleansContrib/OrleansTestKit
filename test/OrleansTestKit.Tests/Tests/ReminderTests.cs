@@ -138,5 +138,18 @@ namespace Orleans.TestKit.Tests
             f.Should().Throw<Exception>();
             grain.FiredReminders.Count.Should().Be(0);
         }
+
+        [Fact]
+        public async Task UnregisterUnknownReminder()
+        {
+            // Arrange
+            var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
+
+            // Act
+            await grain.UnregisterReminder("a");
+
+            // Assert
+            Silo.ReminderRegistry.Mock.Verify(v => v.GetReminder("a"), Times.Once);
+        }
     }
 }
