@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
@@ -30,7 +30,7 @@ namespace Orleans.TestKit.Timers
 
         public void FireAll()
         {
-            foreach (var testTimer in _timers)
+            foreach (var testTimer in _timers.ToArray())
                 testTimer.Fire();
         }
     }

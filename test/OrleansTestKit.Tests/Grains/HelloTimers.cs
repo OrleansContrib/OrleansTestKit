@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Orleans;
 
@@ -8,11 +8,13 @@ namespace TestGrains
     {
         private IDisposable _timer0;
         private IDisposable _timer1;
+        private IDisposable _timer2;
 
         public override Task OnActivateAsync()
         {
             _timer0 = RegisterTimer(_ => OnTimer0(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             _timer1 = RegisterTimer(_ => OnTimer1(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            _timer2 = RegisterTimer(_ => OnTimer2(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
             return base.OnActivateAsync();
         }
@@ -34,6 +36,13 @@ namespace TestGrains
         private Task OnTimer1()
         {
             State.Timer1Fired = true;
+            return Task.CompletedTask;
+        }
+
+        private Task OnTimer2()
+        {
+            _timer2.Dispose();
+            _timer2 = RegisterTimer(_ => OnTimer2(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             return Task.CompletedTask;
         }
     }
