@@ -1,46 +1,36 @@
 # Orleans TestKit
 
-[![Build status](https://ci.appveyor.com/api/projects/status/k4crsho9d5vlbcgg/branch/master?svg=true)](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master)
-[![NuGet](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](http://www.nuget.org/packages/OrleansTestKit/)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/k4crsho9d5vlbcgg/branch/master?svg=true)](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master) [![codecov test status](https://codecov.io/gh/OrleansContrib/OrleansTestKit/branch/master/graph/badge.svg)](https://codecov.io/gh/OrleansContrib/OrleansTestKit) [![NuGet package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](http://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/master/LICENSE) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Orleans TestKit is an easy to use unit testing tool for application code built using [Microsoft Orleans](http://dotnet.github.io/orleans/).
-The Orleans TestKit is intended to augment the [existing testing framework](http://dotnet.github.io/orleans/Tutorials/Unit-Testing-Grains.html?q=test) already included with
-Orleans with simple tests for grain logic only.
+The Orleans TestKit is an easy-to-use toolkit for unit testing the grain logic of applications built with [Microsoft Orleans](http://dotnet.github.io/orleans/). The Orleans TestKit is intended to augment the [`TestCluster` unit testing approach](http://dotnet.github.io/orleans/Documentation/tutorials_and_samples/testing.html) provided by the official `Microsoft.Orleans.TestingHost` NuGet package.
 
-**The TestKit is constantly evolving to meet the demands of the team, if there is something you need please [ask us](https://github.com/OrleansContrib/OrleansTestKit/issues)
-or create a new fork.**
+**The Orleans TestKit is evolving to meet the demands of the team. If you have a question or need, please [ask us](https://github.com/OrleansContrib/OrleansTestKit/issues/new)!**
 
-Installation
-=====
+## Installation
 
-Installation is performed via [NuGet](https://www.nuget.org/packages/OrleansTestKit/). 
+Simply install the `OrleansTestKit` NuGet package in your project to get started. For example, run the following command in your Visual Studio Package Manager Console:
 
-There is currently only one package, additional test framework (xUnit, NUnit...) specific ones may be added in the future.
-
-In your test project:
 ```
-PM> Install-Package Install OrleansTestKit
+PM> Install-Package OrleansTestKit
 ```
 
-### Official Builds
+## Documentation
 
-The stable production-quality release is located on nuget
+Examples are provided by the included [test project](https://github.com/OrleansContrib/OrleansTestKit/tree/master/test).
 
-The latest clean build from Appveyor is located: [download](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master/artifacts) or [private nuget](https://ci.appveyor.com/nuget/orleanstestkit)
+## Build Artifacts
 
-Documentation
-=============
+The stable build artifacts are located on [NuGet](http://www.nuget.org/packages/OrleansTestKit/).
 
-Samples are available in the [tests](https://github.com/OrleansContrib/OrleansTestKit/tree/master/test) 
+The latest `master` branch build artifacts are located on [AppVeyor](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master/artifacts). AppVeyor also provides a NuGet feed with various `master` branch build artifacts:
 
+> https://ci.appveyor.com/nuget/orleanstestkit
 
-Community
-=====
+## Community
 
-* Report bugs or ask questions by opening a new [GitHub Issue](https://github.com/OrleansContrib/OrleansTestKit/issues)
-* [Chat on Gitter](https://gitter.im/dotnet/orleans)
+- Report bugs and ask questions by opening a new [GitHub Issue](https://github.com/OrleansContrib/OrleansTestKit/issues/new)
+- [Chat on Gitter](https://gitter.im/dotnet/orleans)
 
-License
-=====
-This project is licensed under the [MIT license](https://github.com/dotnet/orleans/blob/master/LICENSE).
+## License
+
+This project is released under the [MIT license](https://github.com/OrleansContrib/OrleansTestKit/blob/master/LICENSE).

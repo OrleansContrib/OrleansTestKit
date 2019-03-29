@@ -43,6 +43,7 @@ deploy:
   - provider: NuGet
     api_key:
       secure: DWUE24PKEGW0giJPUGZY76rVzFo5MgosfRR0IPMSIuXZlruaEFwC97g5iKJ7MU4E
-    artifact: /.*\.s?nupkg/
+    # Find a fix for pushing snupkg to NuGet from AppVeyor! Then, change the following pattern to: /.*\.s?nupkg/
+    artifact: /.*\.nupkg/
     on:
       appveyor_repo_tag: true
