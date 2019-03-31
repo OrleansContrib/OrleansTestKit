@@ -18,6 +18,14 @@ PM> Install-Package OrleansTestKit
 
 Examples are provided by the included [test project](https://github.com/OrleansContrib/OrleansTestKit/tree/master/test).
 
+### Known Limitations
+
+When run within a test kit environment, code that calls the `GetPrimaryKey` extension methods sometimes result in an `ArgumentException` with the following message:
+
+> Passing a half baked grain as an argument. It is possible that you instantiated a grain class explicitly, as a regular object and not via Orleans runtime or via proper test mocking.
+
+See [issue #47](https://github.com/OrleansContrib/OrleansTestKit/issues/47) for a discussion and references to upstream issues.
+
 ## Build Artifacts
 
 The stable build artifacts are located on [NuGet](http://www.nuget.org/packages/OrleansTestKit/).
