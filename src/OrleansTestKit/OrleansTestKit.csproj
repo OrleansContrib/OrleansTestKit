@@ -11,7 +11,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/OrleansContrib/OrleansTestKit</RepositoryUrl>
     <Title>OrleansTestKit - Orleans unit test toolkit based on mock silo</Title>
-    <Version>2.3.0</Version>
+    <Version>2.3.1</Version>
   </PropertyGroup>
 
   <PropertyGroup>
