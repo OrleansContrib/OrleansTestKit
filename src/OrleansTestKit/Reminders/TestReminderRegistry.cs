@@ -62,6 +62,18 @@ namespace Orleans.TestKit.Reminders
                 await _grain.ReceiveReminder(reminderName, tickStatus);
             }
         }
+
+        public async Task SetCurrentTime(DateTime currentTime)
+        {
+            foreach (var reminder in _reminders.Values.ToList())
+            {
+                var fireTime = reminder.ScheduledTime + reminder.DueTime;
+                if (currentTime >= fireTime)
+                {
+                    await _grain.ReceiveReminder(reminder.ReminderName, new TickStatus());
+                }
+            }
+        }
     }
 
     public sealed class TestReminder : IGrainReminder
@@ -69,12 +81,14 @@ namespace Orleans.TestKit.Reminders
         public string ReminderName { get; }
         public TimeSpan DueTime { get; }
         public TimeSpan Period { get; }
+        public DateTime ScheduledTime { get; }
 
         public TestReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
         {
             this.ReminderName = reminderName;
             this.DueTime = dueTime;
             this.Period = period;
+            this.ScheduledTime = DateTime.UtcNow;
         }
     }
 }
