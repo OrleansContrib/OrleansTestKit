@@ -120,7 +120,7 @@ namespace Orleans.TestKit
         {
             if (_isGrainCreated)
                 throw new Exception(
-                    "A grain has already been created in this silo. Only 1 grain per test silo should every be created. Add grain probes for supporting grains.");
+                    "A grain has already been created in this silo. Only 1 grain per test silo should ever be created. Add grain probes for supporting grains.");
 
             _isGrainCreated = true;
 
