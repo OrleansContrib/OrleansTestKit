@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
-namespace Orleans.TestKit.Tests.Tests
+namespace Orleans.TestKit.Tests
 {
     public class TestGrainIdentityTests
     {

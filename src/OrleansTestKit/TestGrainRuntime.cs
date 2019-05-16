@@ -2,8 +2,6 @@
 using Moq;
 using Orleans.Core;
 using Orleans.Runtime;
-using Orleans.Streams;
-using Orleans.TestKit.Loggers;
 using Orleans.TestKit.Storage;
 using Orleans.Timers;
 
@@ -11,8 +9,6 @@ namespace Orleans.TestKit
 {
     internal class TestGrainRuntime : IGrainRuntime
     {
-        private readonly TestLogManager _logManager = new TestLogManager();
-
         public readonly Mock<IGrainRuntime> Mock = new Mock<IGrainRuntime>();
 
         private readonly StorageManager _storageManager;
@@ -43,8 +39,6 @@ namespace Orleans.TestKit
             ServiceProvider = serviceProvider;
             _storageManager = storageManager;
         }
-
-        public Orleans.Runtime.Logger GetLogger(string loggerName) => _logManager.GetLogger(loggerName);
 
         public void DeactivateOnIdle(Grain grain)
         {
