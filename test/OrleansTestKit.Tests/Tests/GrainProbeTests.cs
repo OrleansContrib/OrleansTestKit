@@ -145,17 +145,31 @@ namespace Orleans.TestKit.Tests
         [Fact]
         public async Task ProbeWithClassPrefix()
         {
-            Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
-            Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
+            var androidMock = Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
+            var iosMock = Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
 
             var managerGrain = await this.Silo.CreateGrainAsync<DeviceManagerGrain>(0);
-            var iosGrain = await managerGrain.GetDeviceGrain("IOS");
             var androidGrain = await managerGrain.GetDeviceGrain("Android");
+            var iosGrain = await managerGrain.GetDeviceGrain("IOS");
 
+            androidGrain.Should().BeSameAs(androidMock.Object);
+            iosGrain.Should().BeSameAs(iosMock.Object);
+        }
 
-            (await iosGrain.GetDeviceType()).Should().Equals("IOS");
-            (await iosGrain.GetDeviceType()).Should().Equals("Android");
+        [Fact]
+        public async Task ProbeWithClassPrefix2()
+        {
+            var androidMock = Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
+            androidMock.Setup(o => o.GetDeviceType()).ReturnsAsync("Linux");
+            var iosMock = Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
+            iosMock.Setup(o => o.GetDeviceType()).ReturnsAsync("BSD");
 
+            var managerGrain = await this.Silo.CreateGrainAsync<DeviceManagerGrain>(0);
+            var androidType = await managerGrain.GetDeviceType("Android");
+            var iosType = await managerGrain.GetDeviceType("IOS");
+
+            androidType.Should().Be("Linux");
+            iosType.Should().Be("BSD");
         }
     }
 }
