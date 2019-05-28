@@ -22,5 +22,11 @@ namespace TestGrains
                     throw new Exception($"Unknown device type {deviceType}");
             }
         }
+
+        public async Task<string> GetDeviceType(string deviceType)
+        {
+            var device = await this.GetDeviceGrain(deviceType);
+            return await device.GetDeviceType();
+        }
     }
 }
