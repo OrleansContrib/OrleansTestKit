@@ -8,8 +8,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/OrleansContrib/OrleansTestKit</PackageProjectUrl>
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/OrleansContrib/OrleansTestKit</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <Title>OrleansTestKit - Orleans unit test toolkit based on mock silo</Title>
     <Version>2.3.2</Version>
   </PropertyGroup>
@@ -17,6 +16,7 @@
   <PropertyGroup>
     <IncludeSymbols>true</IncludeSymbols>
     <IsTestProject>false</IsTestProject>
+    <LangVersion>latest</LangVersion>
     <RootNamespace>Orleans.TestKit</RootNamespace>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -25,6 +25,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="2.3.3" />
     <PackageReference Include="Microsoft.Orleans.Core" Version="2.3.3" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19270-01">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Moq" Version="4.11.0" />
   </ItemGroup>
 
