@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Orleans.Core;
 
@@ -24,6 +24,7 @@ namespace Orleans.TestKit.Storage
 
         public Task ClearStateAsync()
         {
+            State = new TState();
             Stats.Clears++;
 
             return Task.CompletedTask;
