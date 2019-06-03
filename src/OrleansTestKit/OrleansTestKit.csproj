@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Authors>Daniel Sarfati,Kyle Dodson</Authors>
@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="2.3.3" />
-    <PackageReference Include="Microsoft.Orleans.Core" Version="2.3.3" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19270-01">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
