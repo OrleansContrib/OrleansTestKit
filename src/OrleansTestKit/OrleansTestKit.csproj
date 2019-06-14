@@ -10,7 +10,7 @@
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <Title>OrleansTestKit - Orleans unit test toolkit based on mock silo</Title>
-    <Version>2.3.4</Version>
+    <Version>2.3.5</Version>
   </PropertyGroup>
 
   <PropertyGroup>

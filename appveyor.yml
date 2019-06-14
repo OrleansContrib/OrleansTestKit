@@ -42,6 +42,7 @@ deploy:
     on:
       appveyor_repo_tag: true
   - provider: NuGet
+    server: https://api.nuget.org/v3/index.json
     api_key:
       secure: DWUE24PKEGW0giJPUGZY76rVzFo5MgosfRR0IPMSIuXZlruaEFwC97g5iKJ7MU4E
     on:
