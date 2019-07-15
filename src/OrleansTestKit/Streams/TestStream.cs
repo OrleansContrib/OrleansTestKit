@@ -13,6 +13,8 @@ namespace Orleans.TestKit.Streams
 
         private readonly Mock<IAsyncStream<T>> _mockStream = new Mock<IAsyncStream<T>>();
 
+        private readonly List<StreamSubscriptionHandle<T>> _handlers = new List<StreamSubscriptionHandle<T>>();
+
         public Guid Guid { get; }
 
         public string Namespace { get; }
@@ -49,8 +51,14 @@ namespace Orleans.TestKit.Streams
         {
             _observers.Add(observer);
 
-            var handle = new TestStreamSubscriptionHandle<T>(() => _observers.Remove(observer));
+            TestStreamSubscriptionHandle<T> handle = null;
+            handle = new TestStreamSubscriptionHandle<T>(() =>
+            {
+                _observers.Remove(observer);
+                _handlers.Remove(handle);
+            });
 
+            _handlers.Add(handle);
             return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
         }
 
@@ -97,7 +105,7 @@ namespace Orleans.TestKit.Streams
 
         public Task<IList<StreamSubscriptionHandle<T>>> GetAllSubscriptionHandles()
         {
-            throw new NotImplementedException();
+            return Task.FromResult<IList<StreamSubscriptionHandle<T>>>(_handlers);
         }
 
         public void VerifySend(Func<T, bool> check) => VerifySend(check, Times.Once());
