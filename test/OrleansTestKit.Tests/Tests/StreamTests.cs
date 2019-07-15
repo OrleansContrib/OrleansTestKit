@@ -130,6 +130,7 @@ namespace Orleans.TestKit.Tests
 
             await handlers[0].UnsubscribeAsync();
 
+            handlers.Count.Should().Be(1);
             stream.Subscribed.Should().Be(0);
         }
 
