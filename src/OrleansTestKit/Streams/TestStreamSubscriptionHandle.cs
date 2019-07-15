@@ -10,7 +10,7 @@ namespace Orleans.TestKit.Streams
 
         public override IStreamIdentity StreamIdentity { get { throw new NotImplementedException(); } }
 
-        public override Guid HandleId { get {throw new NotImplementedException();} }
+        public override Guid HandleId { get { throw new NotImplementedException(); } }
 
         public override string ProviderName { get { throw new NotImplementedException(); } }
 
@@ -39,7 +39,7 @@ namespace Orleans.TestKit.Streams
 
         public override bool Equals(StreamSubscriptionHandle<T> other)
         {
-            throw new NotImplementedException();
+            return ReferenceEquals(this, other);
         }
     }
 }

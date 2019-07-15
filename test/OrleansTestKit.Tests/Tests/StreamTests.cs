@@ -33,7 +33,7 @@ namespace Orleans.TestKit.Tests
 
             const string msg = "Hello Chat";
             const int id = 2;
-            await stream.OnNextAsync((msg , id));
+            await stream.OnNextAsync((msg, id));
 
             stream.Sends.Should().Be(1);
             stream.VerifySend(m => m.Message == msg);
@@ -115,6 +115,23 @@ namespace Orleans.TestKit.Tests
             await Silo.CreateGrainAsync<Listener>(1);
 
             stream.Subscribed.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task GrainGetAllSubscriptionHandles()
+        {
+            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+
+            await Silo.CreateGrainAsync<Listener>(1);
+            var handlers = await stream.GetAllSubscriptionHandles();
+
+            handlers.Count.Should().Be(1);
+            stream.Subscribed.Should().Be(1);
+
+            await handlers[0].UnsubscribeAsync();
+
+            handlers.Count.Should().Be(1);
+            stream.Subscribed.Should().Be(0);
         }
 
         [Fact]
