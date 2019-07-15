@@ -105,7 +105,7 @@ namespace Orleans.TestKit.Streams
 
         public Task<IList<StreamSubscriptionHandle<T>>> GetAllSubscriptionHandles()
         {
-            return Task.FromResult<IList<StreamSubscriptionHandle<T>>>(_handlers);
+            return Task.FromResult<IList<StreamSubscriptionHandle<T>>>(new List<StreamSubscriptionHandle<T>>(_handlers));
         }
 
         public void VerifySend(Func<T, bool> check) => VerifySend(check, Times.Once());
