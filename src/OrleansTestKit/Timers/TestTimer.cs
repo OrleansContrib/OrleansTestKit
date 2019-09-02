@@ -14,9 +14,20 @@ namespace Orleans.TestKit.Timers
             _state = state;
         }
 
+        [Obsolete("Use FireAsync instead.")]
         public void Fire()
         {
             _asyncCallback?.Invoke(_state);
+        }
+
+        public Task FireAsync()
+        {
+            if (_asyncCallback == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            return _asyncCallback(_state);
         }
 
         public void Dispose()

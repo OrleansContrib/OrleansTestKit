@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
@@ -23,15 +23,24 @@ namespace Orleans.TestKit.Timers
             return timer;
         }
 
-        public void Fire(int index)
-        {
-            _timers[index].Fire();
-        }
+        [Obsolete("Use FireAsync instead.")]
+        public void Fire(int index) => _timers[index].Fire();
 
+        [Obsolete("Use FireAllAsync instead.")]
         public void FireAll()
         {
             foreach (var testTimer in _timers.ToArray())
                 testTimer.Fire();
+        }
+
+        public Task FireAsync(int index) => _timers[index].FireAsync();
+
+        public async Task FireAllAsync()
+        {
+            foreach (var testTimer in _timers.ToArray())
+            {
+                await testTimer.FireAsync();
+            }
         }
     }
 }
