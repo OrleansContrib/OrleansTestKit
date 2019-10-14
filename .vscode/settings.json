@@ -7,5 +7,6 @@
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 30000,
   "omnisharp.defaultLaunchSolution": "OrleansTestKit.sln",
+  "omnisharp.enableRoslynAnalyzers": true,
   "omnisharp.useEditorFormattingSettings": false
 }

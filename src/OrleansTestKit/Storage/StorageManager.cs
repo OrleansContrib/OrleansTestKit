@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Orleans.Core;
+﻿using Orleans.Core;
 
 namespace Orleans.TestKit.Storage
 {
@@ -23,7 +20,6 @@ namespace Orleans.TestKit.Storage
         {
             //There should only be one state in here since there is only 1 grain under test
             var stats = _storage as IStorageStats;
-
             return stats?.Stats;
         }
     }

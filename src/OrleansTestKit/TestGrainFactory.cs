@@ -7,7 +7,8 @@ using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
-    public class TestGrainFactory : IGrainFactory
+    public sealed class TestGrainFactory :
+        IGrainFactory
     {
         private readonly TestKitOptions _options;
 

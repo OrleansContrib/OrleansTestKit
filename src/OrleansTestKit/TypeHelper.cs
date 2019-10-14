@@ -13,6 +13,16 @@ namespace Orleans.TestKit
         /// <param name="toCheck">To type to determine for whether it derives from <paramref name="baseType"/>.</param>
         public static bool IsSubclassOfRawGeneric(this Type toCheck, Type baseType)
         {
+            if (toCheck == null)
+            {
+                throw new ArgumentNullException(nameof(toCheck));
+            }
+
+            if (baseType == null)
+            {
+                throw new ArgumentNullException(nameof(baseType));
+            }
+
             while (toCheck != typeof(object))
             {
                 var cur = toCheck != null && toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
@@ -29,12 +39,18 @@ namespace Orleans.TestKit
 
         public static PropertyInfo GetProperty(Type t, string name)
         {
+            if (t == null)
+            {
+                throw new ArgumentNullException(nameof(t));
+            }
+
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             var info = t.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (info == null && t.BaseType != null)
-                return GetProperty(t.BaseType, name);
-
-            return info;
+            return info == null && t.BaseType != null ? GetProperty(t.BaseType, name) : info;
         }
     }
 }

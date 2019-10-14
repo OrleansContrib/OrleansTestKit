@@ -8,16 +8,20 @@ using System.Threading.Tasks;
 
 namespace Orleans.TestKit
 {
-    internal sealed class TestGrainLifecycle : IGrainLifecycle
+    internal sealed class TestGrainLifecycle :
+        IGrainLifecycle
     {
         private readonly List<(int, ILifecycleObserver)> observers = new List<(int, ILifecycleObserver)>();
 
         public IDisposable Subscribe(string observerName, int stage, ILifecycleObserver observer)
         {
+            if (observer == null)
+            {
+                throw new ArgumentNullException(nameof(observer));
+            }
+
             var item = (stage, observer);
-
             observers.Add(item);
-
             return new LambdaDisposable(() =>
             {
                 observers.Remove(item);

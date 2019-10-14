@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using Orleans.Runtime;
@@ -9,72 +8,80 @@ using Orleans.Timers;
 
 namespace Orleans.TestKit.Reminders
 {
-    public class TestReminderRegistry : IReminderRegistry
+    public sealed class TestReminderRegistry :
+        IReminderRegistry
     {
-        IRemindable _grain;
+        private IRemindable _grain;
 
         private readonly Dictionary<string, TestReminder> _reminders = new Dictionary<string, TestReminder>();
 
-        public readonly Mock<IReminderRegistry> Mock = new Mock<IReminderRegistry>();
+        internal void SetGrainTarget(IRemindable grain) =>
+            _grain = grain ?? throw new ArgumentNullException(nameof(grain));
 
-        internal void SetGrainTarget(IRemindable grain)
+        public Mock<IReminderRegistry> Mock { get; } = new Mock<IReminderRegistry>();
+
+        public async Task<IGrainReminder> GetReminder(string reminderName)
         {
-            _grain = grain;
-        }
+            if (reminderName == null)
+            {
+                throw new ArgumentNullException(nameof(reminderName));
+            }
 
-        public async Task<IGrainReminder> GetReminder(string reminderName) {
-            await Mock.Object.GetReminder(reminderName);
-
+            await Mock.Object.GetReminder(reminderName).ConfigureAwait(false);
             return !_reminders.TryGetValue(reminderName, out var reminder) ? null : reminder;
         }
-        public async Task<List<IGrainReminder>> GetReminders() {
-            await Mock.Object.GetReminders();
+
+        public async Task<List<IGrainReminder>> GetReminders()
+        {
+            await Mock.Object.GetReminders().ConfigureAwait(false);
             return _reminders.Values.ToList<IGrainReminder>();
         }
+
         public async Task<IGrainReminder> RegisterOrUpdateReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
         {
-            await Mock.Object.RegisterOrUpdateReminder(reminderName, dueTime, period);
+            if (reminderName == null)
+            {
+                throw new ArgumentNullException(nameof(reminderName));
+            }
 
+            await Mock.Object.RegisterOrUpdateReminder(reminderName, dueTime, period).ConfigureAwait(false);
             var reminder = new TestReminder(reminderName, dueTime, period);
             _reminders[reminderName] = reminder;
-
             return reminder;
         }
 
         public async Task UnregisterReminder(IGrainReminder reminder)
         {
-            await Mock.Object.UnregisterReminder(reminder);
+            if (reminder == null)
+            {
+                throw new ArgumentNullException(nameof(reminder));
+            }
+
+            await Mock.Object.UnregisterReminder(reminder).ConfigureAwait(false);
             _reminders.Remove(reminder.ReminderName);
         }
 
         public Task FireReminder(string reminderName, TickStatus tickStatus)
         {
+            if (reminderName == null)
+            {
+                throw new ArgumentNullException(nameof(reminderName));
+            }
+
             if (!_reminders.ContainsKey(reminderName))
+            {
                 throw new ArgumentException($"No reminder named {reminderName} found");
+            }
 
             return _grain.ReceiveReminder(reminderName, tickStatus);
         }
 
         public async Task FireAllReminders(TickStatus tickStatus)
         {
-            foreach(var reminderName in _reminders.Keys)
+            foreach (var reminderName in _reminders.Keys)
             {
-                await _grain.ReceiveReminder(reminderName, tickStatus);
+                await _grain.ReceiveReminder(reminderName, tickStatus).ConfigureAwait(false);
             }
-        }
-    }
-
-    public sealed class TestReminder : IGrainReminder
-    {
-        public string ReminderName { get; }
-        public TimeSpan DueTime { get; }
-        public TimeSpan Period { get; }
-
-        public TestReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
-        {
-            this.ReminderName = reminderName;
-            this.DueTime = dueTime;
-            this.Period = period;
         }
     }
 }

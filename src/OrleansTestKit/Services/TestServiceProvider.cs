@@ -4,7 +4,8 @@ using Moq;
 
 namespace Orleans.TestKit.Services
 {
-    public class TestServiceProvider : IServiceProvider
+    public sealed class TestServiceProvider :
+        IServiceProvider
     {
         private readonly TestKitOptions _options;
 
@@ -12,24 +13,27 @@ namespace Orleans.TestKit.Services
 
         public TestServiceProvider(TestKitOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            _options = options;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
             _services = new Dictionary<Type, object>();
         }
 
         public object GetService(Type serviceType)
         {
-            object service;
+            if (serviceType == null)
+            {
+                throw new ArgumentNullException(nameof(serviceType));
+            }
 
-            if (_services.TryGetValue(serviceType, out service))
+            if (_services.TryGetValue(serviceType, out var service))
+            {
                 return service;
+            }
 
             //If using strict service probes, throw the exception
             if (_options.StrictServiceProbes)
-                throw new Exception(
-                    $"Service probe does not exist for type {serviceType.Name}. Ensure that it is added before the grain is tested.");
+            {
+                throw new Exception($"Service probe does not exist for type {serviceType.Name}. Ensure that it is added before the grain is tested.");
+            }
             else
             {
                 //Create a new mock
@@ -45,24 +49,25 @@ namespace Orleans.TestKit.Services
 
         public Mock<T> AddServiceProbe<T>(Mock<T> mock) where T : class
         {
-            _services.Add(typeof(T), mock.Object);
+            if (mock == null)
+            {
+                throw new ArgumentNullException(nameof(mock));
+            }
 
+            _services.Add(typeof(T), mock.Object);
             return mock;
         }
 
         public Mock<T> AddServiceProbe<T>() where T : class
         {
             var mock = new Mock<T>();
-
             _services.Add(typeof(T), mock.Object);
-
             return mock;
         }
 
         public T AddService<T>(T instance)
         {
             _services.Add(typeof(T), instance);
-
             return instance;
         }
     }

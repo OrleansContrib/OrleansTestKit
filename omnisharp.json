@@ -51,5 +51,8 @@
     "UseTabs": false,
     "WrappingKeepStatementsOnSingleLine": false,
     "WrappingPreserveSingleLine": true
+  },
+  "RoslynExtensionsOptions": {
+    "enableAnalyzersSupport": true
   }
 }

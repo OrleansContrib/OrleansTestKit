@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Orleans.Providers;
 using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
 {
-    public class TestStreamProvider : IStreamProvider
+    public sealed class TestStreamProvider :
+        IStreamProvider
     {
         private readonly TestKitOptions _options;
 
         private readonly Dictionary<TestStreamId, IStreamIdentity> _streams = new Dictionary<TestStreamId, IStreamIdentity>();
 
-        public TestStreamProvider(TestKitOptions options)
-        {
-            _options = options;
-        }
+        public TestStreamProvider(TestKitOptions options) =>
+            _options = options ?? throw new ArgumentNullException(nameof(options));
 
         public string Name { get; private set; }
 
@@ -23,41 +21,31 @@ namespace Orleans.TestKit.Streams
 
         public IAsyncStream<T> GetStream<T>(Guid streamId, string streamNamespace)
         {
-            IStreamIdentity stream;
-
-            if (_streams.TryGetValue(new TestStreamId(streamId, streamNamespace), out stream))
-                return stream as IAsyncStream<T>;
+            if (_streams.TryGetValue(new TestStreamId(streamId, streamNamespace), out var stream))
+            {
+                return (IAsyncStream<T>)stream;
+            }
 
             if (_options.StrictStreamProbes)
+            {
+                throw new Exception($"Unable to find stream {streamId}-{streamNamespace}. Ensure a stream probe was added");
+            }
 
-                throw new Exception(
-                    $"Unable to find stream {streamId}-{streamNamespace}. Ensure a stream probe was added");
-
-            else
-                stream = AddStreamProbe<T>(streamId, streamNamespace);
-
-            return (IAsyncStream<T>) stream;
+            stream = AddStreamProbe<T>(streamId, streamNamespace);
+            return (IAsyncStream<T>)stream;
         }
 
-        public Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
+        public Task Init(string name)
         {
-            Name = name;
-
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             return Task.CompletedTask;
         }
-
-        public Task Close() => Task.CompletedTask;
-
-        public Task Start() => Task.CompletedTask;
 
         public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace)
         {
             var id = new TestStreamId(streamId, streamNamespace);
-
             var stream = new TestStream<T>(streamId, streamNamespace, Name);
-
             _streams.Add(id, stream);
-
             return stream;
         }
     }

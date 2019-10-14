@@ -1,10 +1,10 @@
 image: Visual Studio 2019
 
 artifacts:
-  - path: artifacts\*.nupkg
+  - path: artifacts\Release\*.nupkg
     name: NuGet Packages
     type: NuGetPackage
-  - path: artifacts\*.snupkg
+  - path: artifacts\Release\*.snupkg
     name: NuGet Symbol Packages
     type: NuGetPackage
 branches:

@@ -1,10 +1,12 @@
 {
   "folders": [
     {
+      "name": "OrleansTestKit",
       "path": "."
     }
   ],
   "settings": {
+    "dotnet-test-explorer.testProjectPath": "./test/OrleansTestKit.Tests",
     "editor.formatOnSave": true,
     "editor.minimap.maxColumn": 120,
     "editor.minimap.showSlider": "always",
@@ -13,6 +15,7 @@
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 30000,
     "omnisharp.defaultLaunchSolution": "OrleansTestKit.sln",
+    "omnisharp.enableRoslynAnalyzers": true,
     "omnisharp.useEditorFormattingSettings": false
   }
 }
