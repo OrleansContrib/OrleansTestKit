@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.0.100
+    - name: Build
+      id: build
+      run: |
+        dotnet restore --verbosity minimal
+        dotnet build --configuration Release --no-restore --verbosity minimal /p:TreatWarningsAsErrors=true /warnaserror
+        dotnet pack --configuration Release --no-restore --verbosity minimal
+        nupkg_files=(artifacts/Release/*.nupkg)
+        echo "::set-output name=nupkg_name::$( basename ${nupkg_files[-1]} )"
+        echo "::set-output name=nupkg_path::${nupkg_files[-1]}"
+        snupkg_files=(artifacts/Release/*.snupkg)
+        echo "::set-output name=snupkg_name::$( basename ${snupkg_files[-1]} )"
+        echo "::set-output name=snupkg_path::${snupkg_files[-1]}"
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+    - name: Upload nupkg Artifact
+      uses: actions/upload-release-asset@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        asset_content_type: application/zip
+        asset_name: ${{ steps.build.outputs.nupkg_name }}
+        asset_path: ${{ steps.build.outputs.nupkg_path }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+    - name: Upload snupkg Artifact
+      uses: actions/upload-release-asset@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        asset_content_type: application/zip
+        asset_name: ${{ steps.build.outputs.snupkg_name }}
+        asset_path: ${{ steps.build.outputs.snupkg_path }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
