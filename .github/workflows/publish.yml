@@ -1,0 +1,30 @@
+name: Publish
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  publish-to-nuget:
+    name: Publish to NuGet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download NuGet Packages
+        id: download_nuget_packages
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          urls=( $( echo "${GITHUB_CONTEXT}" | jq --raw-output '.event.release.assets[] | .url' ) )
+          for url in "${urls[@]}"
+          do
+            curl --header 'Accept: application/octet-stream' --header "Authorization: token ${GITHUB_TOKEN}" --location --remote-header-name --remote-name "${url}"
+          done
+          nupkg_files=(*.nupkg)
+          echo "::set-output name=nupkg_name::$( basename ${nupkg_files[-1]} )"
+      - name: Publish NuGet Packages
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push "${{ steps.download_nuget_packages.outputs.nupkg_name }}" -k "${NUGET_API_KEY}" -s https://api.nuget.org/v3/index.json

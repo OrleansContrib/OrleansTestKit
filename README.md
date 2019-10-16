@@ -28,11 +28,9 @@ See [issue #47](https://github.com/OrleansContrib/OrleansTestKit/issues/47) for 
 
 ## Build Artifacts
 
-The stable build artifacts are located on [NuGet](http://www.nuget.org/packages/OrleansTestKit/).
+The build artifacts for tagged commits are published to [NuGet](http://www.nuget.org/packages/OrleansTestKit/) and copied to [GitHub Releases](https://github.com/OrleansContrib/OrleansTestKit/releases).
 
-The latest `master` branch build artifacts are located on [AppVeyor](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master/artifacts). AppVeyor also provides a NuGet feed with various `master` branch build artifacts:
-
-> https://ci.appveyor.com/nuget/orleanstestkit
+The build artifacts for pull request commits and `master` branch commits are attached to the individual [Continuous Integration workflow logs](https://github.com/OrleansContrib/OrleansTestKit/actions).
 
 ## Community
 
