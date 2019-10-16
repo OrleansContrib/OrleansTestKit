@@ -15,7 +15,7 @@
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Version>3.0.0-rc1</Version>
+    <Version>3.0.0-rc2</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -31,7 +31,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.0.0-rc1" />
+    <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.0.0-rc2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-19367-01">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
