@@ -7,88 +7,126 @@ using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
-    public class TestGrainFactory : IGrainFactory
+    public sealed class TestGrainFactory :
+        IGrainFactory
     {
         private readonly TestKitOptions _options;
 
-        private readonly Dictionary<string, IGrain> _probes = new Dictionary<string, IGrain>();
+        private readonly Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>> _probeFactories;
 
-        private readonly Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>> _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>>();
+        private readonly Dictionary<string, IGrain> _probes;
 
         internal TestGrainFactory(TestKitOptions options)
         {
             _options = options;
+            _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>>();
+            _probes = new Dictionary<string, IGrain>();
         }
 
-        public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string grainClassNamePrefix = null)
-            where TGrainInterface : IGrainWithGuidKey
-        {
-            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
-        }
-
-        public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string grainClassNamePrefix = null)
-            where TGrainInterface : IGrainWithIntegerKey
-        {
-            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
-        }
-
-        public TGrainInterface GetGrain<TGrainInterface>(string primaryKey, string grainClassNamePrefix = null)
-            where TGrainInterface : IGrainWithStringKey
-        {
-            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
-        }
-
-        public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string keyExtension,
-            string grainClassNamePrefix = null) where TGrainInterface : IGrainWithGuidCompoundKey
-        {
-            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
-        }
-
-        public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string keyExtension,
-            string grainClassNamePrefix = null) where TGrainInterface : IGrainWithIntegerCompoundKey
-        {
-            return GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
-        }
+        public void BindGrainReference(IAddressable grain) =>
+            throw new NotImplementedException();
 
         public Task<TGrainObserverInterface> CreateObjectReference<TGrainObserverInterface>(IGrainObserver obj)
-            where TGrainObserverInterface : IGrainObserver
-        {
+            where TGrainObserverInterface : IGrainObserver =>
             throw new NotImplementedException();
-        }
 
         public Task DeleteObjectReference<TGrainObserverInterface>(IGrainObserver obj)
-            where TGrainObserverInterface : IGrainObserver
-        {
+            where TGrainObserverInterface : IGrainObserver =>
             throw new NotImplementedException();
-        }
 
-        private static string GetKey(IGrainIdentity identity, Type stateType, string classPrefix = null)
+        public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string grainClassNamePrefix = null)
+            where TGrainInterface : IGrainWithGuidKey =>
+            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
+
+        public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string grainClassNamePrefix = null)
+            where TGrainInterface : IGrainWithIntegerKey =>
+            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
+
+        public TGrainInterface GetGrain<TGrainInterface>(string primaryKey, string grainClassNamePrefix = null)
+            where TGrainInterface : IGrainWithStringKey =>
+            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
+
+        public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string keyExtension,
+            string grainClassNamePrefix = null)
+            where TGrainInterface : IGrainWithGuidCompoundKey =>
+            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
+
+        public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string keyExtension,
+            string grainClassNamePrefix = null)
+            where TGrainInterface : IGrainWithIntegerCompoundKey =>
+            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
+
+        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, Guid grainPrimaryKey)
+            where TGrainInterface : IGrain =>
+            throw new NotImplementedException();
+
+        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, long grainPrimaryKey)
+            where TGrainInterface : IGrain =>
+            throw new NotImplementedException();
+
+        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, string grainPrimaryKey)
+            where TGrainInterface : IGrain =>
+            throw new NotImplementedException();
+
+        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, Guid grainPrimaryKey, string keyExtension)
+            where TGrainInterface : IGrain =>
+            throw new NotImplementedException();
+
+        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, long grainPrimaryKey, string keyExtension)
+            where TGrainInterface : IGrain =>
+            throw new NotImplementedException();
+
+        public IGrain GetGrain(Type grainInterfaceType, Guid grainPrimaryKey) =>
+            throw new NotImplementedException();
+
+        public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey) =>
+            throw new NotImplementedException();
+
+        public IGrain GetGrain(Type grainInterfaceType, string grainPrimaryKey) =>
+            throw new NotImplementedException();
+
+        public IGrain GetGrain(Type grainInterfaceType, Guid grainPrimaryKey, string keyExtension) =>
+            throw new NotImplementedException();
+
+        public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey, string keyExtension) =>
+            throw new NotImplementedException();
+
+        internal Mock<T> AddProbe<T>(IGrainIdentity identity, string classPrefix = null)
+            where T : class, IGrain
         {
-            if (classPrefix == null)
-                return $"{stateType.FullName}-{identity.IdentityString}";
-            else
-                return $"{stateType.FullName}-{classPrefix}-{identity.IdentityString}";
+            var key = GetKey(identity, typeof(T), classPrefix);
+            var mock = new Mock<T>();
+            _probes.Add(key, mock.Object);
+            return mock;
         }
 
-        private T GetProbe<T>(IGrainIdentity identity, string grainClassNamePrefix) where T : IGrain
+        internal void AddProbe<T>(Func<IGrainIdentity, IMock<T>> factory)
+            where T : class, IGrain => _probeFactories.Add(typeof(T), factory);
+
+        private static string GetKey(IGrainIdentity identity, Type stateType, string classPrefix = null) =>
+            classPrefix == null
+                ? $"{stateType.FullName}-{identity.IdentityString}"
+                : $"{stateType.FullName}-{classPrefix}-{identity.IdentityString}";
+
+        private T GetProbe<T>(IGrainIdentity identity, string grainClassNamePrefix)
+            where T : IGrain
         {
             var key = GetKey(identity, typeof(T), grainClassNamePrefix);
-
-            IGrain grain;
-
-            if (_probes.TryGetValue(key, out grain))
+            if (_probes.TryGetValue(key, out var grain))
+            {
                 return (T)grain;
+            }
 
             //If using strict grain probes, throw the exception
             if (_options.StrictGrainProbes)
-                throw new Exception(
-                    $"Probe {identity.IdentityString} does not exist for type {typeof(T).Name}. Ensure that it is added before the grain is tested.");
+            {
+                throw new Exception($"Probe {identity.IdentityString} does not exist for type {typeof(T).Name}. " +
+                    "Ensure that it is added before the grain is tested.");
+            }
             else
             {
                 IMock<IGrain> mock;
-                Func<IGrainIdentity, IMock<IGrain>> factory;
-
-                if (_probeFactories.TryGetValue(typeof(T), out factory))
+                if (_probeFactories.TryGetValue(typeof(T), out var factory))
                 {
                     mock = factory(identity);
                 }
@@ -97,35 +135,12 @@ namespace Orleans.TestKit
                     mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
                 }
 
-                grain = mock?.Object;
-
                 //Save the newly created grain for the next call
+                grain = mock?.Object;
                 _probes.Add(key, grain);
             }
 
             return (T)grain;
-        }
-
-
-        internal Mock<T> AddProbe<T>(IGrainIdentity identity, string classPrefix = null) where T : class, IGrain
-        {
-            var key = GetKey(identity, typeof(T), classPrefix);
-
-            var mock = new Mock<T>();
-
-            _probes.Add(key, mock.Object);
-
-            return mock;
-        }
-
-        internal void AddProbe<T>(Func<IGrainIdentity, IMock<T>> factory) where T : class, IGrain
-        {
-            _probeFactories.Add(typeof(T), factory);
-        }
-
-        public void BindGrainReference(IAddressable grain)
-        {
-            throw new NotImplementedException();
         }
     }
 }

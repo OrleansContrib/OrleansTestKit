@@ -1,0 +1,38 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Build
+        run: |
+          dotnet restore --verbosity minimal
+          dotnet build --configuration Release --no-restore --verbosity minimal /p:TreatWarningsAsErrors=true /warnaserror
+          dotnet pack --configuration Release --no-restore --verbosity minimal
+      - name: Test
+        run: |
+          dotnet test --configuration Release --no-build --no-restore --verbosity minimal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Include="[OrleansTestKit]*"
+      - name: Upload NuGet Packages
+        uses: actions/upload-artifact@v1
+        with:
+          name: Packages
+          path: artifacts/Release/
+      # TODO: Need to create CODECOV_TOKEN secret.
+      - name: Upload Code Coverage Results
+        env:
+          CI: "true"
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          dotnet tool restore --verbosity minimal
+          dotnet codecov --dump --file test/OrleansTestKit.Tests/coverage.opencover.xml --required

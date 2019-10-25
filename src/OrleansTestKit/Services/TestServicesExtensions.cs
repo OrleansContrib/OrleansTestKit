@@ -1,17 +1,38 @@
-﻿using Moq;
+﻿using System;
+using Moq;
 
 namespace Orleans.TestKit
 {
     public static class TestServicesExtensions
     {
-
         public static Mock<T> AddServiceProbe<T>(this TestKitSilo silo) where T : class
-            => silo.ServiceProvider.AddServiceProbe<T>();
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
+
+            return silo.ServiceProvider.AddServiceProbe<T>();
+        }
 
         public static Mock<T> AddServiceProbe<T>(this TestKitSilo silo, Mock<T> mock) where T : class
-            => silo.ServiceProvider.AddServiceProbe(mock);
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
+
+            return silo.ServiceProvider.AddServiceProbe(mock);
+        }
 
         public static T AddService<T>(this TestKitSilo silo, T instance) where T : class
-            => silo.ServiceProvider.AddService(instance);
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
+
+            return silo.ServiceProvider.AddService(instance);
+        }
     }
 }

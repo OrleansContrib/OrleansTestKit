@@ -6,15 +6,24 @@ namespace Orleans.TestKit
 {
     public static class StorageExtensions
     {
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use the State extension method without passing the grain reference.")]
-        public static TState State<TState>(this TestKitSilo silo, Grain<TState> grain) where TState : class, new() =>
-            State<TState>(silo);
+        public static TState State<TState>(this TestKitSilo silo) where TState : class, new()
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
 
-        public static TState State<TState>(this TestKitSilo silo) where TState : class, new() =>
-            silo.StorageManager.GetStorage<TState>().State;
+            return silo.StorageManager.GetStorage<TState>().State;
+        }
 
-        public static TestStorageStats StorageStats(this TestKitSilo silo) =>
-            silo.StorageManager.GetStorageStats();
+        public static TestStorageStats StorageStats(this TestKitSilo silo)
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
+
+            return silo.StorageManager.GetStorageStats();
+        }
     }
 }

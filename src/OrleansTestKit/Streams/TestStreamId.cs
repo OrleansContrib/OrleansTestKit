@@ -5,7 +5,8 @@ using Orleans.Streams;
 namespace Orleans.TestKit.Streams
 {
     [DebuggerStepThrough]
-    internal sealed class TestStreamId : IStreamIdentity
+    internal sealed class TestStreamId :
+        IStreamIdentity
     {
         public Guid Guid { get; }
 
@@ -17,12 +18,8 @@ namespace Orleans.TestKit.Streams
             Namespace = streamNamespace;
         }
 
-        public override bool Equals(object obj)
-        {
-            var o = obj as TestStreamId;
-
-            return o != null && Guid == o.Guid && Namespace == o.Namespace;
-        }
+        public override bool Equals(object obj) =>
+            obj is TestStreamId o && Guid == o.Guid && Namespace == o.Namespace;
 
         public override int GetHashCode()
         {

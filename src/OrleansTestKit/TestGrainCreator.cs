@@ -1,31 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Orleans.Core;
 using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
-    public class TestGrainCreator
+    public sealed class TestGrainCreator
     {
         private readonly IGrainActivator _activator;
-        private readonly IGrainRuntime _runtime;
-        private readonly PropertyInfo _runtimeProperty;
+
         private readonly FieldInfo _identityField;
+
+        private readonly IGrainRuntime _runtime;
+
+        private readonly PropertyInfo _runtimeProperty;
 
         public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
         {
-            _runtime = runtime;
-            _activator = new DefaultGrainActivator(serviceProvider);
-            _runtimeProperty = typeof(Grain).GetProperty("Runtime", BindingFlags.Instance | BindingFlags.NonPublic);
+            _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
+            _activator = new DefaultGrainActivator(serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)));
             _identityField = typeof(Grain).GetField("Identity", BindingFlags.Instance | BindingFlags.NonPublic);
+            _runtimeProperty = typeof(Grain).GetProperty("Runtime", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
         public Grain CreateGrainInstance(IGrainActivationContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             var grain = (Grain)_activator.Create(context);
 
             var participant = grain as ILifecycleParticipant<IGrainLifecycle>;

@@ -1,6 +1,6 @@
 # Orleans TestKit
 
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/k4crsho9d5vlbcgg/branch/master?svg=true)](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master) [![codecov test status](https://codecov.io/gh/OrleansContrib/OrleansTestKit/branch/master/graph/badge.svg)](https://codecov.io/gh/OrleansContrib/OrleansTestKit) [![NuGet package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](http://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/master/LICENSE) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![GitHub build status](https://github.com/OrleansContrib/OrleansTestKit/workflows/Continuous%20Integration/badge.svg)](https://github.com/OrleansContrib/OrleansTestKit/actions) [![codecov test status](https://codecov.io/gh/OrleansContrib/OrleansTestKit/branch/master/graph/badge.svg)](https://codecov.io/gh/OrleansContrib/OrleansTestKit) [![NuGet package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](http://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/master/LICENSE) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 The Orleans TestKit is an easy-to-use toolkit for unit testing the grain logic of applications built with [Microsoft Orleans](http://dotnet.github.io/orleans/). The Orleans TestKit is intended to augment the [`TestCluster` unit testing approach](http://dotnet.github.io/orleans/Documentation/tutorials_and_samples/testing.html) provided by the official `Microsoft.Orleans.TestingHost` NuGet package.
 
@@ -28,11 +28,9 @@ See [issue #47](https://github.com/OrleansContrib/OrleansTestKit/issues/47) for 
 
 ## Build Artifacts
 
-The stable build artifacts are located on [NuGet](http://www.nuget.org/packages/OrleansTestKit/).
+The build artifacts for tagged commits are published to [NuGet](http://www.nuget.org/packages/OrleansTestKit/) and copied to [GitHub Releases](https://github.com/OrleansContrib/OrleansTestKit/releases).
 
-The latest `master` branch build artifacts are located on [AppVeyor](https://ci.appveyor.com/project/dsarfati/orleanstestkit/branch/master/artifacts). AppVeyor also provides a NuGet feed with various `master` branch build artifacts:
-
-> https://ci.appveyor.com/nuget/orleanstestkit
+The build artifacts for pull request commits and `master` branch commits are attached to the individual [Continuous Integration workflow logs](https://github.com/OrleansContrib/OrleansTestKit/actions).
 
 ## Community
 

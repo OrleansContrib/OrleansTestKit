@@ -6,6 +6,6 @@
     /// </summary>
     public abstract class TestKitBase
     {
-        protected readonly TestKitSilo Silo = new TestKitSilo();
+        protected TestKitSilo Silo { get; } = new TestKitSilo();
     }
 }
