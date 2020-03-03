@@ -9,6 +9,7 @@ namespace TestGrains
     public class Chatty : Grain, IChatty
     {
         private (string Message, int Id) _recievedMessage;
+        private StreamSubscriptionHandle<(string Message, int Id)> _subscription;
 
         public Task<(string Message, int Id)> GetMessage()
         {
@@ -27,13 +28,18 @@ namespace TestGrains
         public async Task Subscribe()
         {
             var provider = GetStreamProvider("Default");
-
             var stream = provider.GetStream<(string Message, int Id)>(Guid.Empty, null);
-
-            await stream.SubscribeAsync((item, _) =>
+            _subscription = await stream.SubscribeAsync(async (item, _) =>
             {
                 _recievedMessage = item;
-                return Task.CompletedTask;
+                if ("goodbye".Equals(_recievedMessage.Message, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (_subscription != null)
+                    {
+                        await _subscription.UnsubscribeAsync();
+                        _subscription = null;
+                    }
+                }
             });
         }
     }

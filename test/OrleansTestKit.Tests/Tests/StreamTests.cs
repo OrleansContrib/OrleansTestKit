@@ -118,6 +118,27 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
+        public async Task GrainIsUnsubscribed()
+        {
+            var stream = Silo.AddStreamProbe<(string Message, int Id)>(Guid.Empty, null);
+
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+            await chatty.Subscribe();
+
+            stream.Subscribed.Should().Be(1);
+
+            const string msg = "Goodbye";
+            const int id = 3;
+            await stream.OnNextAsync((msg, id));
+
+            stream.Sends.Should().Be(1);
+            stream.VerifySend(m => m.Message == msg);
+            stream.VerifySend(m => m.Id == id);
+
+            stream.Subscribed.Should().Be(0);
+        }
+
+        [Fact]
         public async Task GrainGetAllSubscriptionHandles()
         {
             var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
