@@ -31,7 +31,7 @@ namespace Orleans.TestKit.Timers
 
         public async Task FireAllAsync()
         {
-            foreach (var testTimer in _timers.ToArray())
+            foreach (var testTimer in new List<TestTimer>(_timers))
             {
                 await testTimer.FireAsync().ConfigureAwait(false);
             }

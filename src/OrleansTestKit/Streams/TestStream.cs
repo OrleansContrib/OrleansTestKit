@@ -82,14 +82,14 @@ namespace Orleans.TestKit.Streams
         {
             Sends++;
             _mockStream.Object.OnNextAsync(item, token);
-            return Task.WhenAll(_observers.Select(o => o.OnNextAsync(item, token)));
+            return Task.WhenAll(_observers.ToList().Select(o => o.OnNextAsync(item, token)));
         }
 
         public Task OnCompletedAsync() =>
-            Task.WhenAll(_observers.Select(o => o.OnCompletedAsync()));
+            Task.WhenAll(_observers.ToList().Select(o => o.OnCompletedAsync()));
 
         public Task OnErrorAsync(Exception ex) =>
-            Task.WhenAll(_observers.Select(o => o.OnErrorAsync(ex)));
+            Task.WhenAll(_observers.ToList().Select(o => o.OnErrorAsync(ex)));
 
         public Task OnNextBatchAsync(IEnumerable<T> batch, StreamSequenceToken token = null) =>
             throw new NotImplementedException();
