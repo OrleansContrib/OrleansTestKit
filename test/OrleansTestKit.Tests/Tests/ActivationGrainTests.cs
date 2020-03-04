@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
 using TestGrains;
@@ -20,6 +21,21 @@ namespace Orleans.TestKit.Tests
 
             // Assert
             value.Should().Be(123);
+        }
+
+        /// <summary>
+        /// This test demonstrates what happens when you try activating a grain with a state that does not have a a parameterless constructor.
+        /// The exception should help the user to find out what the problem is.
+        /// </summary>
+        [Fact]
+        public async Task ShouldThrowNotSupportedException()
+        {
+            // Arrange
+
+
+            // Act and Assert
+            await Assert.ThrowsAsync<NotSupportedException>(
+                async () => await Silo.CreateGrainAsync<StatefulUnsupportedActivationGrain>(0));
         }
     }
 }

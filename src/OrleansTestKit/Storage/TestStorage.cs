@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Orleans.Core;
 
@@ -6,20 +7,22 @@ namespace Orleans.TestKit.Storage
     internal sealed class TestStorage<TState> :
         IStorageStats,
         IStorage<TState>
-        where TState : new()
     {
         public TestStorageStats Stats { get; }
 
-        public TState State { get; set; } = new TState();
+        public TState State { get; set; }
 
         public string Etag => throw new System.NotImplementedException();
 
-        public TestStorage() =>
-            Stats = new TestStorageStats() { Reads = -1 };
+        public TestStorage()
+        {
+            Stats = new TestStorageStats() {Reads = -1};
+            InitializeState();
+        }
 
         public Task ClearStateAsync()
         {
-            State = new TState();
+            InitializeState();
             Stats.Clears++;
             return Task.CompletedTask;
         }
@@ -34,6 +37,17 @@ namespace Orleans.TestKit.Storage
         {
             Stats.Reads++;
             return Task.CompletedTask;
+        }
+
+        private void InitializeState()
+        {
+            if (!typeof(TState).IsValueType && typeof(TState).GetConstructor(Type.EmptyTypes) == null)
+            {
+                throw new NotSupportedException(
+                    $"No parameterless constructor defined for {typeof(TState).Name}. This is currently not supported");
+            }
+
+            State = Activator.CreateInstance<TState>();
         }
     }
 }

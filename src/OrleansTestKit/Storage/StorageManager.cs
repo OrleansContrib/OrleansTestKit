@@ -6,7 +6,7 @@ namespace Orleans.TestKit.Storage
     {
         private object _storage;
 
-        public IStorage<TState> GetStorage<TState>() where TState : new()
+        public IStorage<TState> GetStorage<TState>()
         {
             if (_storage == null)
             {
