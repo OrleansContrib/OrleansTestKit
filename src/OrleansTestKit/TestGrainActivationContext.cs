@@ -23,8 +23,5 @@ namespace Orleans.TestKit
         public IDictionary<object, object> Items => throw new NotImplementedException();
 
         public IGrainLifecycle ObservableLifecycle { get; set; }
-
-        [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-        public IMultiClusterRegistrationStrategy RegistrationStrategy => throw new NotImplementedException();
     }
 }

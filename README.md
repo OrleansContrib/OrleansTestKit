@@ -26,6 +26,8 @@ When run within a test kit environment, code that calls the `GetPrimaryKey` exte
 
 See [issue #47](https://github.com/OrleansContrib/OrleansTestKit/issues/47) for a discussion and references to upstream issues.
 
+Grains with States that do not have a parameterless constructor are not supported by the default IStorage implementation.
+
 ## Build Artifacts
 
 The build artifacts for tagged commits are published to [NuGet](http://www.nuget.org/packages/OrleansTestKit/) and copied to [GitHub Releases](https://github.com/OrleansContrib/OrleansTestKit/releases).
