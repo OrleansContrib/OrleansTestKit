@@ -7,8 +7,7 @@ using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
-    public sealed class TestGrainActivationContext :
-        IGrainActivationContext
+    public sealed class TestGrainActivationContext : IGrainActivationContext
     {
         public IServiceProvider ActivationServices { get; set; }
 
@@ -23,5 +22,8 @@ namespace Orleans.TestKit
         public IDictionary<object, object> Items => throw new NotImplementedException();
 
         public IGrainLifecycle ObservableLifecycle { get; set; }
+
+        [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
+        public IMultiClusterRegistrationStrategy RegistrationStrategy => throw new NotImplementedException();
     }
 }
