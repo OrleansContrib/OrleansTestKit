@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Orleans.Core;
+using Orleans.TestKit.Storage;
 using TestGrains;
 using Xunit;
 
@@ -159,6 +162,71 @@ namespace Orleans.TestKit.Tests
             stats.Writes.Should().Be(0);
 
             greetings.Should().BeEmpty();
+        }
+
+        /// <summary>This test demonstrates how to use storage factory.</summary>
+        [Fact]
+        public async Task GreetingArchiveGrain_GetGreetings_WithCustomStateFactory()
+        {
+            // Arrange
+            this.Silo.Options.StorageFactory = type => Activator.CreateInstance(typeof(CustomStorage<>).MakeGenericType(type));
+
+            const long id = 1000;
+
+            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+
+            // Act
+            var greetings = (await grain.GetGreetings()).ToList();
+
+            // Assert
+            greetings.Should().BeEmpty();
+        }
+    }
+
+    public class CustomStorage<TState> : 
+        IStorageStats,
+        IStorage<TState>
+    {
+        public TestStorageStats Stats { get; }
+
+        public TState State { get; set; }
+
+        public string Etag => throw new System.NotImplementedException();
+
+        public CustomStorage()
+        {
+            Stats = new TestStorageStats() { Reads = -1 };
+            InitializeState();
+        }
+
+        public Task ClearStateAsync()
+        {
+            InitializeState();
+            Stats.Clears++;
+            return Task.CompletedTask;
+        }
+
+        public Task WriteStateAsync()
+        {
+            Stats.Writes++;
+            return Task.CompletedTask;
+        }
+
+        public Task ReadStateAsync()
+        {
+            Stats.Reads++;
+            return Task.CompletedTask;
+        }
+
+        private void InitializeState()
+        {
+            if (!typeof(TState).IsValueType && typeof(TState).GetConstructor(Type.EmptyTypes) == null)
+            {
+                throw new NotSupportedException(
+                    $"No parameterless constructor defined for {typeof(TState).Name}. This is currently not supported");
+            }
+
+            State = Activator.CreateInstance<TState>();
         }
     }
 }

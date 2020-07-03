@@ -2,11 +2,11 @@
 {
     public sealed class TestStorageStats
     {
-        public int Writes { get; internal set; }
+        public int Writes { get; set; }
 
-        public int Clears { get; internal set; }
+        public int Clears { get; set; }
 
-        public int Reads { get; internal set; }
+        public int Reads { get; set; }
 
         public void ResetCounts()
         {

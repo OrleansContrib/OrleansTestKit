@@ -33,7 +33,7 @@ namespace Orleans.TestKit
         {
             GrainFactory = new TestGrainFactory(Options);
             ServiceProvider = new TestServiceProvider(Options);
-            StorageManager = new StorageManager();
+            StorageManager = new StorageManager(Options);
             TimerRegistry = new TestTimerRegistry();
             ReminderRegistry = new TestReminderRegistry();
             StreamProviderManager = new TestStreamProviderManager(Options);

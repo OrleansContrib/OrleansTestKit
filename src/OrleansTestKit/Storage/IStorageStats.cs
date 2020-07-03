@@ -1,6 +1,6 @@
-namespace Orleans.TestKit.Storage
+﻿namespace Orleans.TestKit.Storage
 {
-    internal interface IStorageStats
+    public interface IStorageStats
     {
         TestStorageStats Stats { get; }
     }
