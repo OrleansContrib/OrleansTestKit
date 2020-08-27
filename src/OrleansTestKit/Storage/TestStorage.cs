@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Orleans.Core;
 
 namespace Orleans.TestKit.Storage
 {
-    internal sealed class TestStorage<TState> :
+    internal class TestStorage<TState> :
         IStorageStats,
         IStorage<TState>
     {
@@ -13,6 +13,8 @@ namespace Orleans.TestKit.Storage
         public TState State { get; set; }
 
         public string Etag => throw new System.NotImplementedException();
+
+        public virtual bool RecordExists => throw new NotImplementedException();
 
         public TestStorage()
         {
