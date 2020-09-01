@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Orleans.Core;
 
@@ -8,17 +8,19 @@ namespace Orleans.TestKit.Storage
         IStorageStats,
         IStorage<TState>
     {
-        public TestStorageStats Stats { get; }
-
-        public TState State { get; set; }
+        public TestStorage()
+        {
+            Stats = new TestStorageStats() { Reads = -1 };
+            InitializeState();
+        }
 
         public string Etag => throw new System.NotImplementedException();
 
-        public TestStorage()
-        {
-            Stats = new TestStorageStats() {Reads = -1};
-            InitializeState();
-        }
+        public bool RecordExists => Stats.Clears >= Stats.Writes;
+
+        public TState State { get; set; }
+
+        public TestStorageStats Stats { get; }
 
         public Task ClearStateAsync()
         {
@@ -27,15 +29,15 @@ namespace Orleans.TestKit.Storage
             return Task.CompletedTask;
         }
 
-        public Task WriteStateAsync()
-        {
-            Stats.Writes++;
-            return Task.CompletedTask;
-        }
-
         public Task ReadStateAsync()
         {
             Stats.Reads++;
+            return Task.CompletedTask;
+        }
+
+        public Task WriteStateAsync()
+        {
+            Stats.Writes++;
             return Task.CompletedTask;
         }
 
