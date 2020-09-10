@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Orleans.Streams;
@@ -17,7 +17,7 @@ namespace Orleans.TestKit.Streams
 
         public string Name { get; private set; }
 
-        public bool IsRewindable { get; } = false;
+        public bool IsRewindable { get; }
 
         public IAsyncStream<T> GetStream<T>(Guid streamId, string streamNamespace)
         {

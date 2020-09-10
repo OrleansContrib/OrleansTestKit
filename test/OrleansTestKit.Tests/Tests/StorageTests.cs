@@ -193,6 +193,8 @@ namespace Orleans.TestKit.Tests
 
         public string Etag => throw new System.NotImplementedException();
 
+        public virtual bool RecordExists => throw new NotImplementedException();
+
         public CustomStorage()
         {
             Stats = new TestStorageStats() { Reads = -1 };
