@@ -4,23 +4,23 @@ using Orleans.Core;
 
 namespace Orleans.TestKit.Storage
 {
-    internal sealed class TestStorage<TState> :
+    internal class TestStorage<TState> :
         IStorageStats,
         IStorage<TState>
     {
-        public TestStorage()
-        {
-            Stats = new TestStorageStats() { Reads = -1 };
-            InitializeState();
-        }
-
-        public string Etag => throw new System.NotImplementedException();
-
-        public bool RecordExists => Stats.Clears >= Stats.Writes;
+        public TestStorageStats Stats { get; }
 
         public TState State { get; set; }
 
-        public TestStorageStats Stats { get; }
+        public string Etag => throw new System.NotImplementedException();
+
+        public virtual bool RecordExists => throw new NotImplementedException();
+
+        public TestStorage()
+        {
+            Stats = new TestStorageStats() {Reads = -1};
+            InitializeState();
+        }
 
         public Task ClearStateAsync()
         {
@@ -29,15 +29,15 @@ namespace Orleans.TestKit.Storage
             return Task.CompletedTask;
         }
 
-        public Task ReadStateAsync()
-        {
-            Stats.Reads++;
-            return Task.CompletedTask;
-        }
-
         public Task WriteStateAsync()
         {
             Stats.Writes++;
+            return Task.CompletedTask;
+        }
+
+        public Task ReadStateAsync()
+        {
+            Stats.Reads++;
             return Task.CompletedTask;
         }
 
