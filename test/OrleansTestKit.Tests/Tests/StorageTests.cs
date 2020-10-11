@@ -193,7 +193,7 @@ namespace Orleans.TestKit.Tests
 
         public string Etag => throw new System.NotImplementedException();
 
-        public virtual bool RecordExists => throw new NotImplementedException();
+        public virtual bool RecordExists { get; set; }
 
         public CustomStorage()
         {
@@ -205,12 +205,14 @@ namespace Orleans.TestKit.Tests
         {
             InitializeState();
             Stats.Clears++;
+            RecordExists = false;
             return Task.CompletedTask;
         }
 
         public Task WriteStateAsync()
         {
             Stats.Writes++;
+            RecordExists = true;
             return Task.CompletedTask;
         }
 
