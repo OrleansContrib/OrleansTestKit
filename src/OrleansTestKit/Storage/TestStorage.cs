@@ -33,13 +33,13 @@ namespace Orleans.TestKit.Storage
         public Task ReadStateAsync()
         {
             Stats.Reads++;
-            RecordExists = true;
             return Task.CompletedTask;
         }
 
         public Task WriteStateAsync()
         {
             Stats.Writes++;
+            RecordExists = true;
             return Task.CompletedTask;
         }
 
