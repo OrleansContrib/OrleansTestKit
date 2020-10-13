@@ -85,8 +85,8 @@ namespace Orleans.TestKit.Tests
             // Assert
             var state = this.Silo.State<GreetingArchiveGrainState>();
             state.Greetings.Should().Equal(greeting1, greeting2);
-
             greetings.Should().Equal(greeting1, greeting2);
+            Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>
@@ -116,6 +116,7 @@ namespace Orleans.TestKit.Tests
             stats.Writes.Should().Be(2);
 
             greetings.Should().Equal(greeting1, greeting2);
+            Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>
@@ -201,6 +202,7 @@ namespace Orleans.TestKit.Tests
             state.Greetings.Should().BeEmpty();
 
             greetings.Should().BeEmpty();
+            Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>
@@ -231,11 +233,12 @@ namespace Orleans.TestKit.Tests
             stats.Writes.Should().Be(0);
 
             greetings.Should().BeEmpty();
+            Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
         }
 
         /// <summary>This test demonstrates how to use the RecordExists flag</summary>
         [Fact]
-        public async Task RecordExistsFlagIsSetAfterWrite()
+        public async Task RecordExistsFlagTest()
         {
             var manager = new StorageManager(new TestKitOptions());
             var state = manager.GetStorage<GreetingArchiveGrainState>();
