@@ -8,36 +8,38 @@ namespace Orleans.TestKit.Storage
         IStorageStats,
         IStorage<TState>
     {
-        public TestStorageStats Stats { get; }
-
-        public TState State { get; set; }
+        public TestStorage()
+        {
+            Stats = new TestStorageStats() { Reads = -1 };
+            InitializeState();
+        }
 
         public string Etag => throw new System.NotImplementedException();
 
-        public virtual bool RecordExists => throw new NotImplementedException();
+        public virtual bool RecordExists { get; set; }
 
-        public TestStorage()
-        {
-            Stats = new TestStorageStats() {Reads = -1};
-            InitializeState();
-        }
+        public TState State { get; set; }
+
+        public TestStorageStats Stats { get; }
 
         public Task ClearStateAsync()
         {
             InitializeState();
             Stats.Clears++;
-            return Task.CompletedTask;
-        }
-
-        public Task WriteStateAsync()
-        {
-            Stats.Writes++;
+            RecordExists = false;
             return Task.CompletedTask;
         }
 
         public Task ReadStateAsync()
         {
             Stats.Reads++;
+            return Task.CompletedTask;
+        }
+
+        public Task WriteStateAsync()
+        {
+            Stats.Writes++;
+            RecordExists = true;
             return Task.CompletedTask;
         }
 
