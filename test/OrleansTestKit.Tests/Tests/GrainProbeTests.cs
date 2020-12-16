@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Moq;
@@ -140,6 +141,34 @@ namespace Orleans.TestKit.Tests
             await grain.Ping();
 
             pong.Verify(p => p.Pong(), Times.Once);
+        }
+
+        [Fact]
+        public async Task FactoryProbeWithMulipleNewProbes()
+        {
+            // useful for when a grain needs to create other grains whose identities are not known beforehand
+            // and probes for the new grains need to return certain values
+
+            var pongOne = new Mock<IPong>();
+            var pongTwo = new Mock<IPong>();
+            var probeQueue = new Queue<Mock<IPong>>(new [] {pongOne, pongTwo});
+
+            this.Silo.AddProbe<IPong>(identity =>
+            {
+                var nextProbe = probeQueue.Dequeue();
+
+                nextProbe.Setup(probe => probe.WhatsMyId())
+                    .ReturnsAsync(identity.PrimaryKeyLong);
+
+                return nextProbe;
+            });
+
+            var grain = await this.Silo.CreateGrainAsync<PingGrain>(1);
+
+            await grain.CreateAndPingMultiple();
+
+            grain.WhatsMyIdResults[0].Should().Be(1);
+            grain.WhatsMyIdResults[1].Should().Be(2);
         }
 
         [Fact]
