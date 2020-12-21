@@ -9,7 +9,6 @@ namespace TestGrains
     public class PingGrain : Grain, IPing
     {
 
-        public List<long> WhatsMyIdResults { get; } = new List<long>();
 
         public Task Ping()
         {
@@ -25,13 +24,5 @@ namespace TestGrains
             return pong.Pong();
         }
 
-        public async Task CreateAndPingMultiple()
-        {
-            var pongOne = GrainFactory.GetGrain<IPong>(1);
-            var pongTwo = GrainFactory.GetGrain<IPong>(2);
-
-            WhatsMyIdResults.Add(await pongOne.WhatsMyId());
-            WhatsMyIdResults.Add(await pongTwo.WhatsMyId());
-        }
     }
 }

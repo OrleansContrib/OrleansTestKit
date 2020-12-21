@@ -149,26 +149,26 @@ namespace Orleans.TestKit.Tests
             // useful for when a grain needs to create other grains whose identities are not known beforehand
             // and probes for the new grains need to return certain values
 
-            var pongOne = new Mock<IPong>();
-            var pongTwo = new Mock<IPong>();
-            var probeQueue = new Queue<Mock<IPong>>(new [] {pongOne, pongTwo});
+            var firstUnknownGrain = new Mock<IUnknownGrain>();
+            var secondUnknownGrain = new Mock<IUnknownGrain>();
+            var probeQueue = new Queue<Mock<IUnknownGrain>>(new [] {firstUnknownGrain, secondUnknownGrain});
 
-            this.Silo.AddProbe<IPong>(identity =>
+            this.Silo.AddProbe<IUnknownGrain>(identity =>
             {
                 var nextProbe = probeQueue.Dequeue();
 
                 nextProbe.Setup(probe => probe.WhatsMyId())
-                    .ReturnsAsync(identity.PrimaryKeyLong);
+                    .ReturnsAsync(identity.PrimaryKeyString);
 
                 return nextProbe;
             });
 
-            var grain = await this.Silo.CreateGrainAsync<PingGrain>(1);
+            var grain = await this.Silo.CreateGrainAsync<UnknownGrainResolver>("1");
 
             await grain.CreateAndPingMultiple();
 
-            grain.WhatsMyIdResults[0].Should().Be(1);
-            grain.WhatsMyIdResults[1].Should().Be(2);
+            grain.ResolvedUnknownGrainIds[0].Should().Be("unknownGrainOne");
+            grain.ResolvedUnknownGrainIds[1].Should().Be("unknownGrainTwo");
         }
 
         [Fact]
