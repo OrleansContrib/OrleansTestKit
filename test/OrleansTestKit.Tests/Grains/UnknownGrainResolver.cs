@@ -5,18 +5,19 @@ using TestInterfaces;
 
 namespace TestGrains
 {
-    public class UnknownGrainResolver : Grain, IGrainWithStringKey
+    public class UnknownGrainResolver : Grain, IUnknownGrainResolver
     {
-        
-        public List<string> ResolvedUnknownGrainIds { get; } = new List<string>();
+        private List<string> _resolvedIds = new List<string>();
+
+        public Task<List<string>> GetResolvedUnknownGrainIdsAsync() => Task.FromResult(_resolvedIds); 
         
         public async Task CreateAndPingMultiple()
         {
             var unknownGrainOne = GrainFactory.GetGrain<IUnknownGrain>("unknownGrainOne");
             var unknownGrainTwo = GrainFactory.GetGrain<IUnknownGrain>("unknownGrainTwo");
 
-            ResolvedUnknownGrainIds.Add(await unknownGrainOne.WhatsMyId());
-            ResolvedUnknownGrainIds.Add(await unknownGrainTwo.WhatsMyId());
+            _resolvedIds.Add(await unknownGrainOne.WhatsMyId());
+            _resolvedIds.Add(await unknownGrainTwo.WhatsMyId());
         }
     }
 }

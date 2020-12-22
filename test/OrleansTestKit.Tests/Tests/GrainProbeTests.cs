@@ -167,8 +167,9 @@ namespace Orleans.TestKit.Tests
 
             await grain.CreateAndPingMultiple();
 
-            grain.ResolvedUnknownGrainIds[0].Should().Be("unknownGrainOne");
-            grain.ResolvedUnknownGrainIds[1].Should().Be("unknownGrainTwo");
+            var resolvedIds = await grain.GetResolvedUnknownGrainIdsAsync();
+            resolvedIds[0].Should().Be("unknownGrainOne");
+            resolvedIds[1].Should().Be("unknownGrainTwo");
         }
 
         [Fact]
