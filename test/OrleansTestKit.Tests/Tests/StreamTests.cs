@@ -24,6 +24,24 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
+        public async Task GrainSentBatchMessages()
+        {
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+
+            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+            
+            var msgs = new[] {"Hello Chat", "Goodbye Chat"};
+
+            await chatty.SendChatBatch(msgs);
+
+            stream.Sends.Should().Be((uint)msgs.Length);
+            foreach (var msg in msgs)
+            {
+                stream.VerifySend(m => m.Msg == msg);
+            }
+        }
+
+        [Fact]
         public async Task AddNonReferenceTypeStreamProbe()
         {
             var stream = Silo.AddStreamProbe<(string Message, int Id)>(Guid.Empty, null);

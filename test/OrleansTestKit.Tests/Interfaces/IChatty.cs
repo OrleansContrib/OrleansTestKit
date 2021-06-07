@@ -7,6 +7,8 @@ namespace TestInterfaces
     {
         Task SendChat(string msg);
 
+        Task SendChatBatch(string[] msgs);
+
         Task Subscribe();
 
         Task<(string Message, int Id)> GetMessage();
