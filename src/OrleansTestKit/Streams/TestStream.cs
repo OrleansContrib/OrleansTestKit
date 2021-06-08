@@ -97,9 +97,21 @@ namespace Orleans.TestKit.Streams
             {
                 throw new ArgumentNullException(nameof(batch));
             }
+
+            List<Exception> innerExceptions = null;
             foreach (var item in batch)
             {
-                await OnNextAsync(item, token).ConfigureAwait(false);
+                try { await OnNextAsync(item, token).ConfigureAwait(false); }
+                catch (Exception ex)
+                {
+                    innerExceptions ??= new List<Exception>();
+                    innerExceptions.Add(ex);
+                }
+            }
+
+            if (innerExceptions != null)
+            {
+                throw new AggregateException(innerExceptions);
             }
         }
 
