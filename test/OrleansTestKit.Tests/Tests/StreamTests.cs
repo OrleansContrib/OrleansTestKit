@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Moq;
+using Orleans.Streams;
 using TestGrains;
 using Xunit;
 
@@ -21,6 +23,47 @@ namespace Orleans.TestKit.Tests
 
             stream.Sends.Should().Be(1);
             stream.VerifySend(m => m.Msg == msg);
+        }
+
+        [Fact]
+        public async Task GrainSentBatchMessages()
+        {
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+
+            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+            
+            var msgs = new[] {"Hello Chat", "Goodbye Chat"};
+
+            await chatty.SendChatBatch(msgs);
+
+            stream.Sends.Should().Be((uint)msgs.Length);
+            foreach (var msg in msgs)
+            {
+                stream.VerifySend(m => m.Msg == msg);
+            }
+        }
+
+        [Fact]
+        public async Task GrainSentBatchMessagesHandlesException()
+        {
+            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+
+            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+            var mockObserver = new Mock<IAsyncObserver<ChatMessage>>();
+            mockObserver.Setup(o => o.OnNextAsync(It.IsAny<ChatMessage>(), It.IsAny<StreamSequenceToken>()))
+                .Throws<Exception>();
+
+            await stream.SubscribeAsync(mockObserver.Object);
+            
+            var msgs = new[] {"Hello Chat", "Goodbye Chat"};
+
+            await Assert.ThrowsAsync<AggregateException>(() => chatty.SendChatBatch(msgs));
+
+            stream.Sends.Should().Be((uint)msgs.Length);
+            foreach (var msg in msgs)
+            {
+                stream.VerifySend(m => m.Msg == msg);
+            }
         }
 
         [Fact]

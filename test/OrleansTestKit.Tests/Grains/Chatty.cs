@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Orleans;
 using Orleans.Streams;
@@ -23,6 +24,15 @@ namespace TestGrains
             var stream = provider.GetStream<ChatMessage>(Guid.Empty, null);
 
             await stream.OnNextAsync(new ChatMessage(msg));
+        }
+
+        public async Task SendChatBatch(params string[] chats)
+        {
+            var provider = GetStreamProvider("Default");
+
+            var stream = provider.GetStream<ChatMessage>(Guid.Empty, null);
+
+            await stream.OnNextBatchAsync(chats.Select(chat => new ChatMessage(chat)));
         }
 
         public async Task Subscribe()

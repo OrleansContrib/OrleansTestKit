@@ -91,8 +91,29 @@ namespace Orleans.TestKit.Streams
         public Task OnErrorAsync(Exception ex) =>
             Task.WhenAll(_observers.ToList().Select(o => o.OnErrorAsync(ex)));
 
-        public Task OnNextBatchAsync(IEnumerable<T> batch, StreamSequenceToken token = null) =>
-            throw new NotImplementedException();
+        public async Task OnNextBatchAsync(IEnumerable<T> batch, StreamSequenceToken token = null)
+        {
+            if (batch == null)
+            {
+                throw new ArgumentNullException(nameof(batch));
+            }
+
+            List<Exception> innerExceptions = null;
+            foreach (var item in batch)
+            {
+                try { await OnNextAsync(item, token).ConfigureAwait(false); }
+                catch (Exception ex)
+                {
+                    innerExceptions ??= new List<Exception>();
+                    innerExceptions.Add(ex);
+                }
+            }
+
+            if (innerExceptions != null)
+            {
+                throw new AggregateException(innerExceptions);
+            }
+        }
 
         public Task<IList<StreamSubscriptionHandle<T>>> GetAllSubscriptionHandles() =>
             Task.FromResult<IList<StreamSubscriptionHandle<T>>>(new List<StreamSubscriptionHandle<T>>(_handlers));
