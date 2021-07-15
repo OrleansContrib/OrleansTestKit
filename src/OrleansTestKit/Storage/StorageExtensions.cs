@@ -5,20 +5,23 @@ using System.Threading.Tasks;
 using Moq;
 using Orleans.Core;
 using Orleans.Runtime;
+using Orleans.Storage;
 using Orleans.TestKit.Storage;
 
 namespace Orleans.TestKit
 {
     public static class StorageExtensions
     {
-        public static TState State<TState>(this TestKitSilo silo) where TState : class, new()
+        public static TState State<TGrain, TState>(this TestKitSilo silo)
+            where TGrain : Grain<TState>
+            where TState : class, new()
         {
             if (silo == null)
             {
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.StorageManager.GetStorage<TState>().State;
+            return silo.StorageManager.GetGrainStorage<TGrain, TState>().State;
         }
 
         public static TestStorageStats StorageStats(this TestKitSilo silo)
@@ -28,12 +31,28 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.StorageManager.StorageStats;
+            return silo.StorageManager.GetStorageStats();
+        }
+
+        public static IStorage<T> AddGrainState<TGrain, T>(
+            this TestKitSilo silo,
+            T state = default)
+            where TGrain : Grain<T>
+            where T : new()
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
+
+            var storage = silo.StorageManager.GetGrainStorage<TGrain, T>();
+            storage.State = state ?? new T();
+            return storage;
         }
 
         public static IPersistentState<T> AddPersistentState<T>(
             this TestKitSilo silo,
-            string stateName = default,
+            string stateName,
             string storageName = default,
             T state = default)
             where T : new()
@@ -41,6 +60,11 @@ namespace Orleans.TestKit
             if (silo == null)
             {
                 throw new ArgumentNullException(nameof(silo));
+            }
+
+            if (string.IsNullOrWhiteSpace(stateName))
+            {
+                throw new ArgumentException("A state name must be provided", nameof(stateName));
             }
 
             var storage = silo.StorageManager.GetStorage<T>(stateName);
@@ -51,7 +75,7 @@ namespace Orleans.TestKit
         public static IPersistentState<T> AddPersistentState<T>(
             this TestKitSilo silo,
             IStorage<T> storage,
-            string stateName = default,
+            string stateName,
             string storageName = default,
             T state = default)
             where T : new()
