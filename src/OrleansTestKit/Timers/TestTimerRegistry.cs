@@ -36,5 +36,7 @@ namespace Orleans.TestKit.Timers
                 await testTimer.FireAsync().ConfigureAwait(false);
             }
         }
+
+        public int NumberOfTimers => _timers.Count;
     }
 }

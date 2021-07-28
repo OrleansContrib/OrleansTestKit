@@ -55,5 +55,19 @@ namespace Orleans.TestKit.Tests
             state.Timer0Fired.Should().BeFalse();
             state.Timer1Fired.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task ShouldRegisterSecretTimerAsync()
+        {
+            //Arrange
+            var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
+            var initialActiveTimers = Silo.TimerRegistry.NumberOfTimers;
+
+            //Act
+            await grain.RegisterSecretTimer();
+
+            //Assert
+            Assert.Equal(initialActiveTimers + 1, Silo.TimerRegistry.NumberOfTimers);
+        }
     }
 }
