@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Orleans.TestKit.Storage;
 using Orleans.TestKit.Timers;
@@ -61,13 +62,33 @@ namespace Orleans.TestKit.Tests
         {
             //Arrange
             var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
-            var initialActiveTimers = Silo.TimerRegistry.NumberOfTimers;
+            var initialActiveTimers = Silo.TimerRegistry.NumberOfActiveTimers;
 
             //Act
             await grain.RegisterSecretTimer();
 
             //Assert
-            Assert.Equal(initialActiveTimers + 1, Silo.TimerRegistry.NumberOfTimers);
+            Assert.Equal(initialActiveTimers + 1, Silo.TimerRegistry.NumberOfActiveTimers);
+        }
+
+        [Fact]
+        public async Task ShouldNotCountDisposedTimersAsActive()
+        {
+            //Arrange
+            var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
+            var initialActiveTimers = Silo.TimerRegistry.NumberOfActiveTimers;
+
+            var newTimer = Silo.TimerRegistry.RegisterTimer(grain, _ => Task.CompletedTask, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+
+            Assert.Equal(initialActiveTimers + 1, Silo.TimerRegistry.NumberOfActiveTimers);
+
+            //Act
+            newTimer.Dispose();
+
+            //Assert
+            //Back to the original count
+            Assert.Equal(initialActiveTimers , Silo.TimerRegistry.NumberOfActiveTimers);
+
         }
     }
 }
