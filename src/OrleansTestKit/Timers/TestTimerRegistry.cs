@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using Orleans.Timers;
@@ -36,5 +37,7 @@ namespace Orleans.TestKit.Timers
                 await testTimer.FireAsync().ConfigureAwait(false);
             }
         }
+
+        public int NumberOfActiveTimers => _timers.Count(x => !x.IsDisposed);
     }
 }
