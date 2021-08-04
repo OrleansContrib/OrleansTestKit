@@ -11,15 +11,14 @@ namespace Orleans.TestKit
         IGrainFactory
     {
         private readonly TestKitOptions _options;
-
-        private readonly Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>> _probeFactories;
+        private readonly Dictionary<Type, Func<IGrainIdentity, IGrain>> _probeFactories;
 
         private readonly Dictionary<string, IGrain> _probes;
 
         internal TestGrainFactory(TestKitOptions options)
         {
             _options = options;
-            _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IMock<IGrain>>>();
+            _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IGrain>>();
             _probes = new Dictionary<string, IGrain>();
         }
 
@@ -100,8 +99,14 @@ namespace Orleans.TestKit
             return mock;
         }
 
+        internal void AddProbe<T>(Func<IGrainIdentity, T> factory) where T : class, IGrain => _probeFactories.Add(typeof(T), factory);
+
         internal void AddProbe<T>(Func<IGrainIdentity, IMock<T>> factory)
-            where T : class, IGrain => _probeFactories.Add(typeof(T), factory);
+            where T : class, IGrain
+        {
+            var adaptedFactory = new Func<IGrainIdentity, T>(grainIdentity => factory(grainIdentity).Object);
+            AddProbe<T>(adaptedFactory);
+        }
 
         private static string GetKey(IGrainIdentity identity, Type stateType, string classPrefix = null) =>
             classPrefix == null
@@ -125,18 +130,17 @@ namespace Orleans.TestKit
             }
             else
             {
-                IMock<IGrain> mock;
                 if (_probeFactories.TryGetValue(typeof(T), out var factory))
                 {
-                    mock = factory(identity);
+                    grain = factory(identity);
                 }
                 else
                 {
-                    mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
+                    var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
+                    grain = mock?.Object;
                 }
 
                 //Save the newly created grain for the next call
-                grain = mock?.Object;
                 _probes.Add(key, grain);
             }
 

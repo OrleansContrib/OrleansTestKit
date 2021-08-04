@@ -71,5 +71,16 @@ namespace Orleans.TestKit
 
             silo.GrainFactory.AddProbe(factory);
         }
+
+        public static void AddProbe<T>(this TestKitSilo silo, Func<IGrainIdentity, T> factory)
+            where T : class, IGrain
+        {
+            if (silo == null)
+            {
+                throw new ArgumentNullException(nameof(silo));
+            }
+
+            silo.GrainFactory.AddProbe(factory);
+        }
     }
 }
