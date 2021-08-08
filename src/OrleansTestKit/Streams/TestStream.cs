@@ -55,17 +55,49 @@ namespace Orleans.TestKit.Streams
                 throw new ArgumentNullException(nameof(observer));
             }
 
-            TestStreamSubscriptionHandle<T> handle = null;
-            handle = new TestStreamSubscriptionHandle<T>(() =>
-            {
-                _observers.Remove(observer);
-                _handlers.Remove(handle);
-            });
-
-            _observers.Add(observer);
+            var handle = CreateEmptyStreamHandlerImpl();
+            handle.AttachObserver(observer);
             _handlers.Add(handle);
+
             return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
         }
+
+
+        /// <summary>
+        /// Create an empty handler that can then be used to test ResumeAsync
+        /// </summary>
+        public Task<StreamSubscriptionHandle<T>> AddEmptyStreamHandler(Action<IAsyncObserver<T>> onAttachingObserver = null)
+        {
+            var handle = CreateEmptyStreamHandlerImpl(onAttachingObserver);
+            _handlers.Add(handle);
+
+            return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
+        }
+
+        private TestStreamSubscriptionHandle<T> CreateEmptyStreamHandlerImpl(
+            Action<IAsyncObserver<T>> onAttachingObserver = null)
+        {
+            TestStreamSubscriptionHandle<T> handle = null;
+
+            handle = new TestStreamSubscriptionHandle<T>(observer =>
+            {
+                _handlers.Remove(handle);
+                if (observer != null)
+                {
+                    _observers.Remove(observer);
+                }
+            }, observer =>
+            {
+                onAttachingObserver?.Invoke(observer);
+                _observers.Add(observer);
+            }, observer =>
+            {
+                _observers.Remove(observer);
+            });
+
+            return handle;
+        }
+
 
         public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer, StreamSequenceToken token,
             StreamFilterPredicate filterFunc = null,

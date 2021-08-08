@@ -173,6 +173,11 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(grain));
             }
 
+            if (!_isGrainCreated)
+            {
+                throw new Exception($"You must create the grain using {nameof(CreateGrainAsync)} before trying to reactivate it.");
+            }
+
             if (_isGrainActive)
             {
                 throw new Exception($"This grain is already active, use {nameof(DeactivateAsync)} to deactivate the grain before trying to reactivate it.");

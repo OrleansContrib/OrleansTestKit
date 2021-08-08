@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Moq;
 using Orleans.Runtime;
+using Orleans.Streams;
 using Orleans.TestKit.Streams;
 using TestGrains;
 using Xunit;
@@ -49,13 +51,17 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public async Task GivenHandlerInState_WhenActivating_ThenResumeHandlerAndHandleNewMessages()
+        public async Task GivenDeactivatedGrainThatHasSetupAHandler_WhenActivating_ThenResumeHandlerAndHandleNewMessages()
         {
-            const int grainId = 1;
             //Arrange
             //Stream Setup
-            var grain = await Silo.CreateGrainAsync<PersistentListener>(grainId);
+            var grain = await Silo.CreateGrainAsync<PersistentListener>(1);
+
+            //Check to see there is a handler registered and a stream subscriber
+            var initialHandlers = await _stream.GetAllSubscriptionHandles();
+            Assert.Equal(1, initialHandlers.Count);
             Assert.Equal(1, _stream.Subscribed);
+
             Assert.NotNull(_state.ChatMessageStreamSubscriptionHandle);
 
             //Stream Works
@@ -65,8 +71,11 @@ namespace Orleans.TestKit.Tests
 
             //Deactivate grain
             await Silo.DeactivateAsync(grain);
-            //Subscription still exists...
-            Assert.Equal(1, _stream.Subscribed);
+
+            //Check to see there is a handler registered
+            var handlersAfterDeactivating = await _stream.GetAllSubscriptionHandles();
+            Assert.Equal(1, handlersAfterDeactivating.Count);
+            Assert.Equal(_state.ChatMessageStreamSubscriptionHandle, handlersAfterDeactivating.First());
 
 
 
@@ -85,6 +94,35 @@ namespace Orleans.TestKit.Tests
 
             //Still only one subscriber
             Assert.Equal(1, _stream.Subscribed);
+        }
+
+        [Fact]
+        public async Task GivenEmptyHandlerInState_WhenGrainActivates_ThenResumeHandler()
+        {
+            //Arrange
+            var onResumeCalled = false;
+            var onAttachingObserver = new Action<IAsyncObserver<ChatMessage>>(obs => onResumeCalled = true);
+
+            _state.ChatMessageStreamSubscriptionHandle =
+                await _stream.AddEmptyStreamHandler(onAttachingObserver);
+
+            //Check to see there is a handler registered
+            var handles = await _stream.GetAllSubscriptionHandles();
+            Assert.Equal(1, handles.Count);
+
+            //Act
+            var grain = await Silo.CreateGrainAsync<PersistentListener>(1);
+
+            //Assert
+            Assert.True(onResumeCalled);
+
+            //Act
+            await _stream.OnNextAsync(new ChatMessage("let there be life!"));
+
+            //Assert
+            var receivedMessages = await grain.ReceivedCount();
+            Assert.Equal(1, receivedMessages);
+
         }
     }
 }
