@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Orleans.Streams;
 
@@ -36,11 +37,13 @@ namespace Orleans.TestKit.Streams
             }
         }
 
-        public override Task<StreamSubscriptionHandle<T>> ResumeAsync(IAsyncObserver<T> observer, StreamSequenceToken token = null) =>
-            throw new NotImplementedException();
+        public override Task<StreamSubscriptionHandle<T>> ResumeAsync(IAsyncObserver<T> observer,
+            StreamSequenceToken token = null) => ResumeAsyncImpl();
 
-        public override Task<StreamSubscriptionHandle<T>> ResumeAsync(IAsyncBatchObserver<T> observer, StreamSequenceToken token = null) =>
-            throw new NotImplementedException();
+        public override Task<StreamSubscriptionHandle<T>> ResumeAsync(IAsyncBatchObserver<T> observer,
+            StreamSequenceToken token = null) => ResumeAsyncImpl();
+
+        private Task<StreamSubscriptionHandle<T>> ResumeAsyncImpl() => Task.FromResult<StreamSubscriptionHandle<T>>(this);
 
         public override bool Equals(StreamSubscriptionHandle<T> other) =>
             ReferenceEquals(this, other);
