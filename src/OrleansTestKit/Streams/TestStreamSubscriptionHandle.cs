@@ -8,6 +8,8 @@ namespace Orleans.TestKit.Streams
         StreamSubscriptionHandle<T>
     {
         private readonly Action _unsubscribe;
+        private readonly Guid _handleId = Guid.NewGuid();
+        private readonly string _namespace = "SuperDuperCrazyTown";
 
         public TestStreamSubscriptionHandle(Action unsubscribe) =>
             _unsubscribe = unsubscribe ?? throw new ArgumentNullException(nameof(unsubscribe));
@@ -16,7 +18,7 @@ namespace Orleans.TestKit.Streams
         {
             get
             {
-                throw new NotImplementedException();
+                return _handleId;
             }
         }
 
@@ -24,7 +26,7 @@ namespace Orleans.TestKit.Streams
         {
             get
             {
-                throw new NotImplementedException();
+                return _namespace;
             }
         }
 
@@ -32,7 +34,7 @@ namespace Orleans.TestKit.Streams
         {
             get
             {
-                throw new NotImplementedException();
+                return new TestStreamId(_handleId, _namespace);
             }
         }
 
