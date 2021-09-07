@@ -104,7 +104,7 @@ namespace Orleans.TestKit
         internal void AddProbe<T>(Func<IGrainIdentity, IMock<T>> factory)
             where T : class, IGrain
         {
-            var adaptedFactory = new Func<IGrainIdentity, T>(grainIdentity => factory(grainIdentity).Object);
+            var adaptedFactory = new Func<IGrainIdentity, T>(grainIdentity => factory(grainIdentity)?.Object);
             AddProbe<T>(adaptedFactory);
         }
 

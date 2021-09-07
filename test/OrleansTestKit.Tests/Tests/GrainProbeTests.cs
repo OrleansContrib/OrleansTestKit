@@ -146,7 +146,6 @@ namespace Orleans.TestKit.Tests
             pong.Verify(p => p.Pong(), Times.Once);
         }
 
-        #region FactoryProbeWithMultipleNewProbes
         [Fact]
         public async Task FactoryProbeWithMultipleNewProbes_Moq()
         {
@@ -228,10 +227,6 @@ namespace Orleans.TestKit.Tests
             resolvedIds[0].Should().Be("unknownGrainOne");
             resolvedIds[1].Should().Be("unknownGrainTwo");
         }
-        #endregion
-
-
-
 
 
         [Fact]
