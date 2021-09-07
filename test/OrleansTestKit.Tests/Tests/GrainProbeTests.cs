@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FakeItEasy;
 using FluentAssertions;
 using Moq;
+using NSubstitute;
 using Orleans.TestKit;
 using TestGrains;
 using TestInterfaces;
 using Xunit;
+using Times = Moq.Times;
 
 namespace Orleans.TestKit.Tests
 {
@@ -144,7 +147,7 @@ namespace Orleans.TestKit.Tests
         }
 
         [Fact]
-        public async Task FactoryProbeWithMulipleNewProbes()
+        public async Task FactoryProbeWithMultipleNewProbes_Moq()
         {
             // useful for when a grain needs to create other grains whose identities are not known beforehand
             // and probes for the new grains need to return certain values
@@ -171,6 +174,60 @@ namespace Orleans.TestKit.Tests
             resolvedIds[0].Should().Be("unknownGrainOne");
             resolvedIds[1].Should().Be("unknownGrainTwo");
         }
+
+        [Fact]
+        public async Task FactoryProbeWithMultipleNewProbes_FakeItEasy()
+        {
+
+            var firstUnknownGrain = A.Fake<IUnknownGrain>();
+            var secondUnknownGrain = A.Fake<IUnknownGrain>();
+            var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
+
+            this.Silo.AddProbe<IUnknownGrain>(identity =>
+            {
+                var nextProbe = probeQueue.Dequeue();
+
+                A.CallTo(() => nextProbe.WhatsMyId())
+                    .Returns(identity.PrimaryKeyString);
+
+                return nextProbe;
+            });
+
+            var grain = await this.Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+
+            await grain.CreateAndPingMultiple();
+
+            var resolvedIds = await grain.GetResolvedUnknownGrainIdsAsync();
+            resolvedIds[0].Should().Be("unknownGrainOne");
+            resolvedIds[1].Should().Be("unknownGrainTwo");
+        }
+
+        [Fact]
+        public async Task FactoryProbeWithMultipleNewProbes_NSubstitute()
+        {
+
+            var firstUnknownGrain = Substitute.For<IUnknownGrain>();
+            var secondUnknownGrain = Substitute.For<IUnknownGrain>();
+            var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
+
+            this.Silo.AddProbe<IUnknownGrain>(identity =>
+            {
+                var nextProbe = probeQueue.Dequeue();
+
+                nextProbe.WhatsMyId().Returns(identity.PrimaryKeyString);
+
+                return nextProbe;
+            });
+
+            var grain = await this.Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+
+            await grain.CreateAndPingMultiple();
+
+            var resolvedIds = await grain.GetResolvedUnknownGrainIdsAsync();
+            resolvedIds[0].Should().Be("unknownGrainOne");
+            resolvedIds[1].Should().Be("unknownGrainTwo");
+        }
+
 
         [Fact]
         public async Task ProbeWithClassPrefix()
