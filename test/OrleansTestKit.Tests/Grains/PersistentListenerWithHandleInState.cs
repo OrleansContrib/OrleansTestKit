@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Threading.Tasks;
 using Orleans;
 using Orleans.Runtime;
@@ -7,18 +8,17 @@ using TestInterfaces;
 
 namespace TestGrains
 {
-
-    public class PersistentListenerState
+    public class PersistentListenerStateWithHandle
     {
         public StreamSubscriptionHandle<ChatMessage> ChatMessageStreamSubscriptionHandle = null;
         public int ReceivedCount = 0;
     }
 
-    public class PersistentListener : Grain, IListener
+    public class PersistentListenerWithHandleInState : Grain, IListener
     {
-        private readonly IPersistentState<PersistentListenerState> _persistentState;
+        private readonly IPersistentState<PersistentListenerStateWithHandle> _persistentState;
         
-        public PersistentListener([PersistentState("listenerState")] IPersistentState<PersistentListenerState> persistentState)
+        public PersistentListenerWithHandleInState([PersistentState("listenerStateWithHandler")] IPersistentState<PersistentListenerStateWithHandle> persistentState)
         {
             _persistentState = persistentState;
         }

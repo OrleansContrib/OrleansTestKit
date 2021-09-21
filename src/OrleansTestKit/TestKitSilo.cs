@@ -23,8 +23,6 @@ namespace Orleans.TestKit
         /// </summary>
         private bool _isGrainCreated;
 
-        private bool _isGrainActive;
-
         private readonly TestGrainCreator _grainCreator;
 
         private readonly TestGrainRuntime _grainRuntime;
@@ -114,7 +112,6 @@ namespace Orleans.TestKit
             }
 
             _isGrainCreated = true;
-            _isGrainActive = true;
             Grain grain;
             var grainContext = new TestGrainActivationContext
             {
@@ -157,34 +154,8 @@ namespace Orleans.TestKit
             {
                 throw new ArgumentNullException(nameof(grain));
             }
-            _isGrainActive = false;
 
             return _grainLifecycle.TriggerStopAsync();
-        }
-
-        /// <summary>
-        /// Reactivate the given <see cref="Grain"/>
-        /// </summary>
-        /// <param name="grain">Grain to Reactivate</param>
-        public async Task ReactivateAsync(Grain grain)
-        {
-            if (grain == null)
-            {
-                throw new ArgumentNullException(nameof(grain));
-            }
-
-            if (!_isGrainCreated)
-            {
-                throw new Exception($"You must create the grain using {nameof(CreateGrainAsync)} before trying to reactivate it.");
-            }
-
-            if (_isGrainActive)
-            {
-                throw new Exception($"This grain is already active, use {nameof(DeactivateAsync)} to deactivate the grain before trying to reactivate it.");
-            }
-
-            await _grainLifecycle.TriggerStartAsync().ConfigureAwait(false);
-            _isGrainActive = true;
         }
     }
 }

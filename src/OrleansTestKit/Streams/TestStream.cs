@@ -64,7 +64,7 @@ namespace Orleans.TestKit.Streams
 
 
         /// <summary>
-        /// Create an empty handler that can then be used to test ResumeAsync
+        /// Create an empty handler that can then be used to test resuming streams
         /// </summary>
         public Task<StreamSubscriptionHandle<T>> AddEmptyStreamHandler(Action<IAsyncObserver<T>> onAttachingObserver = null)
         {
