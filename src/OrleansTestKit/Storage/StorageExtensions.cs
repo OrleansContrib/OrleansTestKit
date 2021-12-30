@@ -23,7 +23,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.StorageManager.GetStorageStats();
+            return silo.StorageManager.StorageStats;
         }
     }
 }
