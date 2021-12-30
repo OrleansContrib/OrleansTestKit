@@ -34,7 +34,7 @@ namespace Orleans.TestKit.Tests
         {
             IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
-            grain.Invoking(p => p.Ping()).Should().ThrowExactly<Exception>();
+            await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Orleans.TestKit.Tests
             //This uses the wrong id for the IPong since this is hard coded within PingGrain
             var pong = Silo.AddProbe<IPong>(0);
 
-            grain.Invoking(p => p.Ping()).Should().ThrowExactly<Exception>();
+            await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
 
             pong.Verify(p => p.Pong(), Times.Never);
         }
@@ -58,7 +58,7 @@ namespace Orleans.TestKit.Tests
             //This uses the correct id, but the wrong grain type
             var pong = Silo.AddProbe<IPong2>(22);
 
-            grain.Invoking(p => p.Ping()).Should().ThrowExactly<Exception>();
+            await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
 
             pong.Verify(p => p.Pong2(), Times.Never);
         }

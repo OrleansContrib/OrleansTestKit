@@ -135,7 +135,7 @@ namespace Orleans.TestKit.Tests
             Func<Task> f = async () => { await Silo.FireReminder("b"); };
 
             // Assert
-            f.Should().Throw<Exception>();
+            await f.Should().ThrowAsync<Exception>();
             grain.FiredReminders.Count.Should().Be(0);
         }
 

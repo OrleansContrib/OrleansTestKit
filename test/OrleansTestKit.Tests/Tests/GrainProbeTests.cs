@@ -45,7 +45,7 @@ namespace Orleans.TestKit.Tests
             IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             //There should not be an exception, since we are using loose grain generation
-            grain.Invoking(p => p.Ping()).Should().NotThrow();
+            await grain.Invoking(p => p.Ping()).Should().NotThrowAsync();
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Orleans.TestKit.Tests
             //This uses the wrong id for the IPong since this is hard coded within PingGrain
             var pong = Silo.AddProbe<IPong>(0);
 
-            grain.Invoking(p => p.Ping()).Should().NotThrow();
+            await grain.Invoking(p => p.Ping()).Should().NotThrowAsync();
 
             pong.Verify(p => p.Pong(), Times.Never);
         }
@@ -69,7 +69,7 @@ namespace Orleans.TestKit.Tests
             //This correct id, but a different grain type
             var pong = Silo.AddProbe<IPong2>(22);
 
-            grain.Invoking(p => p.Ping()).Should().NotThrow();
+            await grain.Invoking(p => p.Ping()).Should().NotThrowAsync();
 
             pong.Verify(p => p.Pong2(), Times.Never);
         }
@@ -137,9 +137,9 @@ namespace Orleans.TestKit.Tests
 
             var pong = new Mock<IPong>();
 
-            this.Silo.AddProbe<IPong>(identity => pong);
+            Silo.AddProbe<IPong>(identity => pong);
 
-            var grain = await this.Silo.CreateGrainAsync<PingGrain>(1);
+            var grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
             await grain.Ping();
 
@@ -156,7 +156,7 @@ namespace Orleans.TestKit.Tests
             var secondUnknownGrain = new Mock<IUnknownGrain>();
             var probeQueue = new Queue<Mock<IUnknownGrain>>(new [] {firstUnknownGrain, secondUnknownGrain});
 
-            this.Silo.AddProbe<IUnknownGrain>(identity =>
+            Silo.AddProbe<IUnknownGrain>(identity =>
             {
                 var nextProbe = probeQueue.Dequeue();
 
@@ -166,7 +166,7 @@ namespace Orleans.TestKit.Tests
                 return nextProbe;
             });
 
-            var grain = await this.Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+            var grain = await Silo.CreateGrainAsync<UnknownGrainResolver>("1");
 
             await grain.CreateAndPingMultiple();
 
@@ -183,7 +183,7 @@ namespace Orleans.TestKit.Tests
             var secondUnknownGrain = A.Fake<IUnknownGrain>();
             var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
 
-            this.Silo.AddProbe<IUnknownGrain>(identity =>
+            Silo.AddProbe<IUnknownGrain>(identity =>
             {
                 var nextProbe = probeQueue.Dequeue();
 
@@ -193,7 +193,7 @@ namespace Orleans.TestKit.Tests
                 return nextProbe;
             });
 
-            var grain = await this.Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+            var grain = await Silo.CreateGrainAsync<UnknownGrainResolver>("1");
 
             await grain.CreateAndPingMultiple();
 
@@ -210,7 +210,7 @@ namespace Orleans.TestKit.Tests
             var secondUnknownGrain = Substitute.For<IUnknownGrain>();
             var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
 
-            this.Silo.AddProbe<IUnknownGrain>(identity =>
+            Silo.AddProbe<IUnknownGrain>(identity =>
             {
                 var nextProbe = probeQueue.Dequeue();
 
@@ -219,7 +219,7 @@ namespace Orleans.TestKit.Tests
                 return nextProbe;
             });
 
-            var grain = await this.Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+            var grain = await Silo.CreateGrainAsync<UnknownGrainResolver>("1");
 
             await grain.CreateAndPingMultiple();
 
@@ -235,7 +235,7 @@ namespace Orleans.TestKit.Tests
             var androidMock = Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
             var iosMock = Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
 
-            var managerGrain = await this.Silo.CreateGrainAsync<DeviceManagerGrain>(0);
+            var managerGrain = await Silo.CreateGrainAsync<DeviceManagerGrain>(0);
             var androidGrain = await managerGrain.GetDeviceGrain("Android");
             var iosGrain = await managerGrain.GetDeviceGrain("IOS");
 
@@ -251,7 +251,7 @@ namespace Orleans.TestKit.Tests
             var iosMock = Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
             iosMock.Setup(o => o.GetDeviceType()).ReturnsAsync("BSD");
 
-            var managerGrain = await this.Silo.CreateGrainAsync<DeviceManagerGrain>(0);
+            var managerGrain = await Silo.CreateGrainAsync<DeviceManagerGrain>(0);
             var androidType = await managerGrain.GetDeviceType("Android");
             var iosType = await managerGrain.GetDeviceType("IOS");
 

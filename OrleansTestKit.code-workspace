@@ -6,15 +6,23 @@
     }
   ],
   "settings": {
-    "dotnet-test-explorer.testProjectPath": "./test/OrleansTestKit.Tests",
+    "dotnet-test-explorer.runInParallel": true,
+    "dotnet-test-explorer.testProjectPath": "/test/*.Tests",
     "editor.formatOnSave": true,
     "editor.minimap.maxColumn": 120,
     "editor.minimap.showSlider": "always",
     "editor.renderWhitespace": "all",
-    "editor.rulers": [120],
+    "editor.rulers": [
+      120
+    ],
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 30000,
+    "files.exclude": {
+      "**/bin": true,
+      "**/obj": true
+    },
     "omnisharp.defaultLaunchSolution": "OrleansTestKit.sln",
+    "omnisharp.enableEditorConfigSupport": true,
     "omnisharp.enableRoslynAnalyzers": true,
     "omnisharp.useEditorFormattingSettings": false
   }
