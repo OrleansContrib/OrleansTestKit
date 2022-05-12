@@ -86,7 +86,6 @@ namespace Orleans.TestKit.Storage
         }
 
         private IPersistentState<TState> AddEmptyState<TState>(string stateName, string storageName)
-            where TState : new()
         {
             var storage = storageManager.GetStorage<TState>(stateName);
             return AddPersistentState(storage, stateName, storageName);

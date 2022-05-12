@@ -14,7 +14,6 @@ namespace Orleans.TestKit
     {
         public static TState State<TGrain, TState>(this TestKitSilo silo)
             where TGrain : Grain<TState>
-            where TState : class, new()
         {
             if (silo == null)
             {
@@ -39,7 +38,6 @@ namespace Orleans.TestKit
             this TestKitSilo silo,
             T state = default)
             where TGrain : Grain<T>
-            where T : new()
         {
             if (silo == null)
             {
@@ -47,7 +45,7 @@ namespace Orleans.TestKit
             }
 
             var storage = silo.StorageManager.GetGrainStorage<TGrain, T>();
-            storage.State = state ?? new T();
+            storage.State = state ?? Activator.CreateInstance<T>();
             return storage;
         }
 
@@ -68,12 +66,11 @@ namespace Orleans.TestKit
             string stateName,
             string storageName = default,
             T state = default)
-            where T : new()
         {
             return silo.AddPersistentStateStorage(
                 stateName,
                 storageName,
-                new TestStorage<T>(state ?? new T()));
+                new TestStorage<T>(state ?? Activator.CreateInstance<T>()));
         }
 
         /// <summary>
@@ -93,9 +90,8 @@ namespace Orleans.TestKit
             string stateName,
             string storageName = default,
             IStorage<T> storage = default)
-            where T : new()
         {
-            var normalizedStorage = storage ?? new TestStorage<T>(new T());
+            var normalizedStorage = storage ?? new TestStorage<T>(Activator.CreateInstance<T>());
             var normalizedStorageName = storageName ?? "Default";
 
             if (silo == null)
