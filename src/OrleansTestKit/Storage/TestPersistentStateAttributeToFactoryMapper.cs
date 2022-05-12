@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using Orleans.Core;
 using Orleans.Runtime;
 
@@ -14,25 +15,33 @@ namespace Orleans.TestKit.Storage
         private readonly MethodInfo AddEmptyStateMethod = typeof(TestPersistentStateAttributeToFactoryMapper)
             .GetMethod(nameof(TestPersistentStateAttributeToFactoryMapper.AddEmptyState), BindingFlags.Instance | BindingFlags.NonPublic);
 
-        public TestPersistentStateAttributeToFactoryMapper(StorageManager storageManager)
-        {
-            this.storageManager = storageManager;
-        }
+        public TestPersistentStateAttributeToFactoryMapper(StorageManager storageManager) => this.storageManager = storageManager;
 
         public IPersistentState<T> AddPersistentState<T>(
             IStorage<T> storage,
             string stateName,
-            string storageName = null,
-            T state = default) where T : new()
+            string storageName)
         {
+            if (storage is null)
+            {
+                throw new ArgumentNullException(nameof(storage));
+            }
+
+            if (string.IsNullOrWhiteSpace(stateName))
+            {
+                throw new ArgumentException($"'{nameof(stateName)}' cannot be null or whitespace.", nameof(stateName));
+            }
+
+            if (string.IsNullOrWhiteSpace(storageName))
+            {
+                throw new ArgumentException($"'{nameof(storageName)}' cannot be null or whitespace.", nameof(storageName));
+            }
+
             var dict = registeredStorage.TryGetValue(typeof(T), out var typeStateRegistry)
                 ? typeStateRegistry
                 : registeredStorage[typeof(T)] = new Dictionary<(string StateName, string StorageName), object>(1);
 
-            var fake = new PersistentStateFake<T>(storage)
-            {
-                State = state ?? new T()
-            };
+            var fake = new PersistentStateFake<T>(storage);
             dict[(stateName, storageName)] = fake;
 
             return fake;
@@ -57,22 +66,13 @@ namespace Orleans.TestKit.Storage
             }
 
             var parameterType = parameter.ParameterType.GenericTypeArguments[0];
+            var stateName = metadata.StateName;
+            var storageName = metadata.StorageName ?? "Default";
 
             if (registeredStorage.TryGetValue(parameterType, out var typeStateRegistry))
             {
-                // If a storage name is not provided then find it by the state name
-                if (metadata.StorageName is null)
-                {
-                    foreach (var kvp in typeStateRegistry)
-                    {
-                        if (kvp.Key.StateName == metadata.StateName)
-                        {
-                            return _ => kvp.Value;
-                        }
-                    }
-                }
                 // If we must have the state and the storage name so lookup by both
-                else if (typeStateRegistry.TryGetValue((metadata.StateName, metadata.StorageName), out var persistentState))
+                if (typeStateRegistry.TryGetValue((metadata.StateName, metadata.StorageName), out var persistentState))
                 {
                     return _ => persistentState;
                 }
@@ -80,7 +80,7 @@ namespace Orleans.TestKit.Storage
 
             var state = AddEmptyStateMethod.MakeGenericMethod(parameterType).Invoke(
                 this,
-                new[] { metadata.StateName, metadata.StorageName });
+                new[] { stateName, storageName });
 
             return _ => state;
         }
@@ -91,5 +91,32 @@ namespace Orleans.TestKit.Storage
             var storage = storageManager.GetStorage<TState>(stateName);
             return AddPersistentState(storage, stateName, storageName);
         }
+    }
+
+    internal class PersistentStateFake<TState> : IPersistentState<TState>, IStorageStats
+    {
+        private readonly IStorage<TState> _storage;
+
+        public PersistentStateFake(IStorage<TState> storage) => _storage = storage;
+
+        public TState State
+        {
+            get => _storage.State;
+            set => _storage.State = value;
+        }
+
+        public string Etag => _storage.Etag;
+
+        public bool RecordExists => _storage.RecordExists;
+
+        public TestStorageStats Stats => _storage is IStorageStats statsStorage
+            ? statsStorage.Stats
+            : null;
+
+        public Task ClearStateAsync() => _storage.ClearStateAsync();
+
+        public Task ReadStateAsync() => _storage.ReadStateAsync();
+
+        public Task WriteStateAsync() => _storage.WriteStateAsync();
     }
 }

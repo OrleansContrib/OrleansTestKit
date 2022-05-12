@@ -148,11 +148,13 @@ namespace Orleans.TestKit.Tests
         public async Task SetColor_WithMutatedState_ThrowsInconsistentStateException()
         {
             // Arrange
-            var mock = new Mock<IStorage<ColorGrainState>>();
-            mock.SetupAllProperties();
-            mock.Setup(o => o.WriteStateAsync()).Throws<InconsistentStateException>();
+            var state = new ColorGrainState();
 
-            Silo.AddPersistentState(stateName: "State", storage: mock.Object);
+            var mockState = new Mock<IStorage<ColorGrainState>>();
+            mockState.SetupGet(o => o.State).Returns(state);
+            mockState.Setup(o => o.WriteStateAsync()).Throws<InconsistentStateException>();
+
+            Silo.AddPersistentStateStorage(stateName: "State", storage: mockState.Object);
 
             var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
             Action action = () => grain.SetColor(Color.Green);

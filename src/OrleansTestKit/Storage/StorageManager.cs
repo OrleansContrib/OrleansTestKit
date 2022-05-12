@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Moq;
-using System.Diagnostics.CodeAnalysis;
 using Orleans.Core;
-using Orleans.Runtime;
 
 namespace Orleans.TestKit.Storage
 {
@@ -13,20 +9,18 @@ namespace Orleans.TestKit.Storage
     {
         private readonly TestKitOptions _options;
 
-        private readonly Dictionary<string, object> _storages = new Dictionary<string, object>();
+        private readonly Dictionary<string, object> _storages = new();
 
         public StorageManager(TestKitOptions options)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
-            stateAttributeFactoryMapper = new TestPersistentStateAttributeToFactoryMapper(this);
+            StateAttributeFactoryMapper = new TestPersistentStateAttributeToFactoryMapper(this);
         }
 
-        internal readonly TestPersistentStateAttributeToFactoryMapper stateAttributeFactoryMapper;
+        internal TestPersistentStateAttributeToFactoryMapper StateAttributeFactoryMapper { get; }
 
         public IStorage<TState> GetGrainStorage<TGrain, TState>() where TGrain : Grain<TState>
             => GetStorage<TState>(typeof(TGrain).FullName);
-
-        public IStorage<TState> GetStorage<TState>() => GetStorage<TState>("Default");
 
         public IStorage<TState> GetStorage<TState>(string stateName)
         {
@@ -51,22 +45,12 @@ namespace Orleans.TestKit.Storage
             return storage as IStorage<TState>;
         }
 
-        public TestStorageStats GetStorageStats() => GetStorageStats(null);
+        public TestStorageStats GetStorageStats<TGrain, TState>() where TGrain : Grain<TState>
+            => GetStorageStats(typeof(TGrain).FullName);
 
         public TestStorageStats GetStorageStats(string stateName)
         {
-            if (string.IsNullOrWhiteSpace(stateName))
-            {
-                if (_storages.Count > 0)
-                {
-                    var stats = _storages.First().Value as IStorageStats;
-                    return stats?.Stats;
-                }
-
-                return null;
-            }
-
-            var normalisedStateName = stateName;
+            var normalisedStateName = stateName ?? "Default";
 
             if (_storages.TryGetValue(normalisedStateName, out var storage))
             {
@@ -76,8 +60,6 @@ namespace Orleans.TestKit.Storage
 
             return null;
         }
-
-        public TestStorageStats StorageStats => GetStorageStats();
 
         internal void AddStorage<TState>(IStorage<TState> storage, string stateName = default)
         {

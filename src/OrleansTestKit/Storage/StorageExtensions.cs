@@ -24,14 +24,15 @@ namespace Orleans.TestKit
             return silo.StorageManager.GetGrainStorage<TGrain, TState>().State;
         }
 
-        public static TestStorageStats StorageStats(this TestKitSilo silo)
+        public static TestStorageStats StorageStats<TGrain, TState>(this TestKitSilo silo)
+            where TGrain : Grain<TState>
         {
             if (silo == null)
             {
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.StorageManager.GetStorageStats();
+            return silo.StorageManager.GetStorageStats<TGrain, TState>();
         }
 
         public static IStorage<T> AddGrainState<TGrain, T>(
@@ -50,6 +51,18 @@ namespace Orleans.TestKit
             return storage;
         }
 
+        /// <summary>
+        /// Add persistent state to the silo for a given type. If a state is provided that will be the loaded state otherwise a new <typeparamref name="T"/>
+        /// </summary>
+        /// <remarks>
+        /// If neither StateName or StorageName are provided then we resolve just based on type, otherwise we try state name and optionally a storage name
+        /// </remarks>
+        /// <typeparam name="T">The type of data in the state</typeparam>
+        /// <param name="silo">The silo to add the state to</param>
+        /// <param name="stateName">The state name on the persistent state parameter</param>
+        /// <param name="storageName">The storage name on the persistent state parameter</param>
+        /// <param name="state">The state to set as default if any</param>
+        /// <returns>The persistent state</returns>
         public static IPersistentState<T> AddPersistentState<T>(
             this TestKitSilo silo,
             string stateName,
@@ -57,29 +70,34 @@ namespace Orleans.TestKit
             T state = default)
             where T : new()
         {
-            if (silo == null)
-            {
-                throw new ArgumentNullException(nameof(silo));
-            }
-
-            if (string.IsNullOrWhiteSpace(stateName))
-            {
-                throw new ArgumentException("A state name must be provided", nameof(stateName));
-            }
-
-            var storage = silo.StorageManager.GetStorage<T>(stateName);
-
-            return AddPersistentState(silo, storage, stateName, storageName, state);
+            return silo.AddPersistentStateStorage(
+                stateName,
+                storageName,
+                new TestStorage<T>(state ?? new T()));
         }
 
-        public static IPersistentState<T> AddPersistentState<T>(
+        /// <summary>
+        /// Add persistent state to the silo for a given type. If a storage is provided that will provide the loaded state otherwise a new <typeparamref name="T"/>
+        /// </summary>
+        /// <remarks>
+        /// If neither StateName or StorageName are provided then we resolve just based on type, otherwise we try state name and optionally a storage name
+        /// </remarks>
+        /// <typeparam name="T">The type of data in the state</typeparam>
+        /// <param name="silo">The silo to add the state to</param>
+        /// <param name="stateName">The state name on the persistent state parameter</param>
+        /// <param name="storageName">The storage name on the persistent state parameter</param>
+        /// <param name="storage">The storage to use, if null a default implementation will be created</param>
+        /// <returns>The persistent state</returns>
+        public static IPersistentState<T> AddPersistentStateStorage<T>(
             this TestKitSilo silo,
-            IStorage<T> storage,
             string stateName,
             string storageName = default,
-            T state = default)
+            IStorage<T> storage = default)
             where T : new()
         {
+            var normalizedStorage = storage ?? new TestStorage<T>(new T());
+            var normalizedStorageName = storageName ?? "Default";
+
             if (silo == null)
             {
                 throw new ArgumentNullException(nameof(silo));
@@ -88,41 +106,10 @@ namespace Orleans.TestKit
             if (string.IsNullOrWhiteSpace(stateName))
             {
                 throw new ArgumentException("A state name must be provided", nameof(stateName));
-            }
-
-            if (storage is null)
-            {
-                throw new ArgumentNullException(nameof(storage));
             }
 
             silo.StorageManager.AddStorage(storage, stateName);
-            return silo.StorageManager.stateAttributeFactoryMapper.AddPersistentState(storage, stateName, storageName, state);
+            return silo.StorageManager.StateAttributeFactoryMapper.AddPersistentState(normalizedStorage, stateName, normalizedStorageName);
         }
-    }
-
-    internal class PersistentStateFake<TState> : IPersistentState<TState>
-    {
-        private readonly IStorage<TState> _storage;
-
-        public PersistentStateFake(IStorage<TState> storage)
-        {
-            _storage = storage;
-        }
-
-        public TState State
-        {
-            get => _storage.State;
-            set => _storage.State = value;
-        }
-
-        public string Etag => _storage.Etag;
-
-        public bool RecordExists => _storage.RecordExists;
-
-        public Task ClearStateAsync() => _storage.ClearStateAsync();
-
-        public Task ReadStateAsync() => _storage.ReadStateAsync();
-
-        public Task WriteStateAsync() => _storage.WriteStateAsync();
     }
 }

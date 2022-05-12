@@ -110,7 +110,7 @@ namespace Orleans.TestKit.Tests
             var greetings = (await grain.GetGreetings()).ToList();
 
             // Assert
-            var stats = this.Silo.StorageStats();
+            var stats = this.Silo.StorageStats<GreetingArchiveGrain, GreetingArchiveGrainState>();
             stats.Clears.Should().Be(0);
             stats.Reads.Should().Be(0);
             stats.Writes.Should().Be(2);
@@ -227,7 +227,7 @@ namespace Orleans.TestKit.Tests
             var greetings = (await grain.GetGreetings()).ToList();
 
             // Assert
-            var stats = this.Silo.StorageStats();
+            var stats = this.Silo.StorageStats<GreetingArchiveGrain, GreetingArchiveGrainState>();
             stats.Clears.Should().Be(1);
             stats.Reads.Should().Be(0);
             stats.Writes.Should().Be(0);
