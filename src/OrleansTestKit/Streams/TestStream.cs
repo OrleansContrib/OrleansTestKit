@@ -80,21 +80,25 @@ namespace Orleans.TestKit.Streams
         {
             TestStreamSubscriptionHandle<T> handle = null;
 
-            handle = new TestStreamSubscriptionHandle<T>(observer =>
-            {
-                _handlers.Remove(handle);
-                if (observer != null)
+            handle = new TestStreamSubscriptionHandle<T>(
+                Guid,
+                Namespace,
+                ProviderName,
+                observer =>
+                {
+                    _handlers.Remove(handle);
+                    if (observer != null)
+                    {
+                        _observers.Remove(observer);
+                    }
+                }, observer =>
+                {
+                    onAttachingObserver?.Invoke(observer);
+                    _observers.Add(observer);
+                }, observer =>
                 {
                     _observers.Remove(observer);
-                }
-            }, observer =>
-            {
-                onAttachingObserver?.Invoke(observer);
-                _observers.Add(observer);
-            }, observer =>
-            {
-                _observers.Remove(observer);
-            });
+                });
 
             return handle;
         }
