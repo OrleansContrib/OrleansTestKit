@@ -11,15 +11,26 @@ namespace Orleans.TestKit.Streams
         private readonly Action<IAsyncObserver<T>> _unsubscribe;
         private readonly Action<IAsyncObserver<T>> _onAttachingObserver;
         private readonly Action<IAsyncObserver<T>> _onDetachingObserver;
+        private readonly Guid _handleId;
+        private readonly TestStreamId _streamIdentity;
+        private readonly string _providerName;
         private IAsyncObserver<T> _observer;
 
-        public TestStreamSubscriptionHandle(Action<IAsyncObserver<T>> unsubscribe,
+        public TestStreamSubscriptionHandle(
+            Guid streamId,
+            string streamNamespace,
+            string providerName,
+            Action<IAsyncObserver<T>> unsubscribe,
             Action<IAsyncObserver<T>> onAttachingObserver = null,
             Action<IAsyncObserver<T>> onDetachingObserver = null)
         {
             _unsubscribe = unsubscribe ?? throw new ArgumentNullException(nameof(unsubscribe));
             _onAttachingObserver = onAttachingObserver;
             _onDetachingObserver = onDetachingObserver;
+
+            _handleId = Guid.NewGuid();
+            _streamIdentity = new TestStreamId(streamId, streamNamespace);
+            _providerName = providerName;
         }
 
 
@@ -27,7 +38,7 @@ namespace Orleans.TestKit.Streams
         {
             get
             {
-                throw new NotImplementedException();
+                return _handleId;
             }
         }
 
@@ -35,7 +46,7 @@ namespace Orleans.TestKit.Streams
         {
             get
             {
-                throw new NotImplementedException();
+                return _providerName;
             }
         }
 
@@ -43,7 +54,7 @@ namespace Orleans.TestKit.Streams
         {
             get
             {
-                throw new NotImplementedException();
+                return _streamIdentity;
             }
         }
 

@@ -209,5 +209,33 @@ namespace Orleans.TestKit.Tests
 
             (await grain.ReceivedCount()).Should().Be(1);
         }
+
+
+        [Fact]
+        public async Task SubscriptionHandlesShouldHaveIdentity()
+        {
+            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+
+            await Silo.CreateGrainAsync<Listener>(1);
+            var handlers = await stream.GetAllSubscriptionHandles();
+
+            handlers.Count.Should().Be(1);
+            stream.Subscribed.Should().Be(1);
+
+
+            foreach (var handle in handlers)
+            {
+                handle.ProviderName.Should().Be("Default");
+                handle.HandleId.Should().NotBeEmpty();
+                handle.StreamIdentity.Should().NotBeNull();
+                handle.StreamIdentity.Namespace.Should().BeNull();
+            }
+
+            await handlers[0].UnsubscribeAsync();
+
+            handlers.Count.Should().Be(1);
+            stream.Subscribed.Should().Be(0);
+        }
+
     }
 }
