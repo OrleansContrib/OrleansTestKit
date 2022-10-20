@@ -14,6 +14,10 @@ namespace Orleans.TestKit.Storage
             InitializeState();
         }
 
+        public TestStorage(TState state) : this()
+        {
+            State = state;
+        }
         public string Etag => throw new System.NotImplementedException();
 
         public virtual bool RecordExists { get; set; }

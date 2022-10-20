@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Orleans.Core;
@@ -28,6 +30,8 @@ namespace Orleans.TestKit
         private readonly TestGrainRuntime _grainRuntime;
 
         private readonly TestGrainLifecycle _grainLifecycle = new TestGrainLifecycle();
+
+        private readonly List<IGrainBase> _activatedGrains = new List<IGrainBase>();
 
         public TestKitSilo()
         {
@@ -99,7 +103,7 @@ namespace Orleans.TestKit
         public Task<T> CreateGrainAsync<T>(long id, string keyExtension) where T : Grain, IGrainWithIntegerCompoundKey =>
             CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id, keyExtension));
 
-        private async Task<T> CreateGrainAsync<T>(IdSpan identity) where T : Grain {
+        private async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default) where T : Grain {
             if (_isGrainCreated)
             {
                 throw new Exception(
@@ -118,7 +122,7 @@ namespace Orleans.TestKit
             };
 
             //Create a stateless grain
-            grain = _grainCreator.CreateGrainInstance(grainContext) as T;
+            grain = _grainCreator.CreateGrainInstance<T>(grainContext);
             if (grain == null)
             {
                 throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
@@ -132,6 +136,15 @@ namespace Orleans.TestKit
 
             //Trigger the lifecycle hook that will get the grain's state from the runtime
             await _grainLifecycle.TriggerStartAsync().ConfigureAwait(false);
+
+            // Due to update the OnActivate call has to be done manually
+            // not all Grains implement ILifecycle anymore
+            if (grain is IGrainBase)
+            {
+                await grain.OnActivateAsync(cancellation).ConfigureAwait(false);
+                _activatedGrains.Add(grain);
+            }
+
             return grain as T;
         }
 
@@ -144,14 +157,17 @@ namespace Orleans.TestKit
         /// Deactivate the given <see cref="Grain"/>
         /// </summary>
         /// <param name="grain">Grain to Deactivate</param>
-        public Task DeactivateAsync(Grain grain)
+        public async Task DeactivateAsync(Grain grain,DeactivationReason? deactivationReason = null, CancellationToken cancellationToken = default)
         {
             if (grain == null)
             {
                 throw new ArgumentNullException(nameof(grain));
             }
 
-            return _grainLifecycle.TriggerStopAsync();
+            await _grainLifecycle.TriggerStopAsync().ConfigureAwait(false);
+
+            deactivationReason ??= new DeactivationReason(DeactivationReasonCode.ShuttingDown, $"TestKit {nameof(TestKitSilo.DeactivateAsync)} called");
+            await grain.OnDeactivateAsync(deactivationReason.Value, cancellationToken).ConfigureAwait(false);
         }
     }
 }
