@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using Orleans.Runtime;
 using Orleans.Timers;
 
 namespace Orleans.TestKit.Timers
@@ -14,14 +15,15 @@ namespace Orleans.TestKit.Timers
 
         public Mock<ITimerRegistry> Mock { get; } = new Mock<ITimerRegistry>();
 
-        public IDisposable RegisterTimer(Grain grain, Func<object, Task> asyncCallback, object state, TimeSpan dueTime, TimeSpan period)
+
+        public IDisposable RegisterTimer(IGrainContext grainContext, Func<object, Task> asyncCallback, object state, TimeSpan dueTime, TimeSpan period)
         {
-            if (grain == null)
+            if (grainContext == null)
             {
-                throw new ArgumentNullException(nameof(grain));
+                throw new ArgumentNullException(nameof(grainContext));
             }
 
-            Mock.Object.RegisterTimer(grain, asyncCallback, state, dueTime, period);
+            Mock.Object.RegisterTimer(grainContext, asyncCallback, state, dueTime, period);
             var timer = new TestTimer(asyncCallback, state);
             _timers.Add(timer);
             return timer;

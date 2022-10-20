@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Orleans;
 using TestInterfaces;
 
@@ -8,16 +9,13 @@ namespace TestGrains
     {
         public bool Deactivated { get; set; }
 
-        public Task<string> SayHello(string greeting)
-        {
-            return Task.FromResult("You said: '" + greeting + "', I say: Hello!");
-        }
+        public Task<string> SayHello(string greeting) => Task.FromResult("You said: '" + greeting + "', I say: Hello!");
 
-        public override Task OnDeactivateAsync()
+        public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
         {
             Deactivated = true;
 
-            return Task.CompletedTask;
+            return base.OnDeactivateAsync(reason, cancellationToken);
         }
     }
 }

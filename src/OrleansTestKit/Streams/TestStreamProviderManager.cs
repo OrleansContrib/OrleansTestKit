@@ -35,10 +35,10 @@ namespace Orleans.TestKit.Streams
             return Add(name);
         }
 
-        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace, string providerName)
+        public TestStream<T> AddStreamProbe<T>(StreamId streamId, string providerName)
         {
             var provider = GetOrAdd(providerName);
-            return provider.AddStreamProbe<T>(streamId, streamNamespace);
+            return provider.AddStreamProbe<T>(streamId);
         }
 
         private TestStreamProvider GetOrAdd(string name) =>

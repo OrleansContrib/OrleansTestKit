@@ -8,8 +8,7 @@ using Orleans.Timers;
 
 namespace Orleans.TestKit.Reminders
 {
-    public sealed class TestReminderRegistry :
-        IReminderRegistry
+    public sealed class TestReminderRegistry : IReminderRegistry
     {
         private IRemindable _grain;
 
@@ -20,44 +19,44 @@ namespace Orleans.TestKit.Reminders
 
         public Mock<IReminderRegistry> Mock { get; } = new Mock<IReminderRegistry>();
 
-        public async Task<IGrainReminder> GetReminder(string reminderName)
+        public async Task<IGrainReminder> GetReminder(GrainId callingGrainId, string reminderName)
         {
             if (reminderName == null)
             {
                 throw new ArgumentNullException(nameof(reminderName));
             }
 
-            await Mock.Object.GetReminder(reminderName).ConfigureAwait(false);
+            await Mock.Object.GetReminder(callingGrainId, reminderName).ConfigureAwait(false);
             return !_reminders.TryGetValue(reminderName, out var reminder) ? null : reminder;
         }
 
-        public async Task<List<IGrainReminder>> GetReminders()
+        public async Task<List<IGrainReminder>> GetReminders(GrainId callingGrainId)
         {
-            await Mock.Object.GetReminders().ConfigureAwait(false);
+            await Mock.Object.GetReminders(callingGrainId).ConfigureAwait(false);
             return _reminders.Values.ToList<IGrainReminder>();
         }
 
-        public async Task<IGrainReminder> RegisterOrUpdateReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
+        public async Task<IGrainReminder> RegisterOrUpdateReminder(GrainId callingGrainId, string reminderName, TimeSpan dueTime, TimeSpan period)
         {
             if (reminderName == null)
             {
                 throw new ArgumentNullException(nameof(reminderName));
             }
 
-            await Mock.Object.RegisterOrUpdateReminder(reminderName, dueTime, period).ConfigureAwait(false);
+            await Mock.Object.RegisterOrUpdateReminder(callingGrainId, reminderName, dueTime, period).ConfigureAwait(false);
             var reminder = new TestReminder(reminderName, dueTime, period);
             _reminders[reminderName] = reminder;
             return reminder;
         }
 
-        public async Task UnregisterReminder(IGrainReminder reminder)
+        public async Task UnregisterReminder(GrainId callingGrainId, IGrainReminder reminder)
         {
             if (reminder == null)
             {
                 throw new ArgumentNullException(nameof(reminder));
             }
 
-            await Mock.Object.UnregisterReminder(reminder).ConfigureAwait(false);
+            await Mock.Object.UnregisterReminder(callingGrainId, reminder).ConfigureAwait(false);
             _reminders.Remove(reminder.ReminderName);
         }
 

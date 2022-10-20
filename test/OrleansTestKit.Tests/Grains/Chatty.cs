@@ -19,7 +19,8 @@ namespace TestGrains
 
         public async Task SendChat(string msg)
         {
-            var provider = GetStreamProvider("Default");
+
+            var provider = this.GetStreamProvider("Default");
 
             var stream = provider.GetStream<ChatMessage>(Guid.Empty, null);
 
@@ -28,7 +29,7 @@ namespace TestGrains
 
         public async Task SendChatBatch(params string[] chats)
         {
-            var provider = GetStreamProvider("Default");
+            var provider = this.GetStreamProvider("Default");
 
             var stream = provider.GetStream<ChatMessage>(Guid.Empty, null);
 
@@ -37,7 +38,7 @@ namespace TestGrains
 
         public async Task Subscribe()
         {
-            var provider = GetStreamProvider("Default");
+            var provider = this.GetStreamProvider("Default");
             var stream = provider.GetStream<(string Message, int Id)>(Guid.Empty, null);
             _subscription = await stream.SubscribeAsync(async (item, _) =>
             {

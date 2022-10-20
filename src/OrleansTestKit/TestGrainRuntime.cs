@@ -37,7 +37,7 @@ namespace Orleans.TestKit
 
         public ITimerRegistry TimerRegistry { get; }
 
-        public void DeactivateOnIdle(Grain grain)
+        public void DeactivateOnIdle(IGrainContext grain)
         {
             if (grain == null)
             {
@@ -47,7 +47,7 @@ namespace Orleans.TestKit
             Mock.Object.DeactivateOnIdle(grain);
         }
 
-        public void DelayDeactivation(Grain grain, TimeSpan timeSpan)
+        public void DelayDeactivation(IGrainContext grain, TimeSpan timeSpan)
         {
             if (grain == null)
             {
@@ -57,7 +57,7 @@ namespace Orleans.TestKit
             Mock.Object.DelayDeactivation(grain, timeSpan);
         }
 
-        public IStorage<TGrainState> GetStorage<TGrainState>(Grain grain) =>
+        public IStorage<TGrainState> GetStorage<TGrainState>(IGrainContext grain) =>
             _storageManager.GetStorage<TGrainState>();
     }
 }

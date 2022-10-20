@@ -1,4 +1,5 @@
 ﻿using System;
+using Orleans.Runtime;
 using Orleans.TestKit.Streams;
 
 namespace Orleans.TestKit
@@ -26,7 +27,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(providerName));
             }
 
-            return silo.StreamProviderManager.AddStreamProbe<T>(id, streamNamespace, providerName);
+            return silo.StreamProviderManager.AddStreamProbe<T>(StreamId.Create(streamNamespace, id), providerName);
         }
     }
 }

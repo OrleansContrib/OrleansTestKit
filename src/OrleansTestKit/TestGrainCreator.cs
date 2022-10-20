@@ -6,7 +6,7 @@ namespace Orleans.TestKit
 {
     public sealed class TestGrainCreator
     {
-        private readonly IGrainActivator _activator;
+        private readonly GrainContextActivator _activator;
 
         private readonly FieldInfo _identityField;
 
@@ -14,15 +14,15 @@ namespace Orleans.TestKit
 
         private readonly PropertyInfo _runtimeProperty;
 
-        public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
+        public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider, GrainContextActivator contextActivator)
         {
             _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
-            _activator = new DefaultGrainActivator(serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)));
+            _activator =  new DefaultGrainActivator(serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider)));
             _identityField = typeof(Grain).GetField("Identity", BindingFlags.Instance | BindingFlags.NonPublic);
             _runtimeProperty = typeof(Grain).GetProperty("Runtime", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        public Grain CreateGrainInstance(IGrainActivationContext context)
+        public Grain CreateGrainInstance(IGrainContext context)
         {
             if (context == null)
             {
@@ -38,7 +38,7 @@ namespace Orleans.TestKit
             //when creating new grains. It is messier but easier than trying to wrangle the values
             //in via a constructor which may or may exist on types inheriting from Grain.
             _runtimeProperty.SetValue(grain, _runtime);
-            _identityField.SetValue(grain, context.GrainIdentity);
+            _identityField.SetValue(grain, context.GrainId);
 
             return grain;
         }
