@@ -11,9 +11,9 @@ namespace Orleans.TestKit.Timers
     public sealed class TestTimerRegistry :
         ITimerRegistry
     {
-        private readonly List<TestTimer> _timers = new List<TestTimer>();
+        private readonly List<TestTimer> _timers = new();
 
-        public Mock<ITimerRegistry> Mock { get; } = new Mock<ITimerRegistry>();
+        public Mock<ITimerRegistry> Mock { get; } = new();
 
 
         public IDisposable RegisterTimer(IGrainContext grainContext, Func<object, Task> asyncCallback, object state, TimeSpan dueTime, TimeSpan period)

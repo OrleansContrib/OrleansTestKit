@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Castle.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Configuration;
+using Orleans.Core;
 using Orleans.Runtime;
 using Orleans.TestKit.Storage;
 
@@ -26,16 +28,51 @@ namespace Orleans.TestKit
 
         public Grain CreateGrainInstance<T>(IGrainContext context)
         {
-            if (context == null)
-            {
+            if (context == null) {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var factory = ActivatorUtilities.CreateFactory(typeof(T),Array.Empty<Type>());
+            var constructors = typeof(T).GetConstructors();
+            var states = new List<object>();
+            var types = new List<Type>();
 
-            var grain = (Grain)factory.Invoke(_serviceProvider,null);
+            foreach (var constructor in constructors)
+            {
+                var parameters = constructor.GetParameters();
 
+                foreach (var parameter in parameters)
+                {
+                    var interfaces = parameter.ParameterType.GetInterfaces();
+
+                    foreach (var interf in interfaces)
+                    {
+                        if (interf.IsGenericType && interf.GetGenericTypeDefinition() == typeof(IStorage<>))
+                        {
+                            var stateType = parameter.ParameterType.GenericTypeArguments[0];
+                            var storageType = typeof(TestStorage<>).MakeGenericType(stateType);
+
+                            try
+                            {
+                                var state = Activator.CreateInstance(stateType);
+                                var storage = Activator.CreateInstance(storageType, state);
+                                states.Add(storage);
+                                types.Add(parameter.ParameterType);
+                            }
+                            catch(Exception ex)
+                            {
+                                throw new NotSupportedException($"Could not invoke State {nameof(stateType)}", ex);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            var factory = ActivatorUtilities.CreateFactory(typeof(T),types.ToArray());
+            var grain = (Grain)factory.Invoke(_serviceProvider,states.ToArray());
             var participant = grain as ILifecycleParticipant<IGrainLifecycle>;
+
             participant?.Participate(context.ObservableLifecycle);
 
             //Set the runtime and identity. This is equivalent to what Orleans' GrainCreator does
@@ -45,29 +82,29 @@ namespace Orleans.TestKit
             runtimeBackfield.SetValue(grain, _runtime);
             _contextProperty.SetValue(grain, context);
 
-            var baseType = typeof(T).BaseType;
+            // var baseType = typeof(T).BaseType;
 
-            if(baseType.BaseType == typeof(Grain) && baseType.GenericTypeArguments.Length == 1)
-            {
-                var stateType = baseType.GenericTypeArguments[0];
-                var storageType = typeof(TestStorage<>).MakeGenericType(stateType);
-                var storageField = baseType.GetField("storage", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                if(storageField != null)
-                {
-                    try
-                    {
-                        var state = Activator.CreateInstance(stateType);
-                        var storage = Activator.CreateInstance(storageType, state);
-                        storageField.SetValue(grain, storage);
-                    }
-                    catch(Exception ex)
-                    {
-                        throw new NotSupportedException($"Could not invoke State {nameof(stateType)}", ex);
-                    }
-
-                }
-            }
+            // if(baseType.BaseType == typeof(Grain) && baseType.GenericTypeArguments.Length == 1)
+            // {
+            //     var stateType = baseType.GenericTypeArguments[0];
+            //     var storageType = typeof(TestStorage<>).MakeGenericType(stateType);
+            //     var storageField = baseType.GetField("storage", BindingFlags.Instance | BindingFlags.NonPublic);
+            //
+            //     if(storageField != null)
+            //     {
+            //         try
+            //         {
+            //             var state = Activator.CreateInstance(stateType);
+            //             var storage = Activator.CreateInstance(storageType, state);
+            //             storageField.SetValue(grain, storage);
+            //         }
+            //         catch(Exception ex)
+            //         {
+            //             throw new NotSupportedException($"Could not invoke State {nameof(stateType)}", ex);
+            //         }
+            //
+            //     }
+            // }
 
             return grain;
         }

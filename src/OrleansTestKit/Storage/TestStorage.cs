@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Orleans.Core;
+using Orleans.Runtime;
 
 namespace Orleans.TestKit.Storage
 {
     internal class TestStorage<TState> :
         IStorageStats,
-        IStorage<TState>
+        IStorage<TState>,
+        IPersistentState<TState>
     {
         public TestStorage()
         {

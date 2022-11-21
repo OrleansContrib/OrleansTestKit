@@ -78,7 +78,7 @@ namespace Orleans.TestKit.Tests
             var grain = (Grain)await Silo.CreateGrainAsync<HelloTimers>(0);
             var initialActiveTimers = Silo.TimerRegistry.NumberOfActiveTimers;
 
-            var newTimer = Silo.TimerRegistry.RegisterTimer(grain, _ => Task.CompletedTask, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            var newTimer = Silo.TimerRegistry.RegisterTimer(((IGrainBase)grain).GrainContext, _ => Task.CompletedTask, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
             Assert.Equal(initialActiveTimers + 1, Silo.TimerRegistry.NumberOfActiveTimers);
 

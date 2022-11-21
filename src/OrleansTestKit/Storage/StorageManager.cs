@@ -32,10 +32,5 @@ namespace Orleans.TestKit.Storage
                 return stats?.Stats;
             }
         }
-
-        [Obsolete("Use StorageStats property")]
-        [SuppressMessage("Design", "CA1024:Use properties where appropriate", Justification = "Keeping for backwards compatibility.")]
-        public TestStorageStats GetStorageStats() =>
-            StorageStats;
     }
 }
