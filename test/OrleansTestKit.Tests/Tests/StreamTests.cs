@@ -228,7 +228,7 @@ namespace Orleans.TestKit.Tests
                 handle.ProviderName.Should().Be("Default");
                 handle.HandleId.Should().NotBeEmpty();
                 handle.StreamId.Should().NotBeNull();
-                handle.StreamId.Namespace.Should().BeNull();
+                handle.StreamId.Namespace.Should().NotBeNull();
             }
 
             await handlers[0].UnsubscribeAsync();

@@ -42,7 +42,7 @@ namespace TestGrains
             }
             else
             {
-                var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty, null);
+                var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty);
                 _persistentState.State.ChatMessageStreamSubscriptionHandle = await stream.SubscribeAsync(ChatMessageHandler);
                 await _persistentState.WriteStateAsync();
             }

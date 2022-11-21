@@ -12,7 +12,6 @@ namespace Orleans.TestKit
     {
 
         private readonly PropertyInfo _contextProperty;
-
         private readonly IGrainRuntime _runtime;
         private readonly IServiceProvider _serviceProvider;
         private readonly PropertyInfo _runtimeProperty;
@@ -52,7 +51,6 @@ namespace Orleans.TestKit
             {
                 var stateType = baseType.GenericTypeArguments[0];
                 var storageType = typeof(TestStorage<>).MakeGenericType(stateType);
-
                 var storageField = baseType.GetField("storage", BindingFlags.Instance | BindingFlags.NonPublic);
 
                 if(storageField != null)
@@ -67,7 +65,7 @@ namespace Orleans.TestKit
                     {
                         throw new NotSupportedException($"Could not invoke State {nameof(stateType)}", ex);
                     }
-                   
+
                 }
             }
 

@@ -13,7 +13,7 @@ namespace TestGrains
 
         public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty, null);
+            var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty);
 
             stream.SubscribeAsync((data, token) =>
             {

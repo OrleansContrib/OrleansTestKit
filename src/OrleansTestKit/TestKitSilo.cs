@@ -104,34 +104,31 @@ namespace Orleans.TestKit
             CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id, keyExtension));
 
         private async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default) where T : Grain {
-            if (_isGrainCreated)
-            {
+            if (_isGrainCreated) {
                 throw new Exception(
                     "A grain has already been created in this silo. Only 1 grain per test silo should ever be created. Add grain probes for supporting grains.");
             }
 
             _isGrainCreated = true;
-            Grain grain;
             var grainContext = new TestGrainActivationContext
             {
                 GrainId = GrainId.Create(new GrainType(identity), identity),
                 ActivationServices = ServiceProvider,
                 // GrainIdentity = identity,
                 GrainType = typeof(T),
-                ObservableLifecycle = _grainLifecycle,
+                ObservableLifecycle = _grainLifecycle
             };
 
             //Create a stateless grain
-            grain = _grainCreator.CreateGrainInstance<T>(grainContext);
-            if (grain == null)
+            var grain = _grainCreator.CreateGrainInstance<T>(grainContext);
+            switch (grain)
             {
-                throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
-            }
-
-            //Check if there are any reminders for this grain and set the reminder target
-            if (grain is IRemindable remindable)
-            {
-                ReminderRegistry.SetGrainTarget(remindable);
+                case null:
+                    throw new Exception($"Unable to instantiate grain {typeof(T)} properly");
+                //Check if there are any reminders for this grain and set the reminder target
+                case IRemindable remindable:
+                    ReminderRegistry.SetGrainTarget(remindable);
+                    break;
             }
 
             //Trigger the lifecycle hook that will get the grain's state from the runtime

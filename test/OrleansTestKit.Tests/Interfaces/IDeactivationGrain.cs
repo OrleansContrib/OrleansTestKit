@@ -6,8 +6,8 @@ namespace TestInterfaces
 {
     public interface IDeactivationGrain : IGrainWithIntegerKey
     {
-        Task DeactivateOnIdle();
+        public Task DeactivateOnIdle();
 
-        Task DelayDeactivation(TimeSpan timeSpan);
+        public Task DelayDeactivation(TimeSpan timeSpan);
     }
 }

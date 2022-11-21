@@ -12,12 +12,12 @@ namespace Orleans.TestKit.Reminders
     {
         private IRemindable _grain;
 
-        private readonly Dictionary<string, TestReminder> _reminders = new Dictionary<string, TestReminder>();
+        private readonly Dictionary<string, TestReminder> _reminders = new();
 
         internal void SetGrainTarget(IRemindable grain) =>
             _grain = grain ?? throw new ArgumentNullException(nameof(grain));
 
-        public Mock<IReminderRegistry> Mock { get; } = new Mock<IReminderRegistry>();
+        public Mock<IReminderRegistry> Mock { get; } = new();
 
         public async Task<IGrainReminder> GetReminder(GrainId callingGrainId, string reminderName)
         {
@@ -26,13 +26,13 @@ namespace Orleans.TestKit.Reminders
                 throw new ArgumentNullException(nameof(reminderName));
             }
 
-            await Mock.Object.GetReminder(callingGrainId, reminderName).ConfigureAwait(false);
+            await Mock.Object.GetReminder(callingGrainId, reminderName);
             return !_reminders.TryGetValue(reminderName, out var reminder) ? null : reminder;
         }
 
         public async Task<List<IGrainReminder>> GetReminders(GrainId callingGrainId)
         {
-            await Mock.Object.GetReminders(callingGrainId).ConfigureAwait(false);
+            await Mock.Object.GetReminders(callingGrainId);
             return _reminders.Values.ToList<IGrainReminder>();
         }
 
@@ -43,7 +43,7 @@ namespace Orleans.TestKit.Reminders
                 throw new ArgumentNullException(nameof(reminderName));
             }
 
-            await Mock.Object.RegisterOrUpdateReminder(callingGrainId, reminderName, dueTime, period).ConfigureAwait(false);
+            await Mock.Object.RegisterOrUpdateReminder(callingGrainId, reminderName, dueTime, period);
             var reminder = new TestReminder(reminderName, dueTime, period);
             _reminders[reminderName] = reminder;
             return reminder;
@@ -56,7 +56,7 @@ namespace Orleans.TestKit.Reminders
                 throw new ArgumentNullException(nameof(reminder));
             }
 
-            await Mock.Object.UnregisterReminder(callingGrainId, reminder).ConfigureAwait(false);
+            await Mock.Object.UnregisterReminder(callingGrainId, reminder);
             _reminders.Remove(reminder.ReminderName);
         }
 
@@ -79,7 +79,7 @@ namespace Orleans.TestKit.Reminders
         {
             foreach (var reminderName in _reminders.Keys)
             {
-                await _grain.ReceiveReminder(reminderName, tickStatus).ConfigureAwait(false);
+                await _grain.ReceiveReminder(reminderName, tickStatus);
             }
         }
     }

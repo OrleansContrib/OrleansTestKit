@@ -7,14 +7,13 @@ namespace TestGrains
 {
     public class DeactivationGrain : Grain, IDeactivationGrain
     {
-        public new Task DeactivateOnIdle()
-        {
+        public Task DeactivateOnIdle() {
             base.DeactivateOnIdle();
 
             return Task.CompletedTask;
         }
 
-        public new Task DelayDeactivation(TimeSpan timeSpan)
+        public Task DelayDeactivation(TimeSpan timeSpan)
         {
             base.DelayDeactivation(timeSpan);
 
