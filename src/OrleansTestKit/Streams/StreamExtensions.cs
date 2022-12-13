@@ -15,6 +15,7 @@ namespace Orleans.TestKit
         public static TestStream<T> AddStreamProbe<T>(this TestKitSilo silo, Guid id, string streamNamespace) =>
             AddStreamProbe<T>(silo, id, streamNamespace, "Default");
 
+
         public static TestStream<T> AddStreamProbe<T>(this TestKitSilo silo, Guid id, string streamNamespace, string providerName)
         {
             if (silo == null)
@@ -27,7 +28,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(providerName));
             }
 
-            return silo.StreamProviderManager.AddStreamProbe<T>(StreamId.Create(streamNamespace, id), providerName);
+            return silo.StreamProviderManager.AddStreamProbe<T>(id, streamNamespace, providerName);
         }
     }
 }
