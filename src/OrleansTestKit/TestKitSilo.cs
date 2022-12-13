@@ -13,6 +13,7 @@ using Orleans.TestKit.Services;
 using Orleans.TestKit.Storage;
 using Orleans.TestKit.Streams;
 using Orleans.TestKit.Timers;
+using Orleans.Timers;
 
 namespace Orleans.TestKit
 {
@@ -42,6 +43,7 @@ namespace Orleans.TestKit
             ReminderRegistry = new TestReminderRegistry();
             StreamProviderManager = new TestStreamProviderManager(Options);
             ServiceProvider.AddService<IKeyedServiceCollection<string, IStreamProvider>>(StreamProviderManager);
+            ServiceProvider.AddService<IReminderRegistry>(ReminderRegistry);
             _grainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider,
                 StorageManager);
             _grainCreator = new TestGrainCreator(_grainRuntime, ServiceProvider);
@@ -131,6 +133,8 @@ namespace Orleans.TestKit
                     break;
             }
 
+          
+
             //Trigger the lifecycle hook that will get the grain's state from the runtime
             await _grainLifecycle.TriggerStartAsync().ConfigureAwait(false);
 
@@ -138,9 +142,21 @@ namespace Orleans.TestKit
             // not all Grains implement ILifecycle anymore
             if (grain is IGrainBase)
             {
+                // Used to enable reminder context on during activate
+                IDisposable? reminderContext = null;
+
+                if (grain is IRemindable)
+                {
+                    reminderContext = await GetReminderActivationContext(grain, cancellation).ConfigureAwait(false);
+                }
+
                 await grain.OnActivateAsync(cancellation).ConfigureAwait(false);
                 _activatedGrains.Add(grain);
+
+                reminderContext?.Dispose();
             }
+
+          
 
             return grain as T;
         }
@@ -150,10 +166,57 @@ namespace Orleans.TestKit
             _grainRuntime.Mock.Verify(expression, times);
         }
 
+        public async Task<IDisposable> GetReminderActivationContext(Grain grain, CancellationToken token = default)
+        {
+            var handler = new ReminderContextHandler();
+
+            try
+            {
+                await handler.SetActivationContext(GetContextFromGrain(grain), token).ConfigureAwait(false);
+            }
+            catch // Release Thread to avoid Deadlocks when an Exception happens
+            {
+                handler.Dispose();
+                throw;
+            }
+
+            return handler;
+        }
+
+        
+
+        /// <summary>
+        /// Fetches Grain Context
+        /// </summary>
+        /// <param name="grain">Grain to fetch Context from</param>
+        /// <returns><see cref="IGrainContext"/></returns>
+        /// <exception cref="NotSupportedException">Grain does not derive from <see cref="IGrainBase"/></exception>
+        public IGrainContext GetContextFromGrain(Grain grain)
+        {
+            if(grain is IGrainBase grainbase) {
+                return grainbase.GrainContext;
+            }
+            else
+            {
+                throw new NotSupportedException($"Current Grain does not derive from {nameof(IGrainBase)} can therefore not fetch " +
+                    $"{nameof(IGrainContext)}");
+            }
+        }
+
+        /// <summary>
+        /// Fetches <see cref="GrainId"/> from current Grain
+        /// </summary>
+        /// <param name="grain">Grain to fetch Grain Id</param>
+        /// <returns><see cref="GrainId"/></returns>
+        public GrainId GetGrainId(Grain grain) => GrainId.Parse(grain.IdentityString);
+
+
         /// <summary>
         /// Deactivate the given <see cref="Grain"/>
         /// </summary>
         /// <param name="grain">Grain to Deactivate</param>
+        /// <param name="deactivationReason">Reason which will passed to the Grian <seealso cref="DeactivationReason"/></param>
+        /// <param name="cancellationToken">Token which will passed to the grain</param>
         public async Task DeactivateAsync(Grain grain,DeactivationReason? deactivationReason = null, CancellationToken cancellationToken = default)
         {
             if (grain == null)
