@@ -17,8 +17,9 @@ namespace Orleans.TestKit.Tests
             // Act
             await grain.DeactivateOnIdle();
 
+            var context = Silo.GetContextFromGrain(grain);
             // Assert
-            Silo.VerifyRuntime(i => i.DeactivateOnIdle(grain), Times.Once);
+            Silo.VerifyRuntime(i => i.DeactivateOnIdle(context), Times.Once);
         }
 
         [Fact]
@@ -31,8 +32,10 @@ namespace Orleans.TestKit.Tests
             // Act
             await grain.DelayDeactivation(timeSpan);
 
+            var context = Silo.GetContextFromGrain(grain);
+
             // Assert
-            Silo.VerifyRuntime(i => i.DelayDeactivation(grain, timeSpan), Times.Once);
+            Silo.VerifyRuntime(i => i.DelayDeactivation(context,timeSpan), Times.Once);
         }
     }
 }

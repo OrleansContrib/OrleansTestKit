@@ -31,8 +31,8 @@ namespace Orleans.TestKit.Tests
             var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
             var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
-            
-            var msgs = new[] {"Hello Chat", "Goodbye Chat"};
+
+            var msgs = new[] { "Hello Chat", "Goodbye Chat" };
 
             await chatty.SendChatBatch(msgs);
 
@@ -54,8 +54,8 @@ namespace Orleans.TestKit.Tests
                 .Throws<Exception>();
 
             await stream.SubscribeAsync(mockObserver.Object);
-            
-            var msgs = new[] {"Hello Chat", "Goodbye Chat"};
+
+            var msgs = new[] { "Hello Chat", "Goodbye Chat" };
 
             await Assert.ThrowsAsync<AggregateException>(() => chatty.SendChatBatch(msgs));
 
@@ -227,8 +227,8 @@ namespace Orleans.TestKit.Tests
             {
                 handle.ProviderName.Should().Be("Default");
                 handle.HandleId.Should().NotBeEmpty();
-                handle.StreamIdentity.Should().NotBeNull();
-                handle.StreamIdentity.Namespace.Should().BeNull();
+                handle.StreamId.Should().NotBeNull();
+                handle.StreamId.Namespace.Should().NotBeNull();
             }
 
             await handlers[0].UnsubscribeAsync();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Orleans.Runtime;
 using Orleans.Streams;
+using Orleans.TestKit.Timers;
 
 namespace Orleans.TestKit.Streams
 {
@@ -35,10 +36,13 @@ namespace Orleans.TestKit.Streams
             return Add(name);
         }
 
-        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace, string providerName)
+        public TestStream<T> AddStreamProbe<T>(Guid streamId, string ns, string providerName) =>
+            AddStreamProbe<T>(StreamId.Create(ns, streamId), providerName);
+
+        public TestStream<T> AddStreamProbe<T>(StreamId streamId, string providerName)
         {
             var provider = GetOrAdd(providerName);
-            return provider.AddStreamProbe<T>(streamId, streamNamespace);
+            return provider.AddStreamProbe<T>(streamId);
         }
 
         private TestStreamProvider GetOrAdd(string name) =>

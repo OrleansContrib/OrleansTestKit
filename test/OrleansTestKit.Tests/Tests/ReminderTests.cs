@@ -20,12 +20,16 @@ namespace Orleans.TestKit.Tests
             const string reminderName = "abc123";
             var due = TimeSpan.Zero;
             var period = TimeSpan.MaxValue;
+            var grainId = GrainIdKeyExtensions.CreateIntegerKey(0);
 
             // Act
-            await grain.RegisterReminder(reminderName, due, period);
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder(reminderName, due, period);
+            }
 
             // Assert
-            Silo.ReminderRegistry.Mock.Verify(x => x.RegisterOrUpdateReminder(reminderName, due, period));
+            Silo.ReminderRegistry.Mock.Verify(x => x.RegisterOrUpdateReminder(Silo.GetGrainId(grain), reminderName, due, period));
         }
 
         [Fact]
@@ -39,11 +43,15 @@ namespace Orleans.TestKit.Tests
             var period = TimeSpan.MaxValue;
 
             // Act
-            await grain.RegisterReminder(reminderName, due, period);
-            await grain.UnregisterReminder(reminderName);
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder(reminderName, due, period);
+                await grain.UnregisterReminder(reminderName);
+            }
+           
 
             // Assert
-            Silo.ReminderRegistry.Mock.Verify(x => x.UnregisterReminder(It.Is<IGrainReminder>(r => r.ReminderName == reminderName)));
+             Silo.ReminderRegistry.Mock.Verify(x => x.UnregisterReminder(Silo.GetGrainId(grain), It.Is<IGrainReminder>(r => r.ReminderName == reminderName)));
         }
 
         [Fact]
@@ -55,11 +63,15 @@ namespace Orleans.TestKit.Tests
             const string reminderName = "abc123";
             var due = TimeSpan.Zero;
             var period = TimeSpan.MaxValue;
-            await grain.RegisterReminder(reminderName, due, period);
-            await grain.UnregisterReminder(reminderName);
+           
 
             // Act
-            await Silo.FireAllReminders();
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder(reminderName, due, period);
+                await grain.UnregisterReminder(reminderName);
+                await Silo.FireAllReminders();
+            }
 
             // Assert
             grain.FiredReminders.Count.Should().Be(0);
@@ -74,11 +86,14 @@ namespace Orleans.TestKit.Tests
             const string reminderName1 = "abc123";
             const string reminderName2 = "123";
 
-            await grain.RegisterReminder(reminderName1, TimeSpan.Zero, TimeSpan.MaxValue);
-            await grain.RegisterReminder(reminderName2, TimeSpan.Zero, TimeSpan.MaxValue);
 
             // Act
-            await Silo.FireAllReminders();
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder(reminderName1, TimeSpan.Zero, TimeSpan.MaxValue);
+                await grain.RegisterReminder(reminderName2, TimeSpan.Zero, TimeSpan.MaxValue);
+                await Silo.FireAllReminders();
+            }
 
             // Assert
             grain.FiredReminders.Should().Contain(reminderName1);
@@ -94,10 +109,14 @@ namespace Orleans.TestKit.Tests
 
             const string reminderName = "abc123";
 
-            await grain.RegisterReminder(reminderName, TimeSpan.Zero, TimeSpan.MaxValue);
+         
 
             // Act
-            await Silo.FireReminder(reminderName);
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder(reminderName, TimeSpan.Zero, TimeSpan.MaxValue);
+                await Silo.FireAllReminders();
+            }
 
             // Assert
             grain.FiredReminders.Should().Contain(reminderName);
@@ -112,11 +131,15 @@ namespace Orleans.TestKit.Tests
 
             const string reminderName = "abc123";
 
-            await grain.RegisterReminder(reminderName, TimeSpan.Zero, TimeSpan.MaxValue);
-
+        
             // Act
-            await Silo.FireReminder(reminderName);
-            await Silo.FireReminder(reminderName);
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder(reminderName, TimeSpan.Zero, TimeSpan.MaxValue);
+                await Silo.FireReminder(reminderName);
+                await Silo.FireReminder(reminderName);
+            }
+           
 
             // Assert
             grain.FiredReminders.Should().Contain(reminderName);
@@ -128,11 +151,13 @@ namespace Orleans.TestKit.Tests
         {
             // Arrange
             var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
-
-            await grain.RegisterReminder("a", TimeSpan.Zero, TimeSpan.MaxValue);
+            Func<Task> f = async () => { await Silo.FireReminder("b"); };
 
             // Act
-            Func<Task> f = async () => { await Silo.FireReminder("b"); };
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.RegisterReminder("a", TimeSpan.Zero, TimeSpan.MaxValue);
+            }
 
             // Assert
             await f.Should().ThrowAsync<Exception>();
@@ -146,10 +171,14 @@ namespace Orleans.TestKit.Tests
             var grain = await Silo.CreateGrainAsync<HelloReminders>(0);
 
             // Act
-            await grain.UnregisterReminder("a");
+            using (await Silo.GetReminderActivationContext(grain))
+            {
+                await grain.UnregisterReminder("a");
+            }
+           
 
             // Assert
-            Silo.ReminderRegistry.Mock.Verify(v => v.GetReminder("a"), Times.Once);
+             Silo.ReminderRegistry.Mock.Verify(v => v.GetReminder(Silo.GetGrainId(grain), "a"), Times.Once);
         }
     }
 }

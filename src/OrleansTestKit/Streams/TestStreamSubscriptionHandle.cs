@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Orleans.Runtime;
 using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
@@ -12,13 +13,12 @@ namespace Orleans.TestKit.Streams
         private readonly Action<IAsyncObserver<T>> _onAttachingObserver;
         private readonly Action<IAsyncObserver<T>> _onDetachingObserver;
         private readonly Guid _handleId;
-        private readonly TestStreamId _streamIdentity;
+        private readonly StreamId _streamIdentity;
         private readonly string _providerName;
         private IAsyncObserver<T> _observer;
 
         public TestStreamSubscriptionHandle(
-            Guid streamId,
-            string streamNamespace,
+            StreamId streamId,
             string providerName,
             Action<IAsyncObserver<T>> unsubscribe,
             Action<IAsyncObserver<T>> onAttachingObserver = null,
@@ -29,7 +29,7 @@ namespace Orleans.TestKit.Streams
             _onDetachingObserver = onDetachingObserver;
 
             _handleId = Guid.NewGuid();
-            _streamIdentity = new TestStreamId(streamId, streamNamespace);
+            _streamIdentity = streamId;
             _providerName = providerName;
         }
 
@@ -50,7 +50,7 @@ namespace Orleans.TestKit.Streams
             }
         }
 
-        public override IStreamIdentity StreamIdentity
+        public override StreamId StreamId
         {
             get
             {

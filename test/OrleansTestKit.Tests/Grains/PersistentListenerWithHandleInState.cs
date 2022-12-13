@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Threading;
 using System.Threading.Tasks;
 using Orleans;
 using Orleans.Runtime;
@@ -17,7 +18,7 @@ namespace TestGrains
     public class PersistentListenerWithHandleInState : Grain, IListener
     {
         private readonly IPersistentState<PersistentListenerStateWithHandle> _persistentState;
-        
+
         public PersistentListenerWithHandleInState([PersistentState("listenerStateWithHandler")] IPersistentState<PersistentListenerStateWithHandle> persistentState)
         {
             _persistentState = persistentState;
@@ -33,7 +34,7 @@ namespace TestGrains
 
         public Task<int> ReceivedCount() => Task.FromResult(_persistentState.State.ReceivedCount);
 
-        public override async  Task OnActivateAsync()
+        public override async  Task OnActivateAsync(CancellationToken cancellationToken)
         {
             if (_persistentState.State.ChatMessageStreamSubscriptionHandle != null)
             {
@@ -41,12 +42,12 @@ namespace TestGrains
             }
             else
             {
-                var stream = GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty, null);
+                var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty);
                 _persistentState.State.ChatMessageStreamSubscriptionHandle = await stream.SubscribeAsync(ChatMessageHandler);
                 await _persistentState.WriteStateAsync();
             }
 
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Moq;
-using Orleans.Core;
+using Orleans;
+using Orleans.Runtime;
 
 namespace Orleans.TestKit
 {
@@ -14,7 +15,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
+            return silo.GrainFactory.AddProbe<T>(GrainIdKeyExtensions.CreateIntegerKey(id), classPrefix);
         }
 
         public static Mock<T> AddProbe<T>(this TestKitSilo silo, Guid id, string classPrefix = null)
@@ -25,7 +26,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
+            return silo.GrainFactory.AddProbe<T>(GrainIdKeyExtensions.CreateGuidKey(id), classPrefix);
         }
 
         public static Mock<T> AddProbe<T>(this TestKitSilo silo, long id, string keyExtension, string classPrefix = null)
@@ -36,7 +37,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id, keyExtension), classPrefix);
+            return silo.GrainFactory.AddProbe<T>(GrainIdKeyExtensions.CreateIntegerKey(id, keyExtension), classPrefix);
         }
 
         public static Mock<T> AddProbe<T>(this TestKitSilo silo, Guid id, string keyExtension, string classPrefix = null)
@@ -47,7 +48,7 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id, keyExtension), classPrefix);
+            return silo.GrainFactory.AddProbe<T>(GrainIdKeyExtensions.CreateGuidKey(id, keyExtension), classPrefix);
         }
 
         public static Mock<T> AddProbe<T>(this TestKitSilo silo, string id, string classPrefix = null)
@@ -58,10 +59,10 @@ namespace Orleans.TestKit
                 throw new ArgumentNullException(nameof(silo));
             }
 
-            return silo.GrainFactory.AddProbe<T>(new TestGrainIdentity(id), classPrefix);
+            return silo.GrainFactory.AddProbe<T>(IdSpan.Create(id), classPrefix);
         }
 
-        public static void AddProbe<T>(this TestKitSilo silo, Func<IGrainIdentity, IMock<T>> factory)
+        public static void AddProbe<T>(this TestKitSilo silo, Func<IdSpan, IMock<T>> factory)
             where T : class, IGrain
         {
             if (silo == null)
@@ -72,7 +73,7 @@ namespace Orleans.TestKit
             silo.GrainFactory.AddProbe(factory);
         }
 
-        public static void AddProbe<T>(this TestKitSilo silo, Func<IGrainIdentity, T> factory)
+        public static void AddProbe<T>(this TestKitSilo silo, Func<IdSpan, T> factory)
             where T : class, IGrain
         {
             if (silo == null)

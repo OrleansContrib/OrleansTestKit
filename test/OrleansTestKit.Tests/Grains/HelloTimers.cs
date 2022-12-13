@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Orleans;
 
@@ -11,13 +12,14 @@ namespace TestGrains
         private IDisposable _timer2;
         private IDisposable _secretTimer;
 
-        public override Task OnActivateAsync()
+
+        public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
             _timer0 = RegisterTimer(_ => OnTimer0(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             _timer1 = RegisterTimer(_ => OnTimer1(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
             _timer2 = RegisterTimer(_ => OnTimer2(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
-            return base.OnActivateAsync();
+            return base.OnActivateAsync(cancellationToken);
         }
 
         public Task RegisterSecretTimer()
@@ -26,12 +28,12 @@ namespace TestGrains
             return Task.CompletedTask;
         }
 
-        public override Task OnDeactivateAsync()
+        public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
         {
             _timer0.Dispose();
             _timer1.Dispose();
 
-            return base.OnDeactivateAsync();
+            return base.OnDeactivateAsync(reason, cancellationToken);
         }
 
         private Task OnTimer0()

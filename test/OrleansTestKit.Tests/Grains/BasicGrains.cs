@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Orleans;
+using Orleans.Runtime;
 using TestInterfaces;
 
 namespace TestGrains

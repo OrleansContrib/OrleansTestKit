@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Orleans;
 using TestInterfaces;
@@ -15,7 +16,7 @@ namespace TestGrains
     {
         private int _activationValue;
 
-        public override Task OnActivateAsync()
+        public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
             _activationValue = this.State.Value;
             return Task.CompletedTask;

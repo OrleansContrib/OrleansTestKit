@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Orleans;
 using Orleans.Runtime;
@@ -34,13 +35,13 @@ namespace TestGrains
                 await _persistentState.WriteStateAsync();
             };
 
-        public override async Task OnActivateAsync()
+        public override async Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            var stream = GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty, null);
+            var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty);
             var handlers = await stream.GetAllSubscriptionHandles();
 
             var chatMessageHandle = handlers.FirstOrDefault();
-            
+
             if (chatMessageHandle != null)
             {
                 await chatMessageHandle.ResumeAsync(ChatMessageHandler);
@@ -50,7 +51,7 @@ namespace TestGrains
                 await stream.SubscribeAsync(ChatMessageHandler);
             }
 
-            await base.OnActivateAsync();
+            await base.OnActivateAsync(cancellationToken);
         }
 
     }

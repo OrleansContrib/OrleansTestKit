@@ -24,6 +24,7 @@ namespace Orleans.TestKit.Tests
             _persistentState = new Mock<IPersistentState<PersistentListenerStateWithoutHandle>>();
             _persistentState.SetupGet(o => o.State).Returns(_stateWithoutHandle);
 
+
             var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
             mockMapper.Setup(o =>
                     o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>()))
