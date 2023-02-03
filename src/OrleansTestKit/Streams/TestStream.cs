@@ -4,14 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using Orleans.Runtime;
 using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
 {
     [SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
     [SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix")]
-    public sealed class TestStream<T> :
-        IAsyncStream<T>
+    public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     {
         private readonly List<IAsyncObserver<T>> _observers = new List<IAsyncObserver<T>>();
 
@@ -19,14 +19,13 @@ namespace Orleans.TestKit.Streams
 
         private readonly List<StreamSubscriptionHandle<T>> _handlers = new List<StreamSubscriptionHandle<T>>();
 
-        [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames")]
+        public bool IsRewindable => false;
+        public string ProviderName { get; }
+        public StreamId StreamId { get; }
+
         public Guid Guid { get; }
 
-        public bool IsRewindable => false;
-
         public string Namespace { get; }
-
-        public string ProviderName { get; }
 
         /// <summary>
         /// Number of times OneNextAsync was called
@@ -35,10 +34,9 @@ namespace Orleans.TestKit.Streams
 
         public int Subscribed => _observers.Count;
 
-        public TestStream(Guid streamId, string streamNamespace, string providerName)
+        public TestStream(StreamId streamId, string providerName)
         {
-            Guid = streamId;
-            Namespace = streamNamespace;
+            StreamId = streamId;
             ProviderName = providerName ?? throw new ArgumentNullException(nameof(providerName));
         }
 
@@ -81,8 +79,7 @@ namespace Orleans.TestKit.Streams
             TestStreamSubscriptionHandle<T> handle = null;
 
             handle = new TestStreamSubscriptionHandle<T>(
-                Guid,
-                Namespace,
+                StreamId,
                 ProviderName,
                 observer =>
                 {
@@ -103,11 +100,7 @@ namespace Orleans.TestKit.Streams
             return handle;
         }
 
-
-        public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer, StreamSequenceToken token,
-            StreamFilterPredicate filterFunc = null,
-            object filterData = null) =>
-            throw new NotImplementedException();
+        public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer, StreamSequenceToken token, string filterData = null) => throw new NotImplementedException();
 
         public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T> observer) =>
             throw new NotImplementedException();

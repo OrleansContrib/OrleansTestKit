@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Orleans;
 using TestInterfaces;
 
@@ -10,16 +11,16 @@ namespace TestGrains
 
         public int DeactivateCount { get; set; }
 
-        public override Task OnActivateAsync()
+        public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
             ActivateCount++;
-            return base.OnActivateAsync();
+            return base.OnActivateAsync(cancellationToken);
         }
 
-        public override Task OnDeactivateAsync()
+        public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
         {
             DeactivateCount++;
-            return base.OnDeactivateAsync();
+            return base.OnDeactivateAsync(reason, cancellationToken);
         }
     }
 }

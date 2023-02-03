@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Moq;
-using Orleans.Core;
 using Orleans.Runtime;
 
 namespace Orleans.TestKit
@@ -11,68 +9,55 @@ namespace Orleans.TestKit
         IGrainFactory
     {
         private readonly TestKitOptions _options;
-        private readonly Dictionary<Type, Func<IGrainIdentity, IGrain>> _probeFactories;
+        private readonly Dictionary<Type, Func<IdSpan, IGrain>> _probeFactories;
 
         private readonly Dictionary<string, IGrain> _probes;
 
         internal TestGrainFactory(TestKitOptions options)
         {
             _options = options;
-            _probeFactories = new Dictionary<Type, Func<IGrainIdentity, IGrain>>();
+            _probeFactories = new Dictionary<Type, Func<IdSpan, IGrain>>();
             _probes = new Dictionary<string, IGrain>();
         }
 
-        public void BindGrainReference(IAddressable grain) =>
-            throw new NotImplementedException();
 
-        public Task<TGrainObserverInterface> CreateObjectReference<TGrainObserverInterface>(IGrainObserver obj)
+        public TGrainObserverInterface CreateObjectReference<TGrainObserverInterface>(IGrainObserver obj)
             where TGrainObserverInterface : IGrainObserver =>
             throw new NotImplementedException();
 
-        public Task DeleteObjectReference<TGrainObserverInterface>(IGrainObserver obj)
+        public void DeleteObjectReference<TGrainObserverInterface>(IGrainObserver obj)
             where TGrainObserverInterface : IGrainObserver =>
             throw new NotImplementedException();
 
         public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string grainClassNamePrefix = null)
             where TGrainInterface : IGrainWithGuidKey =>
-            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
+            GetProbe<TGrainInterface>(GrainIdKeyExtensions.CreateGuidKey(primaryKey), grainClassNamePrefix);
 
         public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string grainClassNamePrefix = null)
             where TGrainInterface : IGrainWithIntegerKey =>
-            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
+            GetProbe<TGrainInterface>(GrainIdKeyExtensions.CreateIntegerKey(primaryKey), grainClassNamePrefix);
 
         public TGrainInterface GetGrain<TGrainInterface>(string primaryKey, string grainClassNamePrefix = null)
             where TGrainInterface : IGrainWithStringKey =>
-            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey), grainClassNamePrefix);
+            GetProbe<TGrainInterface>(IdSpan.Create(primaryKey), grainClassNamePrefix);
 
         public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string keyExtension,
             string grainClassNamePrefix = null)
             where TGrainInterface : IGrainWithGuidCompoundKey =>
-            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
+            GetProbe<TGrainInterface>( GrainIdKeyExtensions.CreateGuidKey(primaryKey, keyExtension), grainClassNamePrefix);
 
         public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string keyExtension,
             string grainClassNamePrefix = null)
             where TGrainInterface : IGrainWithIntegerCompoundKey =>
-            GetProbe<TGrainInterface>(new TestGrainIdentity(primaryKey, keyExtension), grainClassNamePrefix);
+            GetProbe<TGrainInterface>(GrainIdKeyExtensions.CreateIntegerKey(primaryKey, keyExtension), grainClassNamePrefix);
 
-        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, Guid grainPrimaryKey)
-            where TGrainInterface : IGrain =>
+        public TGrainInterface GetGrain<TGrainInterface>(GrainId grainId) where TGrainInterface : IAddressable =>
             throw new NotImplementedException();
 
-        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, long grainPrimaryKey)
-            where TGrainInterface : IGrain =>
+        public IAddressable GetGrain(GrainId grainId) =>
             throw new NotImplementedException();
 
-        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, string grainPrimaryKey)
-            where TGrainInterface : IGrain =>
-            throw new NotImplementedException();
-
-        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, Guid grainPrimaryKey, string keyExtension)
-            where TGrainInterface : IGrain =>
-            throw new NotImplementedException();
-
-        public TGrainInterface GetGrain<TGrainInterface>(Type grainInterfaceType, long grainPrimaryKey, string keyExtension)
-            where TGrainInterface : IGrain =>
+        public IAddressable GetGrain(GrainId grainId, GrainInterfaceType interfaceType) =>
             throw new NotImplementedException();
 
         public IGrain GetGrain(Type grainInterfaceType, Guid grainPrimaryKey) =>
@@ -90,7 +75,7 @@ namespace Orleans.TestKit
         public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey, string keyExtension) =>
             throw new NotImplementedException();
 
-        internal Mock<T> AddProbe<T>(IGrainIdentity identity, string classPrefix = null)
+        internal Mock<T> AddProbe<T>(IdSpan identity, string classPrefix = null)
             where T : class, IGrain
         {
             var key = GetKey(identity, typeof(T), classPrefix);
@@ -99,21 +84,21 @@ namespace Orleans.TestKit
             return mock;
         }
 
-        internal void AddProbe<T>(Func<IGrainIdentity, T> factory) where T : class, IGrain => _probeFactories.Add(typeof(T), factory);
+        internal void AddProbe<T>(Func<IdSpan, T> factory) where T : class, IGrain => _probeFactories.Add(typeof(T), factory);
 
-        internal void AddProbe<T>(Func<IGrainIdentity, IMock<T>> factory)
+        internal void AddProbe<T>(Func<IdSpan, IMock<T>> factory)
             where T : class, IGrain
         {
-            var adaptedFactory = new Func<IGrainIdentity, T>(grainIdentity => factory(grainIdentity)?.Object);
+            var adaptedFactory = new Func<IdSpan, T>(grainIdentity => factory(grainIdentity)?.Object);
             AddProbe<T>(adaptedFactory);
         }
 
-        private static string GetKey(IGrainIdentity identity, Type stateType, string classPrefix = null) =>
+        private static string GetKey(IdSpan identity, Type stateType, string classPrefix = null) =>
             classPrefix == null
-                ? $"{stateType.FullName}-{identity.IdentityString}"
-                : $"{stateType.FullName}-{classPrefix}-{identity.IdentityString}";
+                ? $"{stateType.FullName}-{identity}"
+                : $"{stateType.FullName}-{classPrefix}-{identity}";
 
-        private T GetProbe<T>(IGrainIdentity identity, string grainClassNamePrefix)
+        private T GetProbe<T>(IdSpan identity, string grainClassNamePrefix)
             where T : IGrain
         {
             var key = GetKey(identity, typeof(T), grainClassNamePrefix);
@@ -125,7 +110,7 @@ namespace Orleans.TestKit
             //If using strict grain probes, throw the exception
             if (_options.StrictGrainProbes)
             {
-                throw new Exception($"Probe {identity.IdentityString} does not exist for type {typeof(T).Name}. " +
+                throw new Exception($"Probe {identity} does not exist for type {typeof(T).Name}. " +
                     "Ensure that it is added before the grain is tested.");
             }
             else

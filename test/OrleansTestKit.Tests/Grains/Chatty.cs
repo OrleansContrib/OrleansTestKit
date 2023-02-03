@@ -19,26 +19,27 @@ namespace TestGrains
 
         public async Task SendChat(string msg)
         {
-            var provider = GetStreamProvider("Default");
 
-            var stream = provider.GetStream<ChatMessage>(Guid.Empty, null);
+            var provider = this.GetStreamProvider("Default");
+
+            var stream = provider.GetStream<ChatMessage>(Guid.Empty);
 
             await stream.OnNextAsync(new ChatMessage(msg));
         }
 
         public async Task SendChatBatch(params string[] chats)
         {
-            var provider = GetStreamProvider("Default");
+            var provider = this.GetStreamProvider("Default");
 
-            var stream = provider.GetStream<ChatMessage>(Guid.Empty, null);
+            var stream = provider.GetStream<ChatMessage>(Guid.Empty);
 
             await stream.OnNextBatchAsync(chats.Select(chat => new ChatMessage(chat)));
         }
 
         public async Task Subscribe()
         {
-            var provider = GetStreamProvider("Default");
-            var stream = provider.GetStream<(string Message, int Id)>(Guid.Empty, null);
+            var provider = this.GetStreamProvider("Default");
+            var stream = provider.GetStream<(string Message, int Id)>(Guid.Empty);
             _subscription = await stream.SubscribeAsync(async (item, _) =>
             {
                 _recievedMessage = item;

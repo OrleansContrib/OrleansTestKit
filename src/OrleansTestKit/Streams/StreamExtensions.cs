@@ -1,4 +1,5 @@
 ﻿using System;
+using Orleans.Runtime;
 using Orleans.TestKit.Streams;
 
 namespace Orleans.TestKit
@@ -13,6 +14,7 @@ namespace Orleans.TestKit
 
         public static TestStream<T> AddStreamProbe<T>(this TestKitSilo silo, Guid id, string streamNamespace) =>
             AddStreamProbe<T>(silo, id, streamNamespace, "Default");
+
 
         public static TestStream<T> AddStreamProbe<T>(this TestKitSilo silo, Guid id, string streamNamespace, string providerName)
         {

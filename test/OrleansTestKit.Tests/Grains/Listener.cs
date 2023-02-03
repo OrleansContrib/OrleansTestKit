@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Orleans;
 using Orleans.Streams;
@@ -10,9 +11,9 @@ namespace TestGrains
     {
         private int _receivedCount;
 
-        public override Task OnActivateAsync()
+        public override Task OnActivateAsync(CancellationToken cancellationToken)
         {
-            var stream = GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty, null);
+            var stream = this.GetStreamProvider("Default").GetStream<ChatMessage>(Guid.Empty);
 
             stream.SubscribeAsync((data, token) =>
             {
@@ -21,7 +22,7 @@ namespace TestGrains
                 return Task.CompletedTask;
             });
 
-            return base.OnActivateAsync();
+            return base.OnActivateAsync(cancellationToken);
         }
 
         public Task<int> ReceivedCount() => Task.FromResult(_receivedCount);

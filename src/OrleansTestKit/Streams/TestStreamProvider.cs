@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Orleans.Runtime;
 using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams
 {
-    public sealed class TestStreamProvider :
-        IStreamProvider
+    public sealed class TestStreamProvider : IStreamProvider
     {
         private readonly TestKitOptions _options;
 
-        private readonly Dictionary<TestStreamId, IStreamIdentity> _streams = new Dictionary<TestStreamId, IStreamIdentity>();
+        private readonly Dictionary<StreamId, IStreamIdentity> _streams = new();
 
         public TestStreamProvider(TestKitOptions options) =>
             _options = options ?? throw new ArgumentNullException(nameof(options));
@@ -19,20 +19,20 @@ namespace Orleans.TestKit.Streams
 
         public bool IsRewindable { get; }
 
-        public IAsyncStream<T> GetStream<T>(Guid streamId, string streamNamespace)
+        public IAsyncStream<T> GetStream<T>(StreamId streamId)
         {
-            if (_streams.TryGetValue(new TestStreamId(streamId, streamNamespace), out var stream))
+            if (_streams.TryGetValue(streamId, out var stream))
             {
-                return (IAsyncStream<T>)stream;
+                return stream as IAsyncStream<T>;
             }
 
             if (_options.StrictStreamProbes)
             {
-                throw new Exception($"Unable to find stream {streamId}-{streamNamespace}. Ensure a stream probe was added");
+                throw new Exception($"Unable to find stream {streamId}. Ensure a stream probe was added");
             }
 
-            stream = AddStreamProbe<T>(streamId, streamNamespace);
-            return (IAsyncStream<T>)stream;
+            stream = AddStreamProbe<T>(streamId);
+            return stream as IAsyncStream<T>;
         }
 
         public Task Init(string name)
@@ -41,11 +41,10 @@ namespace Orleans.TestKit.Streams
             return Task.CompletedTask;
         }
 
-        public TestStream<T> AddStreamProbe<T>(Guid streamId, string streamNamespace)
+        public TestStream<T> AddStreamProbe<T>(StreamId streamId)
         {
-            var id = new TestStreamId(streamId, streamNamespace);
-            var stream = new TestStream<T>(streamId, streamNamespace, Name);
-            _streams.Add(id, stream);
+            var stream = new TestStream<T>(streamId, Name);
+            _streams.Add(streamId, stream);
             return stream;
         }
     }

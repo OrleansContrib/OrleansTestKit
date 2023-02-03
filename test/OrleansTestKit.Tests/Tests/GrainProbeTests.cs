@@ -154,14 +154,14 @@ namespace Orleans.TestKit.Tests
 
             var firstUnknownGrain = new Mock<IUnknownGrain>();
             var secondUnknownGrain = new Mock<IUnknownGrain>();
-            var probeQueue = new Queue<Mock<IUnknownGrain>>(new [] {firstUnknownGrain, secondUnknownGrain});
+            var probeQueue = new Queue<Mock<IUnknownGrain>>(new[] { firstUnknownGrain, secondUnknownGrain });
 
             Silo.AddProbe<IUnknownGrain>(identity =>
             {
                 var nextProbe = probeQueue.Dequeue();
 
                 nextProbe.Setup(probe => probe.WhatsMyId())
-                    .ReturnsAsync(identity.PrimaryKeyString);
+                    .ReturnsAsync(identity.ToString);
 
                 return nextProbe;
             });
@@ -188,7 +188,7 @@ namespace Orleans.TestKit.Tests
                 var nextProbe = probeQueue.Dequeue();
 
                 A.CallTo(() => nextProbe.WhatsMyId())
-                    .Returns(identity.PrimaryKeyString);
+                    .Returns(identity.ToString());
 
                 return nextProbe;
             });
@@ -214,7 +214,7 @@ namespace Orleans.TestKit.Tests
             {
                 var nextProbe = probeQueue.Dequeue();
 
-                nextProbe.WhatsMyId().Returns(identity.PrimaryKeyString);
+                nextProbe.WhatsMyId().Returns(identity.ToString());
 
                 return nextProbe;
             });

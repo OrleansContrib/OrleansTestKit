@@ -8,10 +8,12 @@ namespace TestGrains
 {
     public class HelloReminders : Grain, IGrainWithIntegerKey, IRemindable
     {
-        public List<string> FiredReminders = new List<string>();
+        public readonly List<string> FiredReminders = new();
 
-        public Task RegisterReminder(string reminderName,TimeSpan dueTime, TimeSpan period) =>
-            this.RegisterOrUpdateReminder(reminderName, dueTime, period);
+        public Task RegisterReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
+        {
+            return this.RegisterOrUpdateReminder(reminderName, dueTime, period);
+        }
 
         Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
         {
