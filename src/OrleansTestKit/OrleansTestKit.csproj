@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <Authors>dsarfati,seniorquico</Authors>
-    <Copyright>Copyright © 2017-2021 Daniel Sarfati</Copyright>
+    <Copyright>Copyright © 2017-2021 Daniel Sarfati, 2021-2023 Kyle Dodson</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <PackageDescription>A unit test toolkit for Microsoft Orleans that does not require a real silo. Instead, tests are run with a mock silo.</PackageDescription>
@@ -15,7 +15,7 @@
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Version>3.1.8</Version>
+    <Version>3.1.9</Version>
   </PropertyGroup>
 
   <PropertyGroup>

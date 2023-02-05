@@ -29,10 +29,10 @@ jobs:
           name: Packages
           path: artifacts/Release/
       # TODO: Need to create CODECOV_TOKEN secret.
-      - name: Upload Code Coverage Results
-        env:
-          CI: "true"
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: |
-          dotnet tool restore --verbosity minimal
-          dotnet codecov --dump --file test/OrleansTestKit.Tests/coverage.opencover.xml --required
+      # - name: Upload Code Coverage Results
+      #   env:
+      #     CI: "true"
+      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      #   run: |
+      #     dotnet tool restore --verbosity minimal
+      #     dotnet codecov --dump --file test/OrleansTestKit.Tests/coverage.opencover.xml --required
