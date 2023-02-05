@@ -20,7 +20,7 @@ namespace Orleans.TestKit.Tests
             await Silo.FireAllTimersAsync();
 
             // Assert
-            var state = Silo.State<HelloTimersState>();
+            var state = Silo.State<HelloTimers, HelloTimersState>();
             state.Timer0Fired.Should().BeTrue();
             state.Timer1Fired.Should().BeTrue();
         }
@@ -37,7 +37,7 @@ namespace Orleans.TestKit.Tests
             await Silo.FireTimerAsync(0);
 
             // Assert
-            var state = Silo.State<HelloTimersState>();
+            var state = Silo.State<HelloTimers, HelloTimersState>();
             state.Timer0Fired.Should().BeTrue();
             state.Timer1Fired.Should().BeFalse();
         }
@@ -52,7 +52,7 @@ namespace Orleans.TestKit.Tests
             await Silo.FireTimerAsync(1);
 
             // Assert
-            var state = Silo.State<HelloTimersState>();
+            var state = Silo.State<HelloTimers, HelloTimersState>();
             state.Timer0Fired.Should().BeFalse();
             state.Timer1Fired.Should().BeTrue();
         }

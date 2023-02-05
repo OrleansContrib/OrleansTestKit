@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 using Orleans.Core;
 
 namespace Orleans.TestKit.Storage
@@ -8,34 +9,63 @@ namespace Orleans.TestKit.Storage
     {
         private readonly TestKitOptions _options;
 
-        private object _storage;
+        private readonly Dictionary<string, object> _storages = new();
 
-        public StorageManager(TestKitOptions options) =>
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-
-        public IStorage<TState> GetStorage<TState>()
+        public StorageManager(TestKitOptions options)
         {
-            if (_storage == null)
-            {
-                _storage = _options.StorageFactory?.Invoke(typeof(TState)) ?? new TestStorage<TState>();
-            }
-
-            return _storage as IStorage<TState>;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            StateAttributeFactoryMapper = new TestPersistentStateAttributeToFactoryMapper(this);
         }
 
-        public TestStorageStats StorageStats
+        internal TestPersistentStateAttributeToFactoryMapper StateAttributeFactoryMapper { get; }
+
+        public IStorage<TState> GetGrainStorage<TGrain, TState>() where TGrain : Grain<TState>
+            => GetStorage<TState>(typeof(TGrain).FullName);
+
+        public IStorage<TState> GetStorage<TState>(string stateName)
         {
-            get
+            if (string.IsNullOrWhiteSpace(stateName))
             {
-                //There should only be one state in here since there is only 1 grain under test
-                var stats = _storage as IStorageStats;
+                foreach (var kvp in _storages)
+                {
+                    if (kvp.Value is TestStorage<TState> typedStorage)
+                    {
+                        return typedStorage;
+                    }
+                }
+
+                throw new InvalidOperationException($"Unable to find any storage with type '{typeof(TState).FullName}'");
+            }
+
+            if (_storages.TryGetValue(stateName, out var storage) is false)
+            {
+                storage = _storages[stateName] = _options.StorageFactory?.Invoke(typeof(TState)) ?? new TestStorage<TState>();
+            }
+
+            return storage as IStorage<TState>;
+        }
+
+        public TestStorageStats GetStorageStats<TGrain, TState>() where TGrain : Grain<TState>
+            => GetStorageStats(typeof(TGrain).FullName);
+
+        public TestStorageStats GetStorageStats(string stateName)
+        {
+            var normalisedStateName = stateName ?? "Default";
+
+            if (_storages.TryGetValue(normalisedStateName, out var storage))
+            {
+                var stats = storage as IStorageStats;
                 return stats?.Stats;
             }
+
+            return null;
         }
 
-        [Obsolete("Use StorageStats property")]
-        [SuppressMessage("Design", "CA1024:Use properties where appropriate", Justification = "Keeping for backwards compatibility.")]
-        public TestStorageStats GetStorageStats() =>
-            StorageStats;
+        internal void AddStorage<TState>(IStorage<TState> storage, string stateName = default)
+        {
+            var normalisedStateName = stateName ?? "Default";
+
+            _storages[normalisedStateName] = storage;
+        }
     }
 }

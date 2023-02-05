@@ -14,22 +14,14 @@ namespace Orleans.TestKit.Tests
     {
 
         private readonly PersistentListenerStateWithoutHandle _stateWithoutHandle;
-        private readonly Mock<IPersistentState<PersistentListenerStateWithoutHandle>> _persistentState;
         private readonly TestStream<ChatMessage> _stream;
 
         public PersistantStreamNotWithinGrainStateTests()
         {
             _stateWithoutHandle = new PersistentListenerStateWithoutHandle();
 
-            _persistentState = new Mock<IPersistentState<PersistentListenerStateWithoutHandle>>();
-            _persistentState.SetupGet(o => o.State).Returns(_stateWithoutHandle);
-
-            var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-            mockMapper.Setup(o =>
-                    o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>()))
-                .Returns(context => _persistentState.Object);
-
-            Silo.AddService(mockMapper.Object);
+            Silo.AddPersistentState(
+                "listenerStateWithoutHandler", state: _stateWithoutHandle);
 
             _stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null, "Default");
         }

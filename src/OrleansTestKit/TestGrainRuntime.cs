@@ -57,7 +57,7 @@ namespace Orleans.TestKit
             Mock.Object.DelayDeactivation(grain, timeSpan);
         }
 
-        public IStorage<TGrainState> GetStorage<TGrainState>(Grain grain) =>
-            _storageManager.GetStorage<TGrainState>();
+        public IStorage<TGrainState> GetStorage<TGrainState>(Grain grain)
+            => _storageManager.GetStorage<TGrainState>(grain.GetType().FullName);
     }
 }
