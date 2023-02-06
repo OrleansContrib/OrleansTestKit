@@ -1,0 +1,28 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "orderingRules": {
+      "usingDirectivesPlacement": "outsideNamespace",
+      "blankLinesBetweenUsingGroups": "omit"
+    },
+    "namingRules": {
+      "includeInferredTupleElementNames": true
+    },
+    "maintainabilityRules": {
+      "topLevelTypes": [
+        "class",
+        "interface",
+        "struct",
+        "enum",
+        "delegate"
+      ]
+    },
+    "layoutRules": {
+      "newlineAtEndOfFile": "require"
+    },
+    "documentationRules": {
+      "companyName": "Daniel Sarfati, Kyle Dodson",
+      "documentInternalElements": false
+    }
+  }
+}

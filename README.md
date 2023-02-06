@@ -1,44 +1,66 @@
 # Orleans TestKit
 
-[![GitHub build status](https://github.com/OrleansContrib/OrleansTestKit/workflows/Continuous%20Integration/badge.svg)](https://github.com/OrleansContrib/OrleansTestKit/actions) [![codecov test status](https://codecov.io/gh/OrleansContrib/OrleansTestKit/branch/master/graph/badge.svg)](https://codecov.io/gh/OrleansContrib/OrleansTestKit) [![NuGet package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](https://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/master/LICENSE) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/orleans?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![GitHub build status](https://github.com/OrleansContrib/OrleansTestKit/workflows/Continuous%20Integration/badge.svg)](https://github.com/OrleansContrib/OrleansTestKit/actions) [![NuGet pre-release package version](https://img.shields.io/nuget/vpre/OrleansTestKit.svg?style=flat)](https://www.nuget.org/packages/OrleansTestKit/) [![NuGet stable package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](https://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/main/LICENSE) [![Discord](https://img.shields.io/discord/333727978460676096?color=4db798&label=Discord%20Chat&logoColor=4db798)](https://aka.ms/orleans-discord)
 
-The Orleans TestKit is an easy-to-use toolkit for unit testing the grain logic of applications built with [Microsoft Orleans](https://dotnet.github.io/orleans/). The Orleans TestKit is intended to augment the [`TestCluster` unit testing approach](https://dotnet.github.io/orleans/docs/implementation/testing.html) provided by the official `Microsoft.Orleans.TestingHost` NuGet package.
+- [Orleans TestKit](#orleans-testkit)
+  - [About](#about)
+  - [Getting Started](#getting-started)
+  - [Contributing](#contributing)
+    - [Visual Studio](#visual-studio)
+    - [Visual Studio Code](#visual-studio-code)
+  - [Community](#community)
 
-**The Orleans TestKit is evolving to meet the demands of the team. If you have a question or need, please [ask us](https://github.com/OrleansContrib/OrleansTestKit/issues/new)!**
+## About
 
-## Installation
+The Orleans TestKit is a community-maintained library providing [mock objects](https://wikipedia.org/wiki/Mock_object) that facilitate unit testing grains in applications built on the [Microsoft Orleans](https://learn.microsoft.com/dotnet/orleans/) framework. It provides a _simulated grain activation context_, leveraging [Moq](https://github.com/moq/moq4) to generate test doubles for dependencies such as persistent state, reminders, timers, and streams. By simulating a grain activation context, you focus on testing the behavior of a single grain in isolation.
 
-Simply install the `OrleansTestKit` NuGet package in your project to get started. For example, run the following command in your Visual Studio Package Manager Console:
+The official [integration testing approach](https://learn.microsoft.com/dotnet/orleans/implementation/testing) leverages the `TestCluster`. The `TestCluster` is a fully functional, in-memory cluster. It is faster to start than a regular cluster and provides a complete runtime. However, it may require complex configuration and custom-developed dependencies to test particular scenarios. That having been said, there are important caveats to the Orleans TestKit approach.
 
+The simulated grain activation context does not provide the single-threaded execution model of the Microsoft Orleans runtime. It is up to you to ensure the grain activation is used appropriately. Unfortunately, this may result in abnormal method execution or behaviors that are impossible to reproduce, especially in reentrant grains.
+
+It is also important to note that mock-based testing presents risk of coupling your test cases to the internal implementation details of the grain. This may make your code difficult to refactor and your tests brittle (see Martin Fowler's article [Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html)).
+
+It is recommended that you consider developing a mixture of tests based on both the Orleans TestKit and the `TestCluster`.
+
+## Getting Started
+
+There are two branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 4, a pre-release version supporting Orleans 7. The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
+
+If you are using Microsoft Orleans 7, install the latest, pre-release [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
+
+```pwsh
+Install-Package OrleansTestKit -IncludePrerelease
 ```
-PM> Install-Package OrleansTestKit
+
+If you are using Microsoft Orleans 3, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
+
+```pwsh
+Install-Package OrleansTestKit
 ```
 
-## Documentation
+Refer to the [unit tests](https://github.com/OrleansContrib/OrleansTestKit/tree/main/test) project to learn how to create test fixtures using the Orleans TestKit.
 
-Examples are provided by the included [test project](https://github.com/OrleansContrib/OrleansTestKit/tree/master/test).
+## Contributing
 
-### Known Limitations
+Either Visual Studio or Visual Studio Code may be used for development. Visual Studio provides a richer experience, especially when it comes to debugging. Visual Studio Code providers a lightweight experience and still works with the majority of the tooling.
 
-When run within a test kit environment, code that calls the `GetPrimaryKey` extension methods sometimes result in an `ArgumentException` with the following message:
+### Visual Studio
 
-> Passing a half baked grain as an argument. It is possible that you instantiated a grain class explicitly, as a regular object and not via Orleans runtime or via proper test mocking.
+1. In Visual Studio, open the `OrleansTestKit.sln` solution.
 
-See [issue #47](https://github.com/OrleansContrib/OrleansTestKit/issues/47) for a discussion and references to upstream issues.
+1. Recommended: Install the [CodeMaid extension](https://marketplace.visualstudio.com/search?term=codemaid&target=VS&category=All%20categories&vsVersion=&sortBy=Relevance).
 
-Grains with States that do not have a parameterless constructor are not supported by the default IStorage implementation.
+### Visual Studio Code
 
-## Build Artifacts
+1. In Visual Studio Code, open the folder containing the `OrleansTestKit.sln` solution file.
 
-The build artifacts for tagged commits are published to [NuGet](https://www.nuget.org/packages/OrleansTestKit/) and copied to [GitHub Releases](https://github.com/OrleansContrib/OrleansTestKit/releases).
-
-The build artifacts for pull request commits and `master` branch commits are attached to the individual [Continuous Integration workflow logs](https://github.com/OrleansContrib/OrleansTestKit/actions).
+1. Recommended: Open Visual Studio Code's extensions panel, and install all of the recommended extensions.
 
 ## Community
 
-- Report bugs and ask questions by opening a new [GitHub Issue](https://github.com/OrleansContrib/OrleansTestKit/issues/new)
-- [Chat on Gitter](https://gitter.im/dotnet/orleans)
+- Chat about all things Orleans on the official [Discord server](https://aka.ms/orleans-discord).
+- Report bugs and ask questions about the Orleans TestKit by opening a new [GitHub Issue](https://github.com/OrleansContrib/OrleansTestKit/issues/new). Please be sure to note which version of the Orleans TestKit you are using.
 
 ## License
 
-This project is released under the [MIT license](https://github.com/OrleansContrib/OrleansTestKit/blob/master/LICENSE).
+This project is released under the [MIT license](https://github.com/OrleansContrib/OrleansTestKit/blob/main/LICENSE).

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IDeactivationGrain : IGrainWithIntegerKey
 {
-    public interface IDeactivationGrain : IGrainWithIntegerKey
-    {
-        public Task DeactivateOnIdle();
+    public Task DeactivateOnIdle();
 
-        public Task DelayDeactivation(TimeSpan timeSpan);
-    }
+    public Task DelayDeactivation(TimeSpan timeSpan);
 }

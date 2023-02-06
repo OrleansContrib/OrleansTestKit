@@ -1,74 +1,81 @@
-﻿using System;
-using System.Collections.Generic;
-using Moq;
+﻿using Moq;
 
-namespace Orleans.TestKit.Services
+namespace Orleans.TestKit.Services;
+
+public sealed class TestServiceProvider : IServiceProvider
 {
-    public sealed class TestServiceProvider :
-        IServiceProvider
+    private readonly TestKitOptions _options;
+
+    private readonly Dictionary<Type, object> _services;
+
+    public TestServiceProvider(TestKitOptions options)
     {
-        private readonly TestKitOptions _options;
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _services = new Dictionary<Type, object>();
+    }
 
-        private readonly Dictionary<Type, object> _services;
-
-        public TestServiceProvider(TestKitOptions options)
+    public T AddService<T>(T instance)
+    {
+        if (instance is null)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
-            _services = new Dictionary<Type, object>();
+            throw new ArgumentNullException(nameof(instance));
         }
 
-        public object GetService(Type serviceType)
+        _services.Add(typeof(T), instance);
+        return instance;
+    }
+
+    public Mock<T> AddServiceProbe<T>(Mock<T> mock)
+        where T : class
+    {
+        if (mock == null)
         {
-            if (serviceType == null)
-            {
-                throw new ArgumentNullException(nameof(serviceType));
-            }
-
-            if (_services.TryGetValue(serviceType, out var service))
-            {
-                return service;
-            }
-
-            //If using strict service probes, throw the exception
-            if (_options.StrictServiceProbes)
-            {
-                throw new Exception($"Service probe does not exist for type {serviceType.Name}. Ensure that it is added before the grain is tested.");
-            }
-            else
-            {
-                //Create a new mock
-                var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(serviceType)) as IMock<object>;
-                service = mock.Object;
-
-                //Save the newly created grain for the next call
-                _services.Add(serviceType, service);
-
-                return service;
-            }
+            throw new ArgumentNullException(nameof(mock));
         }
 
-        public Mock<T> AddServiceProbe<T>(Mock<T> mock) where T : class
+        _services.Add(typeof(T), mock.Object);
+        return mock;
+    }
+
+    public Mock<T> AddServiceProbe<T>()
+        where T : class
+    {
+        var mock = new Mock<T>();
+        _services.Add(typeof(T), mock.Object);
+        return mock;
+    }
+
+    public object GetService(Type serviceType)
+    {
+        if (serviceType == null)
         {
-            if (mock == null)
+            throw new ArgumentNullException(nameof(serviceType));
+        }
+
+        if (_services.TryGetValue(serviceType, out var service))
+        {
+            return service;
+        }
+
+        // If using strict service probes, throw the exception
+        if (_options.StrictServiceProbes)
+        {
+            throw new Exception($"Service probe does not exist for type {serviceType.Name}. Ensure that it is added before the grain is tested.");
+        }
+        else
+        {
+            // Create a new mock
+            if (Activator.CreateInstance(typeof(Mock<>).MakeGenericType(serviceType)) is not IMock<object> mock)
             {
-                throw new ArgumentNullException(nameof(mock));
+                throw new Exception($"Failed to instantiate {serviceType.Name}.");
             }
 
-            _services.Add(typeof(T), mock.Object);
-            return mock;
-        }
+            service = mock.Object;
 
-        public Mock<T> AddServiceProbe<T>() where T : class
-        {
-            var mock = new Mock<T>();
-            _services.Add(typeof(T), mock.Object);
-            return mock;
-        }
+            // Save the newly created grain for the next call
+            _services.Add(serviceType, service);
 
-        public T AddService<T>(T instance)
-        {
-            _services.Add(typeof(T), instance);
-            return instance;
+            return service;
         }
     }
 }

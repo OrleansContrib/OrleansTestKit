@@ -2,7 +2,22 @@
 <Project>
 
   <PropertyGroup>
-    <SourceRoot>$(MSBuildThisFileDirectory)</SourceRoot>
+    <ProjectRoot>$(MSBuildThisFileDirectory)</ProjectRoot>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>dsarfati,seniorquico</Authors>
+    <Product>Orleans TestKit</Product>
+    <Copyright>Copyright © 2017-2021 Daniel Sarfati. 2021-2023 Kyle Dodson. All rights reserved.</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <Features>strict</Features>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
 </Project>

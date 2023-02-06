@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Orleans;
-using TestInterfaces;
+﻿using TestInterfaces;
 
-namespace TestGrains
+namespace TestGrains;
+
+public class DeviceAndroidGrain : Grain, IDevice
 {
-    public class DeviceAndroidGrain : Grain, IDevice
+    public Task<string> GetDeviceType()
     {
-        public Task<string> GetDeviceType()
-        {
-            return Task.FromResult("Android");
-        }
+        return Task.FromResult("Android");
     }
 }

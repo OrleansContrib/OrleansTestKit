@@ -1,16 +1,12 @@
-﻿using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IChatty : IGrainWithIntegerKey
 {
-    public interface IChatty : IGrainWithIntegerKey
-    {
-        Task SendChat(string msg);
+    Task<(string Message, int Id)> GetMessage();
 
-        Task SendChatBatch(string[] msgs);
+    Task SendChat(string msg);
 
-        Task Subscribe();
+    Task SendChatBatch(string[] msgs);
 
-        Task<(string Message, int Id)> GetMessage();
-    }
+    Task Subscribe();
 }

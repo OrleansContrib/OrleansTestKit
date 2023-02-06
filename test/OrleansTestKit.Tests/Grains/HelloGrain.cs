@@ -1,21 +1,17 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Orleans;
-using TestInterfaces;
+﻿using TestInterfaces;
 
-namespace TestGrains
+namespace TestGrains;
+
+public class HelloGrain : Grain, IHello
 {
-    public class HelloGrain : Grain, IHello
+    public bool Deactivated { get; set; }
+
+    public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
-        public bool Deactivated { get; set; }
+        Deactivated = true;
 
-        public Task<string> SayHello(string greeting) => Task.FromResult("You said: '" + greeting + "', I say: Hello!");
-
-        public override Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
-        {
-            Deactivated = true;
-
-            return base.OnDeactivateAsync(reason, cancellationToken);
-        }
+        return base.OnDeactivateAsync(reason, cancellationToken);
     }
+
+    public Task<string> SayHello(string greeting) => Task.FromResult("You said: '" + greeting + "', I say: Hello!");
 }

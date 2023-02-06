@@ -1,28 +1,24 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace Orleans.TestKit;
 
-namespace Orleans.TestKit
+public static class TimerExtensions
 {
-    public static class TimerExtensions
+    public static Task FireAllTimersAsync(this TestKitSilo silo)
     {
-        public static Task FireAllTimersAsync(this TestKitSilo silo)
+        if (silo == null)
         {
-            if (silo == null)
-            {
-                throw new ArgumentNullException(nameof(silo));
-            }
-
-            return silo.TimerRegistry.FireAllAsync();
+            throw new ArgumentNullException(nameof(silo));
         }
 
-        public static Task FireTimerAsync(this TestKitSilo silo, int index)
-        {
-            if (silo == null)
-            {
-                throw new ArgumentNullException(nameof(silo));
-            }
+        return silo.TimerRegistry.FireAllAsync();
+    }
 
-            return silo.TimerRegistry.FireAsync(index);
+    public static Task FireTimerAsync(this TestKitSilo silo, int index)
+    {
+        if (silo == null)
+        {
+            throw new ArgumentNullException(nameof(silo));
         }
+
+        return silo.TimerRegistry.FireAsync(index);
     }
 }

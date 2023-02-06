@@ -16,7 +16,7 @@ jobs:
         id: build
         run: |
           dotnet restore --verbosity minimal
-          dotnet build --configuration Release --no-restore --verbosity minimal /p:TreatWarningsAsErrors=true /warnaserror
+          dotnet build --configuration Release --no-restore --verbosity minimal
           dotnet pack --configuration Release --no-restore --verbosity minimal
           nupkg_files=(artifacts/Release/*.nupkg)
           echo "::set-output name=nupkg_name::$( basename ${nupkg_files[-1]} )"
@@ -33,7 +33,7 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
           draft: true
-          prerelease: false
+          prerelease: true
       - name: Upload NuGet Package
         uses: actions/upload-release-asset@master
         env:

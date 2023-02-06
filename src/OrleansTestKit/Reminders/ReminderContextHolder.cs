@@ -1,48 +1,49 @@
-﻿using System;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using Orleans.Runtime;
 
 namespace Orleans.TestKit.Reminders;
 
-public sealed class ReminderContextHolder
+public sealed class ReminderContextHolder : IDisposable
 {
-    private const string RUNTIME_NAMESPACE = "Orleans.Runtime.RuntimeContext";
-    private const string RUNTIME_METHOD = "SetExecutionContext";
-    private static readonly Lazy<ReminderContextHolder> lazy =
-        new Lazy<ReminderContextHolder>(() => new ReminderContextHolder());
-    private readonly SemaphoreSlim _slim;
+    private const string RuntimeMethod = "SetExecutionContext";
+
+    private const string RuntimeNamespace = "Orleans.Runtime.RuntimeContext";
+
+    private static readonly Lazy<ReminderContextHolder> Lazy = new(() => new ReminderContextHolder());
+
     private readonly MethodInfo _runtimeContextMethod;
 
-    public static ReminderContextHolder Instance { get { return lazy.Value; } }
+    private readonly SemaphoreSlim _slim;
 
     private ReminderContextHolder()
     {
         _slim = new SemaphoreSlim(1);
         var assembly = typeof(GrainId).Assembly;
-        var contextType = assembly.GetType(RUNTIME_NAMESPACE);
-        _runtimeContextMethod = contextType.GetMethod(RUNTIME_METHOD, BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext) });
+        var contextType = assembly.GetType(RuntimeNamespace)!;
+        _runtimeContextMethod = contextType.GetMethod(RuntimeMethod, BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext) })!;
     }
 
-    public async Task SetReminderContext(IGrainContext context, CancellationToken token = default)
-    {
-        await _slim.WaitAsync(token);
+    public static ReminderContextHolder Instance =>
+        Lazy.Value;
 
-        _runtimeContextMethod.Invoke(null, new object[] { context });
-    }
+    public void Dispose() =>
+        _slim.Dispose();
 
     public void ReleaseReminderContext()
     {
         try
         {
-            _runtimeContextMethod.Invoke(null, new object[] { null });
+            _runtimeContextMethod.Invoke(null, new object?[] { null });
         }
         finally
         {
             _slim.Release();
         }
-
     }
 
+    public async Task SetReminderContext(IGrainContext context, CancellationToken token = default)
+    {
+        await _slim.WaitAsync(token);
+        _runtimeContextMethod.Invoke(null, new object[] { context });
+    }
 }

@@ -1,20 +1,16 @@
-﻿using System;
+﻿namespace Orleans.TestKit.Utilities;
 
-namespace Orleans.TestKit.Utilities
+internal sealed class LambdaDisposable : IDisposable
 {
-    internal sealed class LambdaDisposable :
-        IDisposable
+    private Action _action;
+
+    public LambdaDisposable(Action action)
     {
-        private Action _action;
+        _action = action;
+    }
 
-        public LambdaDisposable(Action action)
-        {
-            _action = action;
-        }
-
-        public void Dispose()
-        {
-            _action?.Invoke();
-        }
+    public void Dispose()
+    {
+        _action?.Invoke();
     }
 }

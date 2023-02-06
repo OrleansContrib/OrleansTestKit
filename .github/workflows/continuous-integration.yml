@@ -3,10 +3,10 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build-and-test:
@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: |
           dotnet restore --verbosity minimal
-          dotnet build --configuration Release --no-restore --verbosity minimal /p:TreatWarningsAsErrors=true /warnaserror
+          dotnet build --configuration Release --no-restore --verbosity minimal
           dotnet pack --configuration Release --no-restore --verbosity minimal
       - name: Test
         run: |
@@ -28,11 +28,3 @@ jobs:
         with:
           name: Packages
           path: artifacts/Release/
-      # TODO: Need to create CODECOV_TOKEN secret.
-      - name: Upload Code Coverage Results
-        env:
-          CI: "true"
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: |
-          dotnet tool restore --verbosity minimal
-          dotnet codecov --dump --file test/OrleansTestKit.Tests/coverage.opencover.xml --required

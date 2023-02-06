@@ -1,35 +1,33 @@
-﻿using System;
+﻿using Orleans.Core;
+using Orleans.TestKit.Storage;
 
-namespace Orleans.TestKit
+namespace Orleans.TestKit;
+
+public sealed class TestKitOptions
 {
-    public sealed class TestKitOptions
-    {
-        /// <summary>
-        /// Flag indicating if strict grain probes are enabled.
-        /// True = All probes must be added in order to be used.
-        /// False = Probes do not need to be defined in order to be used.
-        /// </summary>
-        public bool StrictGrainProbes { get; set; }
+    /// <summary>
+    ///     Gets or sets a custom <see cref="IStorage{TState}"/> object factory. The default
+    ///     <see cref="TestStorage{TState}"/> is used if <see langword="null"/>. The custom
+    ///     <see cref="IStorage{TState}"/> object may implement <see cref="IStorageStats"/> to capture and report
+    ///     statistics.
+    /// </summary>
+    public Func<Type, object>? StorageFactory { get; set; }
 
-        /// <summary>
-        /// Flag indicating if strict stream probes are enabled.
-        /// True = All probes must be added in order to be used.
-        /// False = Probes do not need to be defined in order to be used.
-        /// </summary>
-        public bool StrictStreamProbes { get; set; }
+    /// <summary>
+    ///     Gets or sets a value indicating whether strict Moq probes are enabled for grains. When
+    ///     <see langword="true"/>, all probes must be explicitly added to be used.
+    /// </summary>
+    public bool StrictGrainProbes { get; set; }
 
-        /// <summary>
-        /// Flag indicating if strict service probes are enabled.
-        /// True = All probes must be added in order to be used.
-        /// False = Probes do not need to be defined in order to be used.
-        /// </summary>
-        public bool StrictServiceProbes { get; set; }
+    /// <summary>
+    ///     Gets or sets a value indicating whether strict Moq probes are enabled for services. When
+    ///     <see langword="true"/>, all probes must be explicitly added to be used.
+    /// </summary>
+    public bool StrictServiceProbes { get; set; }
 
-        /// <summary>
-        /// Factory that will be used by StorageManager to create an instance of IStorage&lt;TState&gt;.
-        /// Leave null to use default TestStorage.
-        /// Implement IStorageStats in your storage class to support storage statistics.
-        /// </summary>
-        public Func<Type, object> StorageFactory { get; set; }
-    }
+    /// <summary>
+    ///     Gets or sets a value indicating whether strict Moq probes are enabled for streams. When
+    ///     <see langword="true"/>, all probes must be explicitly added to be used.
+    /// </summary>
+    public bool StrictStreamProbes { get; set; }
 }

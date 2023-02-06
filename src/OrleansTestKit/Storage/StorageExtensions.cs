@@ -1,29 +1,26 @@
-﻿using System;
-using System.ComponentModel;
-using Orleans.TestKit.Storage;
+﻿using Orleans.TestKit.Storage;
 
-namespace Orleans.TestKit
+namespace Orleans.TestKit;
+
+public static class StorageExtensions
 {
-    public static class StorageExtensions
+    public static TState State<TState>(this TestKitSilo silo) where TState : class, new()
     {
-        public static TState State<TState>(this TestKitSilo silo) where TState : class, new()
+        if (silo == null)
         {
-            if (silo == null)
-            {
-                throw new ArgumentNullException(nameof(silo));
-            }
-
-            return silo.StorageManager.GetStorage<TState>().State;
+            throw new ArgumentNullException(nameof(silo));
         }
 
-        public static TestStorageStats StorageStats(this TestKitSilo silo)
-        {
-            if (silo == null)
-            {
-                throw new ArgumentNullException(nameof(silo));
-            }
+        return silo.StorageManager.GetStorage<TState>().State;
+    }
 
-            return silo.StorageManager.StorageStats;
+    public static TestStorageStats? StorageStats(this TestKitSilo silo)
+    {
+        if (silo == null)
+        {
+            throw new ArgumentNullException(nameof(silo));
         }
+
+        return silo.StorageManager.StorageStats;
     }
 }

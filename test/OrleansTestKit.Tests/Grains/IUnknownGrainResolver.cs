@@ -1,13 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestGrains;
 
-namespace TestGrains
+public interface IUnknownGrainResolver : IGrainWithStringKey
 {
-    public interface IUnknownGrainResolver : IGrainWithStringKey
-    {
-        Task<List<string>> GetResolvedUnknownGrainIdsAsync();
+    Task CreateAndPingMultiple();
 
-        Task CreateAndPingMultiple();
-    }
+    Task<List<string>> GetResolvedUnknownGrainIdsAsync();
 }

@@ -1,12 +1,8 @@
-﻿using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IPing : IGrainWithIntegerKey
 {
-    public interface IPing : IGrainWithIntegerKey
-    {
-        Task Ping();
+    Task Ping();
 
-        Task PingCompound();
-    }
+    Task PingCompound();
 }

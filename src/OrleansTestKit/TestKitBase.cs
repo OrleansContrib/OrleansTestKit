@@ -1,11 +1,7 @@
-﻿namespace Orleans.TestKit
+﻿namespace Orleans.TestKit;
+
+/// <summary>A unit test base class that provides a default mock grain activation context.</summary>
+public abstract class TestKitBase
 {
-    /// <summary>
-    /// Base class used for all grain based unit tests. The <see cref="TestKitBase"/>
-    /// provides tools to mock up the orleans and create the grain under test
-    /// </summary>
-    public abstract class TestKitBase
-    {
-        protected TestKitSilo Silo { get; } = new TestKitSilo();
-    }
+    protected TestKitSilo Silo { get; } = new TestKitSilo();
 }

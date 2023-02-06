@@ -1,43 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.ObjectModel;
 using Orleans.Runtime;
 using Orleans.TestKit.Utilities;
-using System.Threading;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Orleans.TestKit
+namespace Orleans.TestKit;
+
+internal sealed class TestGrainLifecycle : IGrainLifecycle
 {
-    internal sealed class TestGrainLifecycle :
-        IGrainLifecycle
+    private readonly Collection<(int Stage, ILifecycleObserver Observer)> _observers = new();
+
+    public IDisposable Subscribe(string observerName, int stage, ILifecycleObserver observer)
     {
-        private readonly List<(int, ILifecycleObserver)> observers = new List<(int, ILifecycleObserver)>();
-
-        public IDisposable Subscribe(string observerName, int stage, ILifecycleObserver observer)
+        if (observer == null)
         {
-            if (observer == null)
-            {
-                throw new ArgumentNullException(nameof(observer));
-            }
-
-            var item = (stage, observer);
-            observers.Add(item);
-            return new LambdaDisposable(() =>
-            {
-                observers.Remove(item);
-            });
+            throw new ArgumentNullException(nameof(observer));
         }
 
-        public Task TriggerStartAsync()
+        var item = (Stage: stage, Observer: observer);
+        _observers.Add(item);
+        return new LambdaDisposable(() =>
         {
-            var tasks = observers.OrderBy(x => x.Item1).Select(x => x.Item2.OnStart(CancellationToken.None));
-            return Task.WhenAll(tasks.ToArray());
-        }
+            _observers.Remove(item);
+        });
+    }
 
-        public Task TriggerStopAsync()
-        {
-            var tasks = observers.Select(x => x.Item2.OnStop(CancellationToken.None));
-            return Task.WhenAll(tasks.ToArray());
-        }
+    public Task TriggerStartAsync()
+    {
+        var tasks = _observers.OrderBy(x => x.Stage).Select(x => x.Observer.OnStart(CancellationToken.None));
+        return Task.WhenAll(tasks.ToArray());
+    }
+
+    public Task TriggerStopAsync()
+    {
+        var tasks = _observers.Select(x => x.Observer.OnStop(CancellationToken.None));
+        return Task.WhenAll(tasks.ToArray());
     }
 }

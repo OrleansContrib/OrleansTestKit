@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 using Moq;
 using Orleans.Runtime;
 using Orleans.Streams;
@@ -8,74 +6,72 @@ using Orleans.TestKit.Streams;
 using TestGrains;
 using Xunit;
 
-namespace Orleans.TestKit.Tests
+namespace Orleans.TestKit.Tests;
+
+public class PersistantStreamNotWithinGrainStateTests : TestKitBase
 {
-    public class PersistantStreamNotWithinGrainStateTests : TestKitBase
+    private readonly Mock<IPersistentState<PersistentListenerStateWithoutHandle>> _persistentState;
+
+    private readonly PersistentListenerStateWithoutHandle _stateWithoutHandle;
+
+    private readonly TestStream<ChatMessage> _stream;
+
+    public PersistantStreamNotWithinGrainStateTests()
     {
+        _stateWithoutHandle = new PersistentListenerStateWithoutHandle();
 
-        private readonly PersistentListenerStateWithoutHandle _stateWithoutHandle;
-        private readonly Mock<IPersistentState<PersistentListenerStateWithoutHandle>> _persistentState;
-        private readonly TestStream<ChatMessage> _stream;
+        _persistentState = new Mock<IPersistentState<PersistentListenerStateWithoutHandle>>();
+        _persistentState.SetupGet(o => o.State).Returns(_stateWithoutHandle);
 
-        public PersistantStreamNotWithinGrainStateTests()
-        {
-            _stateWithoutHandle = new PersistentListenerStateWithoutHandle();
+        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.Setup(o =>
+                o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>()))
+            .Returns(context => _persistentState.Object);
 
-            _persistentState = new Mock<IPersistentState<PersistentListenerStateWithoutHandle>>();
-            _persistentState.SetupGet(o => o.State).Returns(_stateWithoutHandle);
+        Silo.AddService(mockMapper.Object);
 
+        _stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null, "Default");
+    }
 
-            var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-            mockMapper.Setup(o =>
-                    o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>()))
-                .Returns(context => _persistentState.Object);
+    [Fact]
+    public async Task GivenHandler_WhenGrainActivates_ThenResumeHandler()
+    {
+        //Arrange
+        var onResumeCalled = false;
+        var onAttachingObserver = new Action<IAsyncObserver<ChatMessage>>(obs => onResumeCalled = true);
 
-            Silo.AddService(mockMapper.Object);
+        //Adds a handler, but doesn't store to state
+        await _stream.AddEmptyStreamHandler(onAttachingObserver);
 
-            _stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null, "Default");
-        }
+        //Check to see there is a handler registered
+        var handles = await _stream.GetAllSubscriptionHandles();
+        Assert.Equal(1, handles.Count);
+        Assert.False(onResumeCalled);
 
-        [Fact]
-        public async Task GivenNoHandler_WhenActivated_ThenSubscribeToStream()
-        {
-            //Arrange + Act
-            await Silo.CreateGrainAsync<PersistentListenerWithoutHandleInState>(1);
+        //Act
+        var grain = await Silo.CreateGrainAsync<PersistentListenerWithoutHandleInState>(1);
 
-            //Assert
-            Assert.Equal(1, _stream.Subscribed);
+        //Assert
+        Assert.True(onResumeCalled);
 
-            var streamHandles = await _stream.GetAllSubscriptionHandles();
-            Assert.Equal(1, streamHandles.Count);
-        }
+        //Act
+        await _stream.OnNextAsync(new ChatMessage("here's a message!"));
 
-        [Fact]
-        public async Task GivenHandler_WhenGrainActivates_ThenResumeHandler()
-        {
-            //Arrange
-            var onResumeCalled = false;
-            var onAttachingObserver = new Action<IAsyncObserver<ChatMessage>>(obs => onResumeCalled = true);
+        //Assert
+        var receivedMessages = await grain.ReceivedCount();
+        Assert.Equal(1, receivedMessages);
+    }
 
-            //Adds a handler, but doesn't store to state
-            await _stream.AddEmptyStreamHandler(onAttachingObserver);
+    [Fact]
+    public async Task GivenNoHandler_WhenActivated_ThenSubscribeToStream()
+    {
+        //Arrange + Act
+        await Silo.CreateGrainAsync<PersistentListenerWithoutHandleInState>(1);
 
-            //Check to see there is a handler registered
-            var handles = await _stream.GetAllSubscriptionHandles();
-            Assert.Equal(1, handles.Count);
-            Assert.False(onResumeCalled);
+        //Assert
+        Assert.Equal(1, _stream.Subscribed);
 
-            //Act
-            var grain = await Silo.CreateGrainAsync<PersistentListenerWithoutHandleInState>(1);
-
-            //Assert
-            Assert.True(onResumeCalled);
-
-            //Act
-            await _stream.OnNextAsync(new ChatMessage("here's a message!"));
-
-            //Assert
-            var receivedMessages = await grain.ReceivedCount();
-            Assert.Equal(1, receivedMessages);
-        }
-
+        var streamHandles = await _stream.GetAllSubscriptionHandles();
+        Assert.Equal(1, streamHandles.Count);
     }
 }

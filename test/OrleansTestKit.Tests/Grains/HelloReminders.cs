@@ -1,34 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Orleans;
-using Orleans.Runtime;
+﻿using Orleans.Runtime;
 
-namespace TestGrains
+namespace TestGrains;
+
+public class HelloReminders : Grain, IGrainWithIntegerKey, IRemindable
 {
-    public class HelloReminders : Grain, IGrainWithIntegerKey, IRemindable
+    public readonly List<string> FiredReminders = new();
+
+    Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
     {
-        public readonly List<string> FiredReminders = new();
+        FiredReminders.Add(reminderName);
+        return Task.CompletedTask;
+    }
 
-        public Task RegisterReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
+    public Task RegisterReminder(string reminderName, TimeSpan dueTime, TimeSpan period)
+    {
+        return this.RegisterOrUpdateReminder(reminderName, dueTime, period);
+    }
+
+    public async Task UnregisterReminder(string reminderName)
+    {
+        var reminder = await this.GetReminder(reminderName);
+
+        if (reminder != null)
         {
-            return this.RegisterOrUpdateReminder(reminderName, dueTime, period);
-        }
-
-        Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
-        {
-            FiredReminders.Add(reminderName);
-            return Task.CompletedTask;
-        }
-
-        public async Task UnregisterReminder(string reminderName)
-        {
-            var reminder = await this.GetReminder(reminderName);
-
-            if (reminder != null)
-            {
-                await this.UnregisterReminder(reminder);
-            }
+            await this.UnregisterReminder(reminder);
         }
     }
 }

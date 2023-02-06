@@ -1,10 +1,6 @@
-﻿using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IPong : IGrainWithIntegerKey
 {
-    public interface IPong : IGrainWithIntegerKey
-    {
-        Task Pong();
-    }
+    Task Pong();
 }

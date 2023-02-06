@@ -1,41 +1,39 @@
-﻿using System;
-using System.Threading.Tasks;
-using Moq;
+﻿using Moq;
 using TestGrains;
 using Xunit;
 
-namespace Orleans.TestKit.Tests
+namespace Orleans.TestKit.Tests;
+
+public class DeactivationGrainTests : TestKitBase
 {
-    public class DeactivationGrainTests : TestKitBase
+    [Fact]
+    public async Task ShouldCallDeactivateOnIdle()
     {
-        [Fact]
-        public async Task ShouldCallDeactivateOnIdle()
-        {
-            // Arrange
-            var grain = await Silo.CreateGrainAsync<DeactivationGrain>(0);
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<DeactivationGrain>(0);
 
-            // Act
-            await grain.DeactivateOnIdle();
+        // Act
+        await grain.DeactivateOnIdle();
 
-            var context = Silo.GetContextFromGrain(grain);
-            // Assert
-            Silo.VerifyRuntime(i => i.DeactivateOnIdle(context), Times.Once);
-        }
+        var context = Silo.GetContextFromGrain(grain);
 
-        [Fact]
-        public async Task ShouldCallDelayDeactivation()
-        {
-            // Arrange
-            var grain = await Silo.CreateGrainAsync<DeactivationGrain>(0);
-            var timeSpan = TimeSpan.FromSeconds(5);
+        // Assert
+        Silo.VerifyRuntime(i => i.DeactivateOnIdle(context), Times.Once);
+    }
 
-            // Act
-            await grain.DelayDeactivation(timeSpan);
+    [Fact]
+    public async Task ShouldCallDelayDeactivation()
+    {
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<DeactivationGrain>(0);
+        var timeSpan = TimeSpan.FromSeconds(5);
 
-            var context = Silo.GetContextFromGrain(grain);
+        // Act
+        await grain.DelayDeactivation(timeSpan);
 
-            // Assert
-            Silo.VerifyRuntime(i => i.DelayDeactivation(context,timeSpan), Times.Once);
-        }
+        var context = Silo.GetContextFromGrain(grain);
+
+        // Assert
+        Silo.VerifyRuntime(i => i.DelayDeactivation(context, timeSpan), Times.Once);
     }
 }

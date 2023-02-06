@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <_ParentDirectoryBuildTargetsPath Condition=" '$(_DirectoryBuildTargetsFile)' != '' ">$([System.IO.Path]::Combine('..', '$(_DirectoryBuildTargetsFile)'))</_ParentDirectoryBuildTargetsPath>
+  </PropertyGroup>
+
+  <Import Condition=" Exists('$(_ParentDirectoryBuildTargetsPath)') " Project="$(_ParentDirectoryBuildTargetsPath)" />
+
+</Project>

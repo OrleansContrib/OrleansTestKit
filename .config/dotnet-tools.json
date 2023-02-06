@@ -2,10 +2,10 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "codecov.tool": {
-      "version": "1.13.0",
+    "dotnet-outdated-tool": {
+      "version": "4.5.0",
       "commands": [
-        "codecov"
+        "dotnet-outdated"
       ]
     }
   }

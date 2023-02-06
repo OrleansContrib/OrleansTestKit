@@ -1,38 +1,22 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace Orleans.TestKit.Timers;
 
-namespace Orleans.TestKit.Timers
+public sealed class TestTimer : IDisposable
 {
-    public sealed class TestTimer :
-        IDisposable
+    private Func<Task>? _asyncCallback;
+
+    public TestTimer(Func<object, Task> asyncCallback, object state) =>
+        _asyncCallback = () => asyncCallback(state);
+
+    public bool IsDisposed { get; private set; }
+
+    public void Dispose()
     {
-        private Func<object, Task> _asyncCallback;
-        private bool _isDisposed;
-        private object _state;
-
-        public TestTimer(Func<object, Task> asyncCallback, object state)
-        {
-            _isDisposed = false;
-            _asyncCallback = asyncCallback;
-            _state = state;
-        }
-
-        public Task FireAsync()
-        {
-            if (_asyncCallback == null)
-            {
-                return Task.CompletedTask;
-            }
-
-            return _asyncCallback(_state);
-        }
-        public bool IsDisposed => _isDisposed;
-
-        public void Dispose()
-        {
-            _asyncCallback = null;
-            _state = null;
-            _isDisposed = true;
-        }
+        _asyncCallback = null;
+        IsDisposed = true;
     }
+
+    public Task FireAsync() =>
+        IsDisposed || _asyncCallback == null
+            ? throw new ObjectDisposedException(GetType().FullName)
+            : _asyncCallback();
 }

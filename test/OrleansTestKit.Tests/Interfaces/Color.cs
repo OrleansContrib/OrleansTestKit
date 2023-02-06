@@ -1,22 +1,21 @@
-﻿namespace TestInterfaces
+﻿namespace TestInterfaces;
+
+/// <summary>A set of well-known colors.</summary>
+public enum Color
 {
-    /// <summary>A set of well-known colors.</summary>
-    public enum Color
-    {
-        Unknown = 0,
+    Unknown = 0,
 
-        Red,
+    Red,
 
-        Orange,
+    Orange,
 
-        Yellow,
+    Yellow,
 
-        Green,
+    Green,
 
-        Blue,
+    Blue,
 
-        Indigo,
+    Indigo,
 
-        Violet,
-    }
+    Violet,
 }

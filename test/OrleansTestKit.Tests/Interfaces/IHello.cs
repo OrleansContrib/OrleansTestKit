@@ -1,10 +1,6 @@
-﻿using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IHello : IGrainWithIntegerKey
 {
-    public interface IHello : IGrainWithIntegerKey
-    {
-        Task<string> SayHello(string greeting);
-    }
+    Task<string> SayHello(string greeting);
 }

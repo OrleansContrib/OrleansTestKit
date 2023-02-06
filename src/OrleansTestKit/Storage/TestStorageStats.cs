@@ -1,18 +1,17 @@
-﻿namespace Orleans.TestKit.Storage
+﻿namespace Orleans.TestKit.Storage;
+
+public sealed class TestStorageStats
 {
-    public sealed class TestStorageStats
+    public int Clears { get; set; }
+
+    public int Reads { get; set; }
+
+    public int Writes { get; set; }
+
+    public void ResetCounts()
     {
-        public int Writes { get; set; }
-
-        public int Clears { get; set; }
-
-        public int Reads { get; set; }
-
-        public void ResetCounts()
-        {
-            Writes = 0;
-            Reads = 0;
-            Clears = 0;
-        }
+        Writes = 0;
+        Reads = 0;
+        Clears = 0;
     }
 }

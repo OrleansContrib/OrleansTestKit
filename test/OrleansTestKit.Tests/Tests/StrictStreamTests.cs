@@ -1,92 +1,88 @@
-﻿using System;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Orleans.TestKit.Streams;
+﻿using FluentAssertions;
 using TestGrains;
 using Xunit;
 
-namespace Orleans.TestKit.Tests
+namespace Orleans.TestKit.Tests;
+
+public class StrictStreamTests : TestKitBase
 {
-    public class StrictStreamTests : TestKitBase
+    public StrictStreamTests()
     {
-        public StrictStreamTests()
-        {
-            Silo.Options.StrictStreamProbes = true;
-        }
+        Silo.Options.StrictStreamProbes = true;
+    }
 
-        [Fact]
-        public async Task GrainSentMessages()
-        {
-            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+    [Fact]
+    public async Task GrainIsSubscribed()
+    {
+        var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
-            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+        await Silo.CreateGrainAsync<Listener>(1);
 
-            const string msg = "Hello Chat";
+        stream.Subscribed.Should().Be(1);
+    }
 
-            await chatty.SendChat(msg);
+    [Fact]
+    public async Task GrainReceives()
+    {
+        var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
-            stream.Sends.Should().Be(1);
-            stream.VerifySend(m => m.Msg == msg);
-        }
+        var grain = await Silo.CreateGrainAsync<Listener>(1);
 
-        [Fact]
-        public async Task IncorrectVerifyMessage()
-        {
-            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+        await stream.OnNextAsync(new ChatMessage("Ding"));
 
-            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+        (await grain.ReceivedCount()).Should().Be(1);
+    }
 
-            const string msg = "Hello Chat";
+    [Fact]
+    public async Task GrainSentMessages()
+    {
+        var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
-            await chatty.SendChat(msg);
+        var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
-            stream.Invoking(s => s.VerifySend(m => m.Msg == "This is not right")).Should().Throw<Exception>();
-        }
+        const string msg = "Hello Chat";
 
-        [Fact]
-        public async Task IncorrectProbeId()
-        {
-            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+        await chatty.SendChat(msg);
 
-            Silo.AddStreamProbe<ChatMessage>(Guid.NewGuid(), null);
+        stream.Sends.Should().Be(1);
+        stream.VerifySend(m => m.Msg == msg);
+    }
 
-            const string msg = "Hello Chat";
+    [Fact]
+    public async Task IncorrectProbeId()
+    {
+        var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
-            chatty.Invoking(p => p.SendChat(msg).Wait()).Should().Throw<Exception>();
-        }
+        Silo.AddStreamProbe<ChatMessage>(Guid.NewGuid(), null);
 
-        [Fact]
-        public async Task IncorrectProbeNamespace()
-        {
-            var chatty = await Silo.CreateGrainAsync<Chatty>(4);
+        const string msg = "Hello Chat";
 
-            Silo.AddStreamProbe<ChatMessage>(Guid.Empty, "Wrong");
+        chatty.Invoking(p => p.SendChat(msg).Wait()).Should().Throw<Exception>();
+    }
 
-            const string msg = "Hello Chat";
+    [Fact]
+    public async Task IncorrectProbeNamespace()
+    {
+        var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
-            chatty.Invoking(p => p.SendChat(msg).Wait()).Should().Throw<Exception>();
-        }
+        Silo.AddStreamProbe<ChatMessage>(Guid.Empty, "Wrong");
 
-        [Fact]
-        public async Task GrainIsSubscribed()
-        {
-            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+        const string msg = "Hello Chat";
 
-            await Silo.CreateGrainAsync<Listener>(1);
+        chatty.Invoking(p => p.SendChat(msg).Wait()).Should().Throw<Exception>();
+    }
 
-            stream.Subscribed.Should().Be(1);
-        }
+    [Fact]
+    public async Task IncorrectVerifyMessage()
+    {
+        var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
-        [Fact]
-        public async Task GrainReceives()
-        {
-            var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+        var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
 
-            var grain = await Silo.CreateGrainAsync<Listener>(1);
+        const string msg = "Hello Chat";
 
-            await stream.OnNextAsync(new ChatMessage("Ding"));
+        await chatty.SendChat(msg);
 
-            (await grain.ReceivedCount()).Should().Be(1);
-        }
+        stream.Invoking(s => s.VerifySend(m => m.Msg == "This is not right")).Should().Throw<Exception>();
     }
 }

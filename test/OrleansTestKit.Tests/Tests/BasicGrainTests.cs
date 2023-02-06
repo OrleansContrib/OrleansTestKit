@@ -1,156 +1,153 @@
-﻿using System;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using TestGrains;
 using TestInterfaces;
 using Xunit;
 
-namespace Orleans.TestKit.Tests
+namespace Orleans.TestKit.Tests;
+
+public class BasicGrainTests : TestKitBase
 {
-    public class BasicGrainTests : TestKitBase
+    [Fact]
+    public async Task GrainActivation()
     {
-        [Fact]
-        public async Task SiloSayHelloTest()
-        {
-            long id = new Random().Next();
-            const string greeting = "Bonjour";
+        var grain = await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
-            IHello grain = await Silo.CreateGrainAsync<HelloGrain>(id);
+        grain.ActivateCount.Should().Be(1);
+    }
 
-            // This will create and call a Hello grain with specified 'id' in one of the test silos.
-            string reply = await grain.SayHello(greeting);
+    [Fact]
+    public async Task GrainDeactivation()
+    {
+        var grain = await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
-            Assert.NotNull(reply);
-            Assert.Equal($"You said: '{greeting}', I say: Hello!", reply);
-        }
+        grain.DeactivateCount.Should().Be(0);
 
-        [Fact]
-        public async Task GrainActivation()
-        {
-            var grain = await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
+        await Silo.DeactivateAsync(grain);
 
-            grain.ActivateCount.Should().Be(1);
-        }
+        grain.DeactivateCount.Should().Be(1);
+    }
 
-        [Fact]
-        public async Task SecondGrainCreated()
-        {
-            await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
+    [Fact]
+    public async Task GuidCompoundKeyGrain()
+    {
+        var id = Guid.NewGuid();
+        var ext = "Thing";
 
-            Func<Task> creatingSecondGrainAsync = async () => await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
-            await creatingSecondGrainAsync.Should().ThrowAsync<Exception>();
-        }
+        var grain = await Silo.CreateGrainAsync<GuidCompoundKeyGrain>(id, ext);
 
-        [Fact]
-        public async Task GrainDeactivation()
-        {
-            var grain = await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
+        var key = await grain.GetKey();
 
-            grain.DeactivateCount.Should().Be(0);
+        key.Item1.Should().Be(id);
+        key.Item2.Should().Be(ext);
+    }
 
-            await Silo.DeactivateAsync(grain);
+    [Fact]
+    public async Task GuidKeyGrain()
+    {
+        var id = Guid.NewGuid();
 
-            grain.DeactivateCount.Should().Be(1);
-        }
+        var grain = await Silo.CreateGrainAsync<GuidKeyGrain>(id);
 
-        [Fact]
-        public async Task IntegerKeyGrain()
-        {
-            const int id = int.MaxValue;
+        var key = await grain.GetKey();
 
-            var grain = await Silo.CreateGrainAsync<IntegerKeyGrain>(id);
+        key.Should().Be(id);
+    }
 
-            var key = await grain.GetKey();
+    [Fact]
+    public async Task IntegerCompoundKeyGrain()
+    {
+        const int id = int.MaxValue;
+        var ext = "Thing";
 
-            key.Should().Be(id);
-        }
+        var grain = await Silo.CreateGrainAsync<IntegerCompoundKeyGrain>(id, ext);
 
-        [Fact]
-        public async Task IntegerCompoundKeyGrain()
-        {
-            const int id = int.MaxValue;
-            var ext = "Thing";
+        var key = await grain.GetKey();
 
-            var grain = await Silo.CreateGrainAsync<IntegerCompoundKeyGrain>(id, ext);
+        key.Item1.Should().Be(id);
+        key.Item2.Should().Be(ext);
+    }
 
-            var key = await grain.GetKey();
+    [Fact]
+    public async Task IntegerKeyGrain()
+    {
+        const int id = int.MaxValue;
 
-            key.Item1.Should().Be(id);
-            key.Item2.Should().Be(ext);
-        }
+        var grain = await Silo.CreateGrainAsync<IntegerKeyGrain>(id);
 
-        [Fact]
-        public async Task GuidKeyGrain()
-        {
-            var id = Guid.NewGuid();
+        var key = await grain.GetKey();
 
-            var grain = await Silo.CreateGrainAsync<GuidKeyGrain>(id);
+        key.Should().Be(id);
+    }
 
-            var key = await grain.GetKey();
+    [Fact]
+    public async Task SecondGrainCreated()
+    {
+        await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
 
-            key.Should().Be(id);
-        }
+        Func<Task> creatingSecondGrainAsync = async () => await Silo.CreateGrainAsync<LifecycleGrain>(new Random().Next());
+        await creatingSecondGrainAsync.Should().ThrowAsync<Exception>();
+    }
 
-        [Fact]
-        public async Task GuidCompoundKeyGrain()
-        {
-            var id = Guid.NewGuid();
-            var ext = "Thing";
+    [Fact]
+    public async Task SiloSayHelloTest()
+    {
+        long id = new Random().Next();
+        const string greeting = "Bonjour";
 
-            var grain = await Silo.CreateGrainAsync<GuidCompoundKeyGrain>(id, ext);
+        IHello grain = await Silo.CreateGrainAsync<HelloGrain>(id);
 
-            var key = await grain.GetKey();
+        // This will create and call a Hello grain with specified 'id' in one of the test silos.
+        string reply = await grain.SayHello(greeting);
 
-            key.Item1.Should().Be(id);
-            key.Item2.Should().Be(ext);
-        }
+        Assert.NotNull(reply);
+        Assert.Equal($"You said: '{greeting}', I say: Hello!", reply);
+    }
 
-        [Fact]
-        public async Task StringKeyGrain()
-        {
-            const string id = "TestId";
+    [Fact]
+    public async Task StatefulGuidKeyGrain()
+    {
+        var id = Guid.NewGuid();
 
-            var grain = await Silo.CreateGrainAsync<StringKeyGrain>(id);
+        var grain = await Silo.CreateGrainAsync<StatefulGuidKeyGrain>(id);
 
-            var key = await grain.GetKey();
+        var key = await grain.GetKey();
 
-            key.Should().Be(id);
-        }
+        key.Should().Be(id);
+    }
 
-        [Fact]
-        public async Task StatefulIntegerKeyGrain()
-        {
-            const int id = int.MaxValue;
+    [Fact]
+    public async Task StatefulIntegerKeyGrain()
+    {
+        const int id = int.MaxValue;
 
-            var grain = await Silo.CreateGrainAsync<StatefulIntegerKeyGrain>(id);
+        var grain = await Silo.CreateGrainAsync<StatefulIntegerKeyGrain>(id);
 
-            var key = await grain.GetKey();
+        var key = await grain.GetKey();
 
-            key.Should().Be(id);
-        }
+        key.Should().Be(id);
+    }
 
-        [Fact]
-        public async Task StatefulGuidKeyGrain()
-        {
-            var id = Guid.NewGuid();
+    [Fact]
+    public async Task StatefulStringKeyGrain()
+    {
+        const string id = "TestId";
 
-            var grain = await Silo.CreateGrainAsync<StatefulGuidKeyGrain>(id);
+        var grain = await Silo.CreateGrainAsync<StatefulStringKeyGrain>(id);
 
-            var key = await grain.GetKey();
+        var key = await grain.GetKey();
 
-            key.Should().Be(id);
-        }
+        key.Should().Be(id);
+    }
 
-        [Fact]
-        public async Task StatefulStringKeyGrain()
-        {
-            const string id = "TestId";
+    [Fact]
+    public async Task StringKeyGrain()
+    {
+        const string id = "TestId";
 
-            var grain = await Silo.CreateGrainAsync<StatefulStringKeyGrain>(id);
+        var grain = await Silo.CreateGrainAsync<StringKeyGrain>(id);
 
-            var key = await grain.GetKey();
+        var key = await grain.GetKey();
 
-            key.Should().Be(id);
-        }
+        key.Should().Be(id);
     }
 }

@@ -1,31 +1,26 @@
-﻿using System;
-using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IGuidCompoundKeyGrain : IGrainWithGuidCompoundKey
 {
-    public interface IGuidKeyGrain : IGrainWithGuidKey
-    {
-        Task<Guid> GetKey();
-    }
+    Task<(Guid, string)> GetKey();
+}
 
-    public interface IGuidCompoundKeyGrain : IGrainWithGuidCompoundKey
-    {
-        Task<(Guid, string)> GetKey();
-    }
+public interface IGuidKeyGrain : IGrainWithGuidKey
+{
+    Task<Guid> GetKey();
+}
 
-    public interface IIntegerCompoundKeyGrain : IGrainWithIntegerCompoundKey
-    {
-        Task<(long, string)> GetKey();
-    }
+public interface IIntegerCompoundKeyGrain : IGrainWithIntegerCompoundKey
+{
+    Task<(long, string)> GetKey();
+}
 
-    public interface IIntegerKeyGrain : IGrainWithIntegerKey
-    {
-        Task<long> GetKey();
-    }
+public interface IIntegerKeyGrain : IGrainWithIntegerKey
+{
+    Task<long> GetKey();
+}
 
-    public interface IStringKeyGrain : IGrainWithStringKey
-    {
-        Task<string> GetKey();
-    }
+public interface IStringKeyGrain : IGrainWithStringKey
+{
+    Task<string> GetKey();
 }

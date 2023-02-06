@@ -1,27 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Orleans;
-using TestInterfaces;
+﻿using TestInterfaces;
 
-namespace TestGrains
+namespace TestGrains;
+
+public sealed class GreetingArchiveGrain : Grain<GreetingArchiveGrainState>, IGreetingArchiveGrain
 {
-    public sealed class GreetingArchiveGrain : Grain<GreetingArchiveGrainState>, IGreetingArchiveGrain
+    public Task AddGreeting(string greeting)
     {
-        public Task AddGreeting(string greeting)
-        {
-            this.State.Greetings.Add(greeting);
-            return this.WriteStateAsync();
-        }
-
-        public Task<IEnumerable<string>> GetGreetings() =>
-            Task.FromResult<IEnumerable<string>>(this.State.Greetings);
-
-        public Task ResetGreetings() =>
-            this.ClearStateAsync();
+        this.State.Greetings.Add(greeting);
+        return this.WriteStateAsync();
     }
 
-    public sealed class GreetingArchiveGrainState
-    {
-        public List<string> Greetings { get; private set; } = new List<string>();
-    }
+    public Task<IEnumerable<string>> GetGreetings() =>
+        Task.FromResult<IEnumerable<string>>(this.State.Greetings);
+
+    public Task ResetGreetings() =>
+        this.ClearStateAsync();
+}
+
+public sealed class GreetingArchiveGrainState
+{
+    public List<string> Greetings { get; private set; } = new List<string>();
 }

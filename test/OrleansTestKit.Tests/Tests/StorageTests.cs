@@ -1,258 +1,252 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Orleans.Core;
 using Orleans.TestKit.Storage;
 using TestGrains;
 using Xunit;
 
-namespace Orleans.TestKit.Tests
+namespace Orleans.TestKit.Tests;
+
+public class CustomStorage<TState> : IStorageStats, IStorage<TState>
 {
-    public class CustomStorage<TState> :
-        IStorageStats,
-        IStorage<TState>
+    public CustomStorage()
     {
-        public CustomStorage()
-        {
-            Stats = new TestStorageStats() { Reads = -1 };
-            InitializeState();
-        }
-
-        public string Etag => throw new System.NotImplementedException();
-
-        public virtual bool RecordExists { get; set; }
-
-        public TState State { get; set; }
-
-        public TestStorageStats Stats { get; }
-
-        public Task ClearStateAsync()
-        {
-            InitializeState();
-            Stats.Clears++;
-            RecordExists = false;
-            return Task.CompletedTask;
-        }
-
-        public Task ReadStateAsync()
-        {
-            Stats.Reads++;
-            return Task.CompletedTask;
-        }
-
-        public Task WriteStateAsync()
-        {
-            Stats.Writes++;
-            RecordExists = true;
-            return Task.CompletedTask;
-        }
-
-        private void InitializeState()
-        {
-            if (!typeof(TState).IsValueType && typeof(TState).GetConstructor(Type.EmptyTypes) == null)
-            {
-                throw new NotSupportedException(
-                    $"No parameterless constructor defined for {typeof(TState).Name}. This is currently not supported");
-            }
-
-            State = Activator.CreateInstance<TState>();
-        }
+        Stats = new TestStorageStats() { Reads = -1 };
+        InitializeState();
     }
 
-    public class StorageTests : TestKitBase
+    public string Etag => throw new System.NotImplementedException();
+
+    public virtual bool RecordExists { get; set; }
+
+    public TState State { get; set; }
+
+    public TestStorageStats Stats { get; }
+
+    public Task ClearStateAsync()
     {
-        /// <summary>
-        ///     This test demonstrates how to assert changes occurred to the state object using the instance returned by
-        ///     the <see cref="StorageExtensions.State{TState}(TestKitSilo)"/> extension method.
-        /// </summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_AddGreeting_StateChanged()
+        InitializeState();
+        Stats.Clears++;
+        RecordExists = false;
+        return Task.CompletedTask;
+    }
+
+    public Task ReadStateAsync()
+    {
+        Stats.Reads++;
+        return Task.CompletedTask;
+    }
+
+    public Task WriteStateAsync()
+    {
+        Stats.Writes++;
+        RecordExists = true;
+        return Task.CompletedTask;
+    }
+
+    private void InitializeState()
+    {
+        if (!typeof(TState).IsValueType && typeof(TState).GetConstructor(Type.EmptyTypes) == null)
         {
-            // Arrange
-            const long id = 3000;
-            const string greeting1 = "Bonjour";
-            const string greeting2 = "Hei";
-
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
-
-            // Act
-            await grain.AddGreeting(greeting1);
-            await grain.AddGreeting(greeting2);
-
-            var greetings = (await grain.GetGreetings()).ToList();
-
-            // Assert
-            var state = this.Silo.State<GreetingArchiveGrainState>();
-            state.Greetings.Should().Equal(greeting1, greeting2);
-            greetings.Should().Equal(greeting1, greeting2);
-            Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+            throw new NotSupportedException(
+                $"No parameterless constructor defined for {typeof(TState).Name}. This is currently not supported");
         }
 
-        /// <summary>
-        ///     This test demonstrates how to assert a `WriteStateAsync` call occurred using the counters returned by
-        ///     the <see cref="StorageExtensions.StorageStats(TestKitSilo)"/> extension method.
-        /// </summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_AddGreeting_StatsChanged()
-        {
-            // Arrange
-            const long id = 4000;
-            const string greeting1 = "Salve";
-            const string greeting2 = "Konnichiwa";
+        State = Activator.CreateInstance<TState>();
+    }
+}
 
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+public class StorageTests : TestKitBase
+{
+    /// <summary>
+    ///     This test demonstrates how to assert changes occurred to the state object using the instance returned by the
+    ///     <see cref="StorageExtensions.State{TState}(TestKitSilo)"/> extension method.
+    /// </summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_AddGreeting_StateChanged()
+    {
+        // Arrange
+        const long id = 3000;
+        const string greeting1 = "Bonjour";
+        const string greeting2 = "Hei";
 
-            // Act
-            await grain.AddGreeting(greeting1);
-            await grain.AddGreeting(greeting2);
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-            var greetings = (await grain.GetGreetings()).ToList();
+        // Act
+        await grain.AddGreeting(greeting1);
+        await grain.AddGreeting(greeting2);
 
-            // Assert
-            var stats = this.Silo.StorageStats();
-            stats.Clears.Should().Be(0);
-            stats.Reads.Should().Be(0);
-            stats.Writes.Should().Be(2);
+        var greetings = (await grain.GetGreetings()).ToList();
 
-            greetings.Should().Equal(greeting1, greeting2);
-            Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
-        }
+        // Assert
+        var state = this.Silo.State<GreetingArchiveGrainState>();
+        state.Greetings.Should().Equal(greeting1, greeting2);
+        greetings.Should().Equal(greeting1, greeting2);
+        Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+    }
 
-        /// <summary>
-        ///     This test demonstrates how to customize the state object before the grain is initialized using the
-        ///     instance returned by the <see cref="StorageExtensions.State{TState}(TestKitSilo)"/> extension method.
-        /// </summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_GetGreetings_CustomInitialState()
-        {
-            // Arrange
-            const long id = 2000;
-            const string greeting = "Hola";
+    /// <summary>
+    ///     This test demonstrates how to assert a `WriteStateAsync` call occurred using the counters returned by the
+    ///     <see cref="StorageExtensions.StorageStats(TestKitSilo)"/> extension method.
+    /// </summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_AddGreeting_StatsChanged()
+    {
+        // Arrange
+        const long id = 4000;
+        const string greeting1 = "Salve";
+        const string greeting2 = "Konnichiwa";
 
-            var state = this.Silo.State<GreetingArchiveGrainState>();
-            state.Greetings.Add(greeting);
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+        // Act
+        await grain.AddGreeting(greeting1);
+        await grain.AddGreeting(greeting2);
 
-            // Act
-            var greetings = (await grain.GetGreetings()).ToList();
+        var greetings = (await grain.GetGreetings()).ToList();
 
-            // Assert
-            greetings.Should().Equal(greeting);
-        }
+        // Assert
+        var stats = this.Silo.StorageStats();
+        stats.Clears.Should().Be(0);
+        stats.Reads.Should().Be(0);
+        stats.Writes.Should().Be(2);
 
-        /// <summary>This test demonstrates how the grain is initialized with a default state object.</summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_GetGreetings_DefaultInitialState()
-        {
-            // Arrange
-            const long id = 1000;
+        greetings.Should().Equal(greeting1, greeting2);
+        Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+    }
 
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+    /// <summary>
+    ///     This test demonstrates how to customize the state object before the grain is initialized using the instance
+    ///     returned by the <see cref="StorageExtensions.State{TState}(TestKitSilo)"/> extension method.
+    /// </summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_GetGreetings_CustomInitialState()
+    {
+        // Arrange
+        const long id = 2000;
+        const string greeting = "Hola";
 
-            // Act
-            var greetings = (await grain.GetGreetings()).ToList();
+        var state = this.Silo.State<GreetingArchiveGrainState>();
+        state.Greetings.Add(greeting);
 
-            // Assert
-            greetings.Should().BeEmpty();
-        }
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-        /// <summary>This test demonstrates how to use storage factory.</summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_GetGreetings_WithCustomStateFactory()
-        {
-            // Arrange
-            this.Silo.Options.StorageFactory = type => Activator.CreateInstance(typeof(CustomStorage<>).MakeGenericType(type));
+        // Act
+        var greetings = (await grain.GetGreetings()).ToList();
 
-            const long id = 1000;
+        // Assert
+        greetings.Should().Equal(greeting);
+    }
 
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+    /// <summary>This test demonstrates how the grain is initialized with a default state object.</summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_GetGreetings_DefaultInitialState()
+    {
+        // Arrange
+        const long id = 1000;
 
-            // Act
-            var greetings = (await grain.GetGreetings()).ToList();
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-            // Assert
-            greetings.Should().BeEmpty();
-        }
+        // Act
+        var greetings = (await grain.GetGreetings()).ToList();
 
-        /// <summary>
-        ///     This test demonstrates how to assert changes occurred to the state object using the instance returned by
-        ///     the <see cref="StorageExtensions.State{TState}(TestKitSilo)"/> extension method.
-        /// </summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_ResetGreetings_StateChanged()
-        {
-            // Arrange
-            const long id = 5000;
-            const string greeting = "Olá";
+        // Assert
+        greetings.Should().BeEmpty();
+    }
 
-            var state = this.Silo.State<GreetingArchiveGrainState>();
-            state.Greetings.Add(greeting);
+    /// <summary>This test demonstrates how to use storage factory.</summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_GetGreetings_WithCustomStateFactory()
+    {
+        // Arrange
+        this.Silo.Options.StorageFactory = type => Activator.CreateInstance(typeof(CustomStorage<>).MakeGenericType(type));
 
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+        const long id = 1000;
 
-            // Act
-            await grain.ResetGreetings();
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-            var greetings = (await grain.GetGreetings()).ToList();
+        // Act
+        var greetings = (await grain.GetGreetings()).ToList();
 
-            // Assert
-            state = this.Silo.State<GreetingArchiveGrainState>();
-            state.Greetings.Should().BeEmpty();
+        // Assert
+        greetings.Should().BeEmpty();
+    }
 
-            greetings.Should().BeEmpty();
-            Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
-        }
+    /// <summary>
+    ///     This test demonstrates how to assert changes occurred to the state object using the instance returned by the
+    ///     <see cref="StorageExtensions.State{TState}(TestKitSilo)"/> extension method.
+    /// </summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_ResetGreetings_StateChanged()
+    {
+        // Arrange
+        const long id = 5000;
+        const string greeting = "Olá";
 
-        /// <summary>
-        ///     This test demonstrates how to assert a `ClearStateAsync` call occurred using the counters returned by
-        ///     the <see cref="StorageExtensions.StorageStats(TestKitSilo)"/> extension method.
-        /// </summary>
-        [Fact]
-        public async Task GreetingArchiveGrain_ResetGreetings_StatsChanged()
-        {
-            // Arrange
-            const long id = 6000;
-            const string greeting = "Hallo";
+        var state = this.Silo.State<GreetingArchiveGrainState>();
+        state.Greetings.Add(greeting);
 
-            var state = this.Silo.State<GreetingArchiveGrainState>();
-            state.Greetings.Add(greeting);
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-            var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
+        // Act
+        await grain.ResetGreetings();
 
-            // Act
-            await grain.ResetGreetings();
+        var greetings = (await grain.GetGreetings()).ToList();
 
-            var greetings = (await grain.GetGreetings()).ToList();
+        // Assert
+        state = this.Silo.State<GreetingArchiveGrainState>();
+        state.Greetings.Should().BeEmpty();
 
-            // Assert
-            var stats = this.Silo.StorageStats();
-            stats.Clears.Should().Be(1);
-            stats.Reads.Should().Be(0);
-            stats.Writes.Should().Be(0);
+        greetings.Should().BeEmpty();
+        Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+    }
 
-            greetings.Should().BeEmpty();
-            Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
-        }
+    /// <summary>
+    ///     This test demonstrates how to assert a `ClearStateAsync` call occurred using the counters returned by the
+    ///     <see cref="StorageExtensions.StorageStats(TestKitSilo)"/> extension method.
+    /// </summary>
+    [Fact]
+    public async Task GreetingArchiveGrain_ResetGreetings_StatsChanged()
+    {
+        // Arrange
+        const long id = 6000;
+        const string greeting = "Hallo";
 
-        /// <summary>This test demonstrates how to use the RecordExists flag</summary>
-        [Fact]
-        public async Task RecordExistsFlagTest()
-        {
-            var manager = new StorageManager(new TestKitOptions());
-            var state = manager.GetStorage<GreetingArchiveGrainState>();
+        var state = this.Silo.State<GreetingArchiveGrainState>();
+        state.Greetings.Add(greeting);
 
-            // be default, RecordExists is false
-            Assert.False(state.RecordExists);
+        var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
 
-            // Write and check that RecordExists is true
-            await state.WriteStateAsync();
-            Assert.True(state.RecordExists);
+        // Act
+        await grain.ResetGreetings();
 
-            // Clear and check that RecordExists is false
-            await state.ClearStateAsync();
-            Assert.False(state.RecordExists);
-        }
+        var greetings = (await grain.GetGreetings()).ToList();
+
+        // Assert
+        var stats = this.Silo.StorageStats();
+        stats.Clears.Should().Be(1);
+        stats.Reads.Should().Be(0);
+        stats.Writes.Should().Be(0);
+
+        greetings.Should().BeEmpty();
+        Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+    }
+
+    /// <summary>This test demonstrates how to use the RecordExists flag</summary>
+    [Fact]
+    public async Task RecordExistsFlagTest()
+    {
+        var manager = new StorageManager(new TestKitOptions());
+        var state = manager.GetStorage<GreetingArchiveGrainState>();
+
+        // be default, RecordExists is false
+        Assert.False(state.RecordExists);
+
+        // Write and check that RecordExists is true
+        await state.WriteStateAsync();
+        Assert.True(state.RecordExists);
+
+        // Clear and check that RecordExists is false
+        await state.ClearStateAsync();
+        Assert.False(state.RecordExists);
     }
 }

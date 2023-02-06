@@ -1,23 +1,20 @@
-﻿using System;
-using System.Threading.Tasks;
-using Orleans;
-using TestInterfaces;
+﻿using TestInterfaces;
 
-namespace TestGrains
+namespace TestGrains;
+
+public class DeactivationGrain : Grain, IDeactivationGrain
 {
-    public class DeactivationGrain : Grain, IDeactivationGrain
+    public Task DeactivateOnIdle()
     {
-        public Task DeactivateOnIdle() {
-            base.DeactivateOnIdle();
+        base.DeactivateOnIdle();
 
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
+    }
 
-        public Task DelayDeactivation(TimeSpan timeSpan)
-        {
-            base.DelayDeactivation(timeSpan);
+    public Task DelayDeactivation(TimeSpan timeSpan)
+    {
+        base.DelayDeactivation(timeSpan);
 
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
     }
 }

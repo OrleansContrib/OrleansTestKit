@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Orleans;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IDevice : IGrainWithStringKey
 {
-    public interface IDevice : IGrainWithStringKey
-    {
-        Task<string> GetDeviceType();
-    }
+    Task<string> GetDeviceType();
 }

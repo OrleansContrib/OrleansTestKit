@@ -1,10 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace TestInterfaces;
 
-namespace TestInterfaces
+public interface IDateTimeService
 {
-    public interface IDateTimeService
-    {
-        Task<DateTime> GetCurrentDate();
-    }
+    Task<DateTime> GetCurrentDate();
 }

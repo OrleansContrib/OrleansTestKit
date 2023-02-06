@@ -1,24 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
-using Orleans;
-using TestInterfaces;
+﻿namespace TestGrains;
 
-namespace TestGrains
+public interface IDIService
 {
-    public sealed class DIGrain : Grain, IGrainWithGuidKey
+    bool GetValue();
+}
+
+public sealed class DIGrain : Grain, IGrainWithGuidKey
+{
+    public DIGrain(IDIService service)
     {
-        public DIGrain(IDIService service)
-        {
-            Service = service;
-        }
-
-        public IDIService Service { get; }
-
-        public bool GetServiceValue() => Service.GetValue();
+        Service = service;
     }
 
-    public interface IDIService
-    {
-        bool GetValue();
-    }
+    public IDIService Service { get; }
+
+    public bool GetServiceValue() => Service.GetValue();
 }
