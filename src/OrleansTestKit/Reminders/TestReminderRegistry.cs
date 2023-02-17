@@ -1,4 +1,11 @@
-﻿using Moq;
+﻿#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
+using Moq;
+#endif
+
 using Orleans.Runtime;
 using Orleans.Timers;
 
@@ -10,7 +17,13 @@ public sealed class TestReminderRegistry : IReminderRegistry
 
     private IRemindable _grain;
 
+#if NSUBSTITUTE
+
+    public IReminderRegistry Mock { get; } = Substitute.For<IReminderRegistry>();
+
+#else
     public Mock<IReminderRegistry> Mock { get; } = new();
+#endif
 
     public async Task FireAllReminders(TickStatus tickStatus)
     {
@@ -42,13 +55,22 @@ public sealed class TestReminderRegistry : IReminderRegistry
             throw new ArgumentNullException(nameof(reminderName));
         }
 
+#if NSUBSTITUTE
+        await Mock.GetReminder(callingGrainId, reminderName);
+#else
         await Mock.Object.GetReminder(callingGrainId, reminderName);
+#endif
         return !_reminders.TryGetValue(reminderName, out var reminder) ? null : reminder;
     }
 
     public async Task<List<IGrainReminder>> GetReminders(GrainId callingGrainId)
     {
+#if NSUBSTITUTE
+        await Mock.GetReminders(callingGrainId);
+#else
         await Mock.Object.GetReminders(callingGrainId);
+#endif
+
         return _reminders.Values.ToList<IGrainReminder>();
     }
 
@@ -58,8 +80,11 @@ public sealed class TestReminderRegistry : IReminderRegistry
         {
             throw new ArgumentNullException(nameof(reminderName));
         }
-
+#if NSUBSTITUTE
+        await Mock.RegisterOrUpdateReminder(callingGrainId, reminderName, dueTime, period);
+#else
         await Mock.Object.RegisterOrUpdateReminder(callingGrainId, reminderName, dueTime, period);
+#endif
         var reminder = new TestReminder(reminderName, dueTime, period);
         _reminders[reminderName] = reminder;
         return reminder;
@@ -72,7 +97,11 @@ public sealed class TestReminderRegistry : IReminderRegistry
             throw new ArgumentNullException(nameof(reminder));
         }
 
+#if NSUBSTITUTE
+        await Mock.UnregisterReminder(callingGrainId, reminder);
+#else
         await Mock.Object.UnregisterReminder(callingGrainId, reminder);
+#endif
         _reminders.Remove(reminder.ReminderName);
     }
 

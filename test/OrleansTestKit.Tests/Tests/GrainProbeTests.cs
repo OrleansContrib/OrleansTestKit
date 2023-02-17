@@ -1,13 +1,268 @@
-﻿using FakeItEasy;
+﻿namespace Orleans.TestKit.Tests;
+
+#if NSUBSTITUTE
+
+using FakeItEasy;
 using FluentAssertions;
-using Moq;
+
 using NSubstitute;
 using TestGrains;
 using TestInterfaces;
 using Xunit;
-using Times = Moq.Times;
 
-namespace Orleans.TestKit.Tests;
+public class GrainProbeTests : TestKitBase
+{
+    [Fact]
+    public async Task FactoryProbe()
+    {
+        var pong = Substitute.For<IPong>();
+
+        Silo.AddProbe<IPong>(identity => pong);
+
+        var grain = await Silo.CreateGrainAsync<PingGrain>(1);
+
+        await grain.Ping();
+
+        pong.Received(1).Pong();
+    }
+
+    [Fact]
+    public async Task FactoryProbeWithMultipleNewProbes_FakeItEasy()
+    {
+        var firstUnknownGrain = A.Fake<IUnknownGrain>();
+        var secondUnknownGrain = A.Fake<IUnknownGrain>();
+        var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
+
+        Silo.AddProbe<IUnknownGrain>(identity =>
+        {
+            var nextProbe = probeQueue.Dequeue();
+
+            A.CallTo(() => nextProbe.WhatsMyId())
+                .Returns(identity.ToString());
+
+            return nextProbe;
+        });
+
+        var grain = await Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+
+        await grain.CreateAndPingMultiple();
+
+        var resolvedIds = await grain.GetResolvedUnknownGrainIdsAsync();
+        resolvedIds[0].Should().Be("unknownGrainOne");
+        resolvedIds[1].Should().Be("unknownGrainTwo");
+    }
+
+    [Fact]
+    public async Task FactoryProbeWithMultipleNewProbes_Moq()
+    {
+        // useful for when a grain needs to create other grains whose identities are not known beforehand and probes for
+        // the new grains need to return certain values
+
+        var firstUnknownGrain = Substitute.For<IUnknownGrain>();
+
+        var secondUnknownGrain = Substitute.For<IUnknownGrain>();
+        var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
+
+        Silo.AddProbe<IUnknownGrain>(identity =>
+        {
+            var nextProbe = probeQueue.Dequeue();
+
+            nextProbe.WhatsMyId().Returns(identity.ToString());
+
+            return nextProbe;
+        });
+
+        var grain = await Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+
+        await grain.CreateAndPingMultiple();
+
+        var resolvedIds = await grain.GetResolvedUnknownGrainIdsAsync();
+        resolvedIds[0].Should().Be("unknownGrainOne");
+        resolvedIds[1].Should().Be("unknownGrainTwo");
+    }
+
+    [Fact]
+    public async Task FactoryProbeWithMultipleNewProbes_NSubstitute()
+    {
+        var firstUnknownGrain = Substitute.For<IUnknownGrain>();
+        var secondUnknownGrain = Substitute.For<IUnknownGrain>();
+        var probeQueue = new Queue<IUnknownGrain>(new[] { firstUnknownGrain, secondUnknownGrain });
+
+        Silo.AddProbe<IUnknownGrain>(identity =>
+        {
+            var nextProbe = probeQueue.Dequeue();
+
+            nextProbe.WhatsMyId().Returns(identity.ToString());
+
+            return nextProbe;
+        });
+
+        var grain = await Silo.CreateGrainAsync<UnknownGrainResolver>("1");
+
+        await grain.CreateAndPingMultiple();
+
+        var resolvedIds = await grain.GetResolvedUnknownGrainIdsAsync();
+        resolvedIds[0].Should().Be("unknownGrainOne");
+        resolvedIds[1].Should().Be("unknownGrainTwo");
+    }
+
+    [Fact]
+    public async Task GuidCompoundKeyProbe()
+    {
+        var probe = Silo.AddProbe<IGuidCompoundKeyGrain>(Guid.NewGuid(), keyExtension: "Test");
+
+        var key = await probe.GetKey();
+
+        probe.Should().NotBeNull();
+        key.Item1.Should().Be(Guid.Empty);
+        key.Item2.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GuidKeyProbe()
+    {
+        var probe = Silo.AddProbe<IGuidKeyGrain>(Guid.NewGuid());
+
+        var key = await probe.GetKey();
+
+        probe.Should().NotBeNull();
+        key.Should().Be(Guid.Empty);
+    }
+
+    [Fact]
+    public async Task IntCompoundKeyProbe()
+    {
+        var probe = Silo.AddProbe<IIntegerCompoundKeyGrain>(2, keyExtension: "Test");
+
+        var key = await probe.GetKey();
+
+        probe.Should().NotBeNull();
+        key.Item1.Should().Be(0);
+        key.Item2.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task IntKeyProbe()
+    {
+        var probe = Silo.AddProbe<IIntegerKeyGrain>(2);
+
+        var key = await probe.GetKey();
+
+        probe.Should().NotBeNull();
+        key.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task InvalidProbe()
+    {
+        IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
+
+        //This uses the wrong id for the IPong since this is hard coded within PingGrain
+        var pong = Silo.AddProbe<IPong>(0);
+
+        await grain.Invoking(p => p.Ping()).Should().NotThrowAsync();
+
+        pong.DidNotReceive().Pong();
+    }
+
+    [Fact]
+    public async Task InvalidProbeType()
+    {
+        IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
+
+        //This correct id, but a different grain type
+        var pong = Silo.AddProbe<IPong2>(22);
+
+        await grain.Invoking(p => p.Ping()).Should().NotThrowAsync();
+
+        pong.DidNotReceive().Pong2();
+    }
+
+    [Fact]
+    public async Task MissingProbe()
+    {
+        IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
+
+        //There should not be an exception, since we are using loose grain generation
+        await grain.Invoking(p => p.Ping()).Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task ProbeWithClassPrefix()
+    {
+        var androidMock = Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
+        var iosMock = Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
+
+        var managerGrain = await Silo.CreateGrainAsync<DeviceManagerGrain>(0);
+        var androidGrain = await managerGrain.GetDeviceGrain("Android");
+        var iosGrain = await managerGrain.GetDeviceGrain("IOS");
+
+        androidGrain.Should().BeSameAs(androidMock);
+        iosGrain.Should().BeSameAs(iosMock);
+    }
+
+    [Fact]
+    public async Task ProbeWithClassPrefix2()
+    {
+        var androidMock = Silo.AddProbe<IDevice>("Android", "TestGrains.DeviceAndroidGrain");
+        androidMock.GetDeviceType().Returns("Linux");
+        var iosMock = Silo.AddProbe<IDevice>("IOS", "TestGrains.DeviceIosGrain");
+        iosMock.GetDeviceType().Returns("BSD");
+
+        var managerGrain = await Silo.CreateGrainAsync<DeviceManagerGrain>(0);
+        var androidType = await managerGrain.GetDeviceType("Android");
+        var iosType = await managerGrain.GetDeviceType("IOS");
+
+        androidType.Should().Be("Linux");
+        iosType.Should().Be("BSD");
+    }
+
+    [Fact]
+    public async Task SetupCompoundProbe()
+    {
+        IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
+
+        var pong = Silo.AddProbe<IPongCompound>(44, keyExtension: "Test");
+
+        await grain.PingCompound();
+
+        pong.Received(1).Pong();
+    }
+
+    [Fact]
+    public async Task SetupProbe()
+    {
+        IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
+
+        var pong = Silo.AddProbe<IPong>(22);
+
+        await grain.Ping();
+
+        pong.Received(1).Pong();
+    }
+
+    [Fact]
+    public async Task StringKeyProbe()
+    {
+        var probe = Silo.AddProbe<IStringKeyGrain>("ABC");
+
+        var key = await probe.GetKey();
+
+        probe.Should().NotBeNull();
+        key.Should().BeNullOrWhiteSpace();
+    }
+}
+
+#else
+
+using FakeItEasy;
+using FluentAssertions;
+
+using Moq;
+using TestGrains;
+using TestInterfaces;
+using Xunit;
+using Times = Moq.Times;
 
 public class GrainProbeTests : TestKitBase
 {
@@ -251,3 +506,4 @@ public class GrainProbeTests : TestKitBase
         key.Should().BeNull();
     }
 }
+#endif

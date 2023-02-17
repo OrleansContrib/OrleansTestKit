@@ -1,4 +1,11 @@
-﻿using Moq;
+﻿#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
+using Moq;
+#endif
+
 using Orleans.Runtime;
 
 namespace Orleans.TestKit;
@@ -72,6 +79,18 @@ public sealed class TestGrainFactory : IGrainFactory
     public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey, string keyExtension) =>
         throw new NotImplementedException();
 
+#if NSUBSTITUTE
+
+    internal T AddProbe<T>(IdSpan identity, string? grainClassNamePrefix = null)
+        where T : class, IGrain
+    {
+        var key = GetKey(identity, typeof(T), grainClassNamePrefix);
+        var mock = Substitute.For<T>();
+        _probes.Add(key, mock);
+        return mock;
+    }
+
+#else
     internal Mock<T> AddProbe<T>(IdSpan identity, string? grainClassNamePrefix = null)
         where T : class, IGrain
     {
@@ -80,17 +99,29 @@ public sealed class TestGrainFactory : IGrainFactory
         _probes.Add(key, mock.Object);
         return mock;
     }
+#endif
 
     internal void AddProbe<T>(Func<IdSpan, T> factory)
         where T : class, IGrain =>
         _probeFactories.Add(typeof(T), factory);
 
+#if NSUBSTITUTE
+
+    internal void AddProbe<T>(Func<IdSpan> factory)
+        where T : class, IGrain
+    {
+        var adaptedFactory = new Func<IdSpan, T>(grainIdentity => Substitute.For<T>(grainIdentity));
+        AddProbe<T>(adaptedFactory);
+    }
+
+#else
     internal void AddProbe<T>(Func<IdSpan, IMock<T>> factory)
         where T : class, IGrain
     {
         var adaptedFactory = new Func<IdSpan, T>(grainIdentity => factory(grainIdentity)?.Object);
         AddProbe<T>(adaptedFactory);
     }
+#endif
 
     private static string GetKey(IdSpan identity, Type stateType, string? classPrefix = null) =>
         classPrefix == null
@@ -120,8 +151,15 @@ public sealed class TestGrainFactory : IGrainFactory
             }
             else
             {
+#if NSUBSTITUTE
+
+                var mock = Substitute.For(new Type[] { typeof(T) }, new object[] { });
+
+                grain = (T)mock;
+#else
                 var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
                 grain = mock?.Object;
+#endif
             }
 
             // Save the newly created grain for the next call

@@ -1,5 +1,14 @@
 ﻿using FluentAssertions;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+
+#else
 using Moq;
+#endif
+
 using Orleans.Streams;
 using TestGrains;
 using Xunit;
@@ -114,11 +123,18 @@ public class StreamTests : TestKitBase
         var chatty = await Silo.CreateGrainAsync<Chatty>(4);
 
         var stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null);
+#if NSUBSTITUTE
+        var mockObserver = Substitute.For<IAsyncObserver<ChatMessage>>();
+        mockObserver.OnNextAsync(Arg.Any<ChatMessage>(), Arg.Any<StreamSequenceToken>()).Throws<Exception>();
+
+        await stream.SubscribeAsync(mockObserver);
+#else
         var mockObserver = new Mock<IAsyncObserver<ChatMessage>>();
         mockObserver.Setup(o => o.OnNextAsync(It.IsAny<ChatMessage>(), It.IsAny<StreamSequenceToken>()))
             .Throws<Exception>();
 
         await stream.SubscribeAsync(mockObserver.Object);
+#endif
 
         var msgs = new[] { "Hello Chat", "Goodbye Chat" };
 

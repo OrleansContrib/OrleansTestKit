@@ -1,4 +1,11 @@
-﻿using Moq;
+﻿#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
+using Moq;
+#endif
+
 using Orleans.Core;
 using Orleans.Runtime;
 using Orleans.TestKit.Storage;
@@ -6,7 +13,7 @@ using Orleans.Timers;
 
 namespace Orleans.TestKit;
 
-internal sealed class TestGrainRuntime : IGrainRuntime
+public sealed class TestGrainRuntime : IGrainRuntime
 {
     private readonly StorageManager _storageManager;
 
@@ -21,7 +28,14 @@ internal sealed class TestGrainRuntime : IGrainRuntime
 
     public IGrainFactory GrainFactory { get; }
 
+#if NSUBSTITUTE
+
+    public IGrainRuntime Mock { get; } = Substitute.For<IGrainRuntime>();
+
+#else
     public Mock<IGrainRuntime> Mock { get; } = new Mock<IGrainRuntime>();
+
+#endif
 
     public IReminderRegistry ReminderRegistry { get; }
 
@@ -42,7 +56,11 @@ internal sealed class TestGrainRuntime : IGrainRuntime
             throw new ArgumentNullException(nameof(grain));
         }
 
+#if NSUBSTITUTE
+        Mock.DeactivateOnIdle(grain);
+#else
         Mock.Object.DeactivateOnIdle(grain);
+#endif
     }
 
     public void DelayDeactivation(IGrainContext grain, TimeSpan timeSpan)
@@ -51,8 +69,11 @@ internal sealed class TestGrainRuntime : IGrainRuntime
         {
             throw new ArgumentNullException(nameof(grain));
         }
-
+#if NSUBSTITUTE
+        Mock.DelayDeactivation(grain, timeSpan);
+#else
         Mock.Object.DelayDeactivation(grain, timeSpan);
+#endif
     }
 
     public IStorage<TGrainState> GetStorage<TGrainState>(IGrainContext grain) =>

@@ -1,6 +1,15 @@
 ﻿using System.Reflection;
 using FluentAssertions;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+
+#else
 using Moq;
+#endif
+
 using Orleans.Runtime;
 using Orleans.Storage;
 using TestGrains;
@@ -18,7 +27,15 @@ public class StorageFacetTests : TestKitBase
     {
         // Arrange
         var state = new ColorGrainState();
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
 
@@ -26,7 +43,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
-
+#endif
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
         // Act
@@ -46,6 +63,15 @@ public class StorageFacetTests : TestKitBase
             Id = GrainId,
         };
 
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
+
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
 
@@ -53,7 +79,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
-
+#endif
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
         // Act
@@ -68,7 +94,15 @@ public class StorageFacetTests : TestKitBase
     {
         // Arrange
         var state = new ColorGrainState();
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
 
@@ -76,6 +110,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
+#endif
 
         // Act
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
@@ -90,7 +125,15 @@ public class StorageFacetTests : TestKitBase
     {
         // Arrange
         var state = new ColorGrainState();
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.ClearStateAsync());
@@ -99,6 +142,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
+#endif
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -112,7 +156,11 @@ public class StorageFacetTests : TestKitBase
         // Note that the following assert ties this test to the _implementation_ details. Generally, one should try to
         // avoid tying the test to the implementation details. It can lead to more brittle tests. However, one may
         // choose to accept this as a trade-off when the implementation detail represents an important behavior.
+#if NSUBSTITUTE
+        mockState.DidNotReceive().ClearStateAsync();
+#else
         mockState.Verify(o => o.ClearStateAsync(), Times.Never);
+#endif
     }
 
     [Fact]
@@ -125,6 +173,16 @@ public class StorageFacetTests : TestKitBase
             Id = GrainId,
         };
 
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
+        mockState.ClearStateAsync();
+
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.ClearStateAsync());
@@ -134,13 +192,18 @@ public class StorageFacetTests : TestKitBase
 
         Silo.AddService(mockMapper.Object);
 
+#endif
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
         // Act
         await grain.ResetColor();
 
         // Assert
+#if NSUBSTITUTE
+        mockState.Received().ClearStateAsync();
+#else
         mockState.Verify(o => o.ClearStateAsync(), Times.Once);
+#endif
     }
 
     [Fact]
@@ -148,7 +211,15 @@ public class StorageFacetTests : TestKitBase
     {
         // Arrange
         var state = new ColorGrainState();
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.WriteStateAsync());
@@ -157,7 +228,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
-
+#endif
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
         // Act
@@ -175,7 +246,15 @@ public class StorageFacetTests : TestKitBase
     {
         // Arrange
         var state = new ColorGrainState();
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.WriteStateAsync());
@@ -184,6 +263,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
+#endif
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
         Action action = () => grain.SetColor(color);
@@ -198,7 +278,16 @@ public class StorageFacetTests : TestKitBase
     {
         // Arrange
         var state = new ColorGrainState();
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
+        mockState.WriteStateAsync().Throws<InconsistentStateException>();
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.WriteStateAsync()).Throws<InconsistentStateException>();
@@ -207,7 +296,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
-
+#endif
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
         Action action = () => grain.SetColor(Color.Green);
 
@@ -224,7 +313,16 @@ public class StorageFacetTests : TestKitBase
             Color = Color.Red,
             Id = GrainId,
         };
+#if NSUBSTITUTE
+        var mockState = Substitute.For<IPersistentState<ColorGrainState>>();
+        mockState.State.Returns(state);
+        mockState.ClearStateAsync();
 
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => mockState);
+
+        Silo.AddService(mockMapper);
+#else
         var mockState = new Mock<IPersistentState<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.ClearStateAsync());
@@ -233,7 +331,7 @@ public class StorageFacetTests : TestKitBase
         mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
 
         Silo.AddService(mockMapper.Object);
-
+#endif
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
         // Act

@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.CodeCoverage" Version="17.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.1.0" />
-    <PackageReference Include="NSubstitute" Version="4.4.0" />
+    
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
     <PackageReference Include="xunit" Version="2.4.2" />
     <PackageReference Include="xunit.analyzers" Version="1.1.0" />
@@ -24,5 +24,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\OrleansTestKit\OrleansTestKit.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(Flavor)'=='nsubstitute'">
+    <DefineConstants>$(DefineConstants);NSUBSTITUTE</DefineConstants>
+  </PropertyGroup>
 
 </Project>

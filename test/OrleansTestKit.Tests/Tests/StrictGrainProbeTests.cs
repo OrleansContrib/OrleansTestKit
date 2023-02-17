@@ -1,5 +1,13 @@
 ﻿using FluentAssertions;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
 using Moq;
+#endif
+
 using TestGrains;
 using TestInterfaces;
 using Xunit;
@@ -23,8 +31,11 @@ public class StrictGrainProbeTests : TestKitBase
         var pong = Silo.AddProbe<IPong>(0);
 
         await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
-
+#if NSUBSTITUTE
+        pong.DidNotReceive().Pong();
+#else
         pong.Verify(p => p.Pong(), Times.Never);
+#endif
     }
 
     [Fact]
@@ -37,7 +48,11 @@ public class StrictGrainProbeTests : TestKitBase
 
         await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
 
+#if NSUBSTITUTE
+        pong.DidNotReceive().Pong2();
+#else
         pong.Verify(p => p.Pong2(), Times.Never);
+#endif
     }
 
     [Fact]
@@ -57,6 +72,10 @@ public class StrictGrainProbeTests : TestKitBase
 
         await grain.Ping();
 
+#if NSUBSTITUTE
+        pong.Received(1).Pong();
+#else
         pong.Verify(p => p.Pong(), Times.Once);
+#endif
     }
 }

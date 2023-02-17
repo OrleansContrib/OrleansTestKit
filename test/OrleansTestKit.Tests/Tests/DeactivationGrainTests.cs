@@ -1,4 +1,11 @@
-﻿using Moq;
+﻿#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
+using Moq;
+#endif
+
 using TestGrains;
 using Xunit;
 
@@ -18,7 +25,11 @@ public class DeactivationGrainTests : TestKitBase
         var context = Silo.GetContextFromGrain(grain);
 
         // Assert
+#if NSUBSTITUTE
+        Silo.GrainRuntime.Mock.Received(1).DeactivateOnIdle(context);
+#else
         Silo.VerifyRuntime(i => i.DeactivateOnIdle(context), Times.Once);
+#endif
     }
 
     [Fact]
@@ -34,6 +45,10 @@ public class DeactivationGrainTests : TestKitBase
         var context = Silo.GetContextFromGrain(grain);
 
         // Assert
-        Silo.VerifyRuntime(i => i.DelayDeactivation(context, timeSpan), Times.Once);
+#if NSUBSTITUTE
+        Silo.GrainRuntime.Mock.Received(1).DelayDeactivation(context, timeSpan);
+#else
+Silo.VerifyRuntime(i => i.DelayDeactivation(context, timeSpan), Times.Once);
+#endif
     }
 }

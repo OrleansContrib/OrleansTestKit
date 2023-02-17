@@ -1,6 +1,16 @@
 ﻿using System.Collections.ObjectModel;
-using System.Linq.Expressions;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
+
 using Moq;
+using System.Linq.Expressions;
+
+#endif
+
 using Orleans.Runtime;
 using Orleans.Streams;
 using Orleans.TestKit.Reminders;
@@ -47,6 +57,8 @@ public sealed class TestKitSilo
     ///     the grain, not any test code.
     /// </summary>
     public TestGrainFactory GrainFactory { get; }
+
+    public TestGrainRuntime GrainRuntime => _grainRuntime;
 
     /// <summary>Gets the test silo options.</summary>
     public TestKitOptions Options { get; } = new();
@@ -140,8 +152,14 @@ public sealed class TestKitSilo
         return handler;
     }
 
+#if NSUBSTITUTE
+
+#else
+
     public void VerifyRuntime(Expression<Action<IGrainRuntime>> expression, Func<Times> times) =>
         _grainRuntime.Mock.Verify(expression, times);
+
+#endif
 
     private async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default) where T : Grain
     {

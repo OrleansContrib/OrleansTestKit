@@ -1,5 +1,13 @@
 ﻿using System.Reflection;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
 using Moq;
+#endif
+
 using Orleans.Runtime;
 using Orleans.Streams;
 using Orleans.TestKit.Streams;
@@ -10,7 +18,13 @@ namespace Orleans.TestKit.Tests;
 
 public class PersistantStreamNotWithinGrainStateTests : TestKitBase
 {
+#if NSUBSTITUTE
+
+    private readonly IPersistentState<PersistentListenerStateWithoutHandle> _persistentState;
+
+#else
     private readonly Mock<IPersistentState<PersistentListenerStateWithoutHandle>> _persistentState;
+#endif
 
     private readonly PersistentListenerStateWithoutHandle _stateWithoutHandle;
 
@@ -20,6 +34,14 @@ public class PersistantStreamNotWithinGrainStateTests : TestKitBase
     {
         _stateWithoutHandle = new PersistentListenerStateWithoutHandle();
 
+#if NSUBSTITUTE
+        _persistentState = Substitute.For<IPersistentState<PersistentListenerStateWithoutHandle>>();
+        _persistentState.State.Returns(_stateWithoutHandle);
+
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>()).Returns(context => _persistentState);
+        Silo.AddService(mockMapper);
+#else
         _persistentState = new Mock<IPersistentState<PersistentListenerStateWithoutHandle>>();
         _persistentState.SetupGet(o => o.State).Returns(_stateWithoutHandle);
 
@@ -27,8 +49,8 @@ public class PersistantStreamNotWithinGrainStateTests : TestKitBase
         mockMapper.Setup(o =>
                 o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>()))
             .Returns(context => _persistentState.Object);
-
-        Silo.AddService(mockMapper.Object);
+            Silo.AddService(mockMapper.Object);
+#endif
 
         _stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null, "Default");
     }

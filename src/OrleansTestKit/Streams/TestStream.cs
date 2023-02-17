@@ -1,5 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
 using Moq;
+#endif
+
+using System.Diagnostics.CodeAnalysis;
 using Orleans.Runtime;
 using Orleans.Streams;
 
@@ -11,7 +18,13 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
 {
     private readonly List<StreamSubscriptionHandle<T>> _handlers = new List<StreamSubscriptionHandle<T>>();
 
+#if NSUBSTITUTE
+
+    private readonly IAsyncStream<T> _mockStream = Substitute.For<IAsyncStream<T>>();
+
+#else
     private readonly Mock<IAsyncStream<T>> _mockStream = new Mock<IAsyncStream<T>>();
+#endif
 
     private readonly List<IAsyncObserver<T>> _observers = new List<IAsyncObserver<T>>();
 
@@ -64,7 +77,11 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     public Task OnNextAsync(T item, StreamSequenceToken token = null)
     {
         Sends++;
+#if NSUBSTITUTE
+        _mockStream.OnNextAsync(item, token);
+#else
         _mockStream.Object.OnNextAsync(item, token);
+#endif
         return Task.WhenAll(_observers.ToList().Select(o => o.OnNextAsync(item, token)));
     }
 
@@ -118,11 +135,19 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T> observer, StreamSequenceToken token) =>
         throw new NotImplementedException();
 
+#if NSUBSTITUTE
+
+    public void VerifySend(Func<T, bool> check) => VerifySend(check, 1);
+
+    public void VerifySend(Func<T, bool> check, int times) => _mockStream.Received(times).OnNextAsync(Arg.Is<T>(a => check(a)), Arg.Any<StreamSequenceToken>());
+
+#else
     public void VerifySend(Func<T, bool> check) =>
         VerifySend(check, Times.Once());
 
     public void VerifySend(Func<T, bool> check, Times times) =>
         _mockStream.Verify(s => s.OnNextAsync(It.Is<T>(a => check(a)), It.IsAny<StreamSequenceToken>()), times);
+#endif
 
     private TestStreamSubscriptionHandle<T> CreateEmptyStreamHandlerImpl(
         Action<IAsyncObserver<T>> onAttachingObserver = null)

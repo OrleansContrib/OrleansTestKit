@@ -19,19 +19,24 @@
     <RootNamespace>Orleans.TestKit</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Flavor)'=='nsubstitute'">
+    <PackageId>$(AssemblyName).NSubstitute</PackageId>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="DotNetAnalyzers.DocumentationAnalyzers" Version="1.0.0-beta.59">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Orleans.Reminders" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="7.1.0" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Orleans.Runtime" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Runtime" Version="7.1.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Moq" Version="4.18.4" />
+    <PackageReference Include="NSubstitute" Version="5.0.0" Condition="'$(Flavor)'=='nsubstitute'"/>
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -41,5 +46,10 @@
   <ItemGroup>
     <None Include="$(ProjectRoot)assets/logo_128.png" Pack="true" Visible="false" PackagePath="/" />
   </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(Flavor)'=='nsubstitute'">
+    <DefineConstants>$(DefineConstants);NSUBSTITUTE</DefineConstants>
+  </PropertyGroup>
 
 </Project>

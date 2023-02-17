@@ -1,4 +1,8 @@
-﻿using Moq;
+﻿#if NSUBSTITUTE
+
+#else
+using Moq;
+#endif
 
 namespace Orleans.TestKit;
 
@@ -15,7 +19,32 @@ public static class TestServicesExtensions
         return silo.ServiceProvider.AddService(instance);
     }
 
-    public static Mock<T> AddServiceProbe<T>(this TestKitSilo silo)
+#if NSUBSTITUTE
+
+    public static T AddServiceProbe<T>(this TestKitSilo silo)
+            where T : class
+    {
+        if (silo == null)
+        {
+            throw new ArgumentNullException(nameof(silo));
+        }
+
+        return silo.ServiceProvider.AddServiceProbe<T>();
+    }
+
+    public static T AddServiceProbe<T>(this TestKitSilo silo, T mock)
+        where T : class
+    {
+        if (silo == null)
+        {
+            throw new ArgumentNullException(nameof(silo));
+        }
+
+        return silo.ServiceProvider.AddServiceProbe(mock);
+    }
+
+#else
+public static Mock<T> AddServiceProbe<T>(this TestKitSilo silo)
         where T : class
     {
         if (silo == null)
@@ -36,4 +65,5 @@ public static class TestServicesExtensions
 
         return silo.ServiceProvider.AddServiceProbe(mock);
     }
+#endif
 }

@@ -1,5 +1,13 @@
 ﻿using FluentAssertions;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
 using Moq;
+#endif
+
 using Orleans.Runtime;
 using TestGrains;
 using Xunit;
@@ -26,7 +34,11 @@ public class ReminderTests : TestKitBase
         }
 
         // Assert
+#if NSUBSTITUTE
+        Silo.ReminderRegistry.Mock.Received().RegisterOrUpdateReminder(Silo.GetGrainId(grain), reminderName, due, period);
+#else
         Silo.ReminderRegistry.Mock.Verify(x => x.RegisterOrUpdateReminder(Silo.GetGrainId(grain), reminderName, due, period));
+#endif
     }
 
     [Fact]
@@ -151,7 +163,11 @@ public class ReminderTests : TestKitBase
         }
 
         // Assert
+#if NSUBSTITUTE
+        Silo.ReminderRegistry.Mock.Received().UnregisterReminder(Silo.GetGrainId(grain), Arg.Is<IGrainReminder>(r => r.ReminderName == reminderName));
+#else
         Silo.ReminderRegistry.Mock.Verify(x => x.UnregisterReminder(Silo.GetGrainId(grain), It.Is<IGrainReminder>(r => r.ReminderName == reminderName)));
+#endif
     }
 
     [Fact]
@@ -167,6 +183,10 @@ public class ReminderTests : TestKitBase
         }
 
         // Assert
+#if NSUBSTITUTE
+        Silo.ReminderRegistry.Mock.Received(1).GetReminder(Silo.GetGrainId(grain), "a");
+#else
         Silo.ReminderRegistry.Mock.Verify(v => v.GetReminder(Silo.GetGrainId(grain), "a"), Times.Once);
+#endif
     }
 }

@@ -1,5 +1,13 @@
 ﻿using System.Reflection;
+
+#if NSUBSTITUTE
+
+using NSubstitute;
+
+#else
 using Moq;
+#endif
+
 using Orleans.Runtime;
 using Orleans.Streams;
 using Orleans.TestKit.Streams;
@@ -10,7 +18,13 @@ namespace Orleans.TestKit.Tests;
 
 public class PersistentStreamWithinGrainStateTests : TestKitBase
 {
+#if NSUBSTITUTE
+
+    private readonly IPersistentState<PersistentListenerStateWithHandle> _persistentState;
+
+#else
     private readonly Mock<IPersistentState<PersistentListenerStateWithHandle>> _persistentState;
+#endif
 
     private readonly PersistentListenerStateWithHandle _stateWithHandle;
 
@@ -20,6 +34,16 @@ public class PersistentStreamWithinGrainStateTests : TestKitBase
     {
         _stateWithHandle = new PersistentListenerStateWithHandle();
 
+#if NSUBSTITUTE
+        _persistentState = Substitute.For<IPersistentState<PersistentListenerStateWithHandle>>();
+        _persistentState.State.Returns(_stateWithHandle);
+
+        var mockMapper = Substitute.For<IAttributeToFactoryMapper<PersistentStateAttribute>>();
+        mockMapper.GetFactory(Arg.Any<ParameterInfo>(), Arg.Any<PersistentStateAttribute>())
+            .Returns(context => _persistentState);
+
+        Silo.AddService(mockMapper);
+#else
         _persistentState = new Mock<IPersistentState<PersistentListenerStateWithHandle>>();
         _persistentState.SetupGet(o => o.State).Returns(_stateWithHandle);
 
@@ -29,7 +53,7 @@ public class PersistentStreamWithinGrainStateTests : TestKitBase
             .Returns(context => _persistentState.Object);
 
         Silo.AddService(mockMapper.Object);
-
+#endif
         _stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null, "Default");
     }
 
@@ -71,6 +95,11 @@ public class PersistentStreamWithinGrainStateTests : TestKitBase
         //Assert
         Assert.Equal(1, _stream.Subscribed);
         Assert.NotNull(_stateWithHandle.ChatMessageStreamSubscriptionHandle);
+
+#if NSUBSTITUTE
+        _persistentState.Received(1).WriteStateAsync();
+#else
         _persistentState.Verify(x => x.WriteStateAsync(), Times.Once);
+#endif
     }
 }
