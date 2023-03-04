@@ -2,10 +2,14 @@
 
 namespace TestGrains;
 
-public class DeviceAndroidGrain : Grain, IDevice
+using Orleans.Runtime;
+
+public class DeviceAndroidGrain : IGrainBase, IDevice
 {
     public Task<string> GetDeviceType()
     {
         return Task.FromResult("Android");
     }
+
+    public IGrainContext GrainContext { get; set; }
 }

@@ -555,6 +555,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.idea/
 
 ## VisualStudioCode.gitignore
 ## https://github.com/github/gitignore
