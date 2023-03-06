@@ -13,7 +13,7 @@ public class PingGrain : Grain, IPing
 
     public Task PingCompound()
     {
-        var pong = GrainFactory.GetGrain<IPongCompound>(44, keyExtension: "Test");
+        var pong = (IPongCompound)GrainFactory.GetGrain(typeof(IPongCompound),44, keyExtension: "Test");
 
         return pong.Pong();
     }

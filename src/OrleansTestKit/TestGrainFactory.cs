@@ -58,19 +58,19 @@ public sealed class TestGrainFactory : IGrainFactory
         throw new NotImplementedException();
 
     public IGrain GetGrain(Type grainInterfaceType, Guid grainPrimaryKey) =>
-        throw new NotImplementedException();
+        GetProbe(grainInterfaceType, GrainIdKeyExtensions.CreateGuidKey(grainPrimaryKey), null);
 
     public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey) =>
-        throw new NotImplementedException();
+        GetProbe(grainInterfaceType, GrainIdKeyExtensions.CreateIntegerKey(grainPrimaryKey), null);
 
     public IGrain GetGrain(Type grainInterfaceType, string grainPrimaryKey) =>
-        throw new NotImplementedException();
+        GetProbe(grainInterfaceType, IdSpan.Create(grainPrimaryKey), null);
 
     public IGrain GetGrain(Type grainInterfaceType, Guid grainPrimaryKey, string keyExtension) =>
-        throw new NotImplementedException();
+        GetProbe(grainInterfaceType, GrainIdKeyExtensions.CreateGuidKey(grainPrimaryKey, keyExtension), null);
 
     public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey, string keyExtension) =>
-        throw new NotImplementedException();
+        GetProbe(grainInterfaceType, GrainIdKeyExtensions.CreateIntegerKey(grainPrimaryKey, keyExtension), null);
 
     internal Mock<T> AddProbe<T>(IdSpan identity, string? grainClassNamePrefix = null)
         where T : class, IGrain
@@ -100,34 +100,40 @@ public sealed class TestGrainFactory : IGrainFactory
     private T GetProbe<T>(IdSpan identity, string? grainClassNamePrefix)
         where T : IGrain
     {
-        var key = GetKey(identity, typeof(T), grainClassNamePrefix);
+        var grain = GetProbe(typeof(T), identity, grainClassNamePrefix);
+        return (T)grain;
+    }
+
+    private IGrain GetProbe(Type grainType, IdSpan identity, string? grainClassNamePrefix)
+    {
+        var key = GetKey(identity, grainType, grainClassNamePrefix);
         if (_probes.TryGetValue(key, out var grain))
         {
-            return (T)grain;
+            return grain;
         }
 
         // If using strict grain probes, throw the exception
         if (_options.StrictGrainProbes)
         {
-            throw new Exception($"Probe {identity} does not exist for type {typeof(T).Name}. " +
+            throw new Exception($"Probe {identity} does not exist for type {grainType.Name}. " +
                 "Ensure that it is added before the grain is tested.");
         }
         else
         {
-            if (_probeFactories.TryGetValue(typeof(T), out var factory))
+            if (_probeFactories.TryGetValue(grainType, out var factory))
             {
                 grain = factory(identity);
             }
             else
             {
-                var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(typeof(T))) as IMock<IGrain>;
+                var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(grainType)) as IMock<IGrain>;
                 grain = mock?.Object;
             }
 
             // Save the newly created grain for the next call
-            _probes.Add(key, grain);
+            _probes.Add(key, grain!);
         }
 
-        return (T)grain;
+        return grain!;
     }
 }
