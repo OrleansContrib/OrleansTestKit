@@ -14,7 +14,7 @@ public sealed class TestTimerRegistry : ITimerRegistry
 
     public async Task FireAllAsync()
     {
-        foreach (var testTimer in new List<TestTimer>(_timers))
+        foreach (var testTimer in new List<TestTimer>(_timers.Where(x => !x.IsDisposed)))
         {
             await testTimer.FireAsync().ConfigureAwait(false);
         }

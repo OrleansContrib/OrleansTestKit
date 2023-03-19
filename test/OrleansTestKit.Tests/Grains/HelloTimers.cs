@@ -54,6 +54,7 @@ public class HelloTimers : Grain<HelloTimersState>, IGrainWithIntegerKey
 
     private Task OnTimer2()
     {
+        State.Timer2Fired = true;
         _timer2.Dispose();
         _timer2 = RegisterTimer(_ => OnTimer2(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         return Task.CompletedTask;
@@ -71,4 +72,6 @@ public class HelloTimersState
     public bool Timer0Fired { get; set; }
 
     public bool Timer1Fired { get; set; }
+
+    public bool Timer2Fired { get; set; }
 }

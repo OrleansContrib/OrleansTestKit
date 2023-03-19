@@ -22,6 +22,24 @@ public class TimerTests : TestKitBase
     }
 
     [Fact]
+    public async Task ShouldFireAllTimersRepeatedlyAsync()
+    {
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
+
+        // Act
+        await Silo.FireAllTimersAsync();
+        await Silo.FireAllTimersAsync();
+
+        // Assert
+        var state = Silo.State<HelloTimersState>();
+        state.Timer0Fired.Should().BeTrue();
+        state.Timer1Fired.Should().BeTrue();
+        state.Timer2Fired.Should().BeTrue();
+
+    }
+
+    [Fact]
     public async Task ShouldFireFirstTimerAsync()
     {
         // Arrange
