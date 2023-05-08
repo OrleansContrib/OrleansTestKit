@@ -15,6 +15,10 @@ public sealed class TestGrainCreator
 
     private const string RUNTIME_PROPERTYNAME = "Runtime";
 
+    private static readonly Action<IGrainContext> SetExecutionContextMethod;
+
+    private static readonly Action ResetExecutionContextMethod;
+
     private static readonly Type FacetMarkerInterfaceType = typeof(IFacetMetadata);
 
     private static readonly MethodInfo GetFactoryMethod = typeof(TestGrainCreator).GetMethod("GetFactory", BindingFlags.NonPublic | BindingFlags.Static);
@@ -26,6 +30,17 @@ public sealed class TestGrainCreator
     private readonly PropertyInfo _runtimeProperty;
 
     private readonly IServiceProvider _serviceProvider;
+
+    static TestGrainCreator()
+    {
+        var runtimeContext = typeof(GrainReference).Assembly.GetType("Orleans.Runtime.RuntimeContext")!;
+
+        var method = runtimeContext.GetMethod("SetExecutionContext", BindingFlags.NonPublic | BindingFlags.Static, new[] { typeof(IGrainContext) })!;
+        SetExecutionContextMethod = method.CreateDelegate<Action<IGrainContext>>();
+
+        var resetMethod = runtimeContext.GetMethod("ResetExecutionContext", BindingFlags.NonPublic | BindingFlags.Static)!;
+        ResetExecutionContextMethod = resetMethod.CreateDelegate<Action>();
+    }
 
     public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
     {
@@ -42,21 +57,33 @@ public sealed class TestGrainCreator
             throw new ArgumentNullException(nameof(context));
         }
 
-        var (instances, types) = GetConstructorParameters(typeof(T), context);
-        var factory = ActivatorUtilities.CreateFactory(typeof(T), types.ToArray());
-        var grain = (Grain)factory.Invoke(_serviceProvider, instances.ToArray());
-        var participant = grain as ILifecycleParticipant<IGrainLifecycle>;
+        SetExecutionContextMethod(context);
 
-        participant?.Participate(context.ObservableLifecycle);
+        try
+        {
+            var (instances, types) = GetConstructorParameters(typeof(T), context);
+            var factory = ActivatorUtilities.CreateFactory(typeof(T), types.ToArray());
+            var grain = (Grain)factory.Invoke(_serviceProvider, instances.ToArray());
+
+            var participant = grain as ILifecycleParticipant<IGrainLifecycle>;
+
+            participant?.Participate(context.ObservableLifecycle);
+
+            return grain;
+        }
+        finally
+        {
+            ResetExecutionContextMethod();
+        }
 
         // Set the runtime and identity. This is equivalent to what Orleans' GrainCreator does when creating new grains.
         // It is messier but easier than trying to wrangle the values in via a constructor which may or may exist on
         // types inheriting from Grain.
-        var runtimeBackfield = _runtimeProperty.DeclaringType.GetField($"<{_runtimeProperty.Name}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-        runtimeBackfield.SetValue(grain, _runtime);
-        _contextProperty.SetValue(grain, context);
+        //var runtimeBackfield = _runtimeProperty.DeclaringType.GetField($"<{_runtimeProperty.Name}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+        //runtimeBackfield.SetValue(grain, _runtime);
+        //_contextProperty.SetValue(grain, context);
 
-        return grain;
+        // return grain;
     }
 
     /// <summary>

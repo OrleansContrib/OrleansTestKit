@@ -39,6 +39,7 @@ public sealed class TestKitSilo
         ServiceProvider.AddService<IKeyedServiceCollection<string, IStreamProvider>>(StreamProviderManager);
         ServiceProvider.AddService<IReminderRegistry>(ReminderRegistry);
         _grainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
+        ServiceProvider.AddService<IGrainRuntime>(_grainRuntime);
         _grainCreator = new TestGrainCreator(_grainRuntime, ServiceProvider);
     }
 
@@ -161,6 +162,9 @@ public sealed class TestKitSilo
             GrainType = typeof(T),
             ObservableLifecycle = _grainLifecycle
         };
+
+        // make context injectable so grain dependency components can inject IGrainContext directly themselves
+        ServiceProvider.AddService<IGrainContext>(grainContext);
 
         // Create a stateless grain
         var grain = _grainCreator.CreateGrainInstance<T>(grainContext);
