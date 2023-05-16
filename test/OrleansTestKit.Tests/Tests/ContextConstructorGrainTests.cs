@@ -1,8 +1,8 @@
-﻿using Orleans.TestKit;
-using OrleansTestKit.Tests.Grains;
+﻿using OrleansTestKit.Tests.Grains;
 using Xunit;
 
-namespace OrleansTestKit.Tests.Tests;
+namespace Orleans.TestKit.Tests;
+
 public class ContextConstructorGrainTests : TestKitBase
 {
     [Fact]
