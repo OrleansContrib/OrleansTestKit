@@ -18,6 +18,7 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFramework>net7.0</TargetFramework>
+    <AnalysisLevel>latest-Recommended</AnalysisLevel>
   </PropertyGroup>
 
 </Project>

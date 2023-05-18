@@ -5,39 +5,59 @@ using Orleans.Streams;
 
 namespace Orleans.TestKit.Streams;
 
-[SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes")]
-[SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix")]
+/// <summary>
+/// A test stream that implements IAsyncStream.
+/// </summary>
+/// <typeparam name="T">The stream event type.</typeparam>
+[SuppressMessage("Microsoft.Design", "CA1036:OverrideMethodsOnComparableTypes", Justification = "not needed")]
 public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
 {
-    private readonly List<StreamSubscriptionHandle<T>> _handlers = new List<StreamSubscriptionHandle<T>>();
+    private readonly List<StreamSubscriptionHandle<T>> _handlers = new();
 
-    private readonly Mock<IAsyncStream<T>> _mockStream = new Mock<IAsyncStream<T>>();
+    private readonly Mock<IAsyncStream<T>> _mockStream = new();
 
-    private readonly List<IAsyncObserver<T>> _observers = new List<IAsyncObserver<T>>();
+    private readonly List<IAsyncObserver<T>> _observers = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestStream{T}"/> class.
+    /// </summary>
+    /// <param name="streamId">The stream id.</param>
+    /// <param name="providerName">The provider name to use.</param>
     public TestStream(StreamId streamId, string providerName)
     {
         StreamId = streamId;
         ProviderName = providerName ?? throw new ArgumentNullException(nameof(providerName));
     }
 
+    /// <inheritdoc/>
     public Guid Guid { get; }
 
+    /// <inheritdoc/>
     public bool IsRewindable => false;
 
-    public string Namespace { get; }
+    /// <inheritdoc/>
+    public string Namespace { get; } = string.Empty;
 
+    /// <inheritdoc/>
     public string ProviderName { get; }
 
     /// <summary>Gets the number of times OneNextAsync was called.</summary>
     public uint Sends { get; private set; }
 
+    /// <inheritdoc/>
     public StreamId StreamId { get; }
 
+    /// <summary>
+    /// Gets the count of subscribers.
+    /// </summary>
     public int Subscribed => _observers.Count;
 
-    /// <summary>Create an empty handler that can then be used to test resuming streams.</summary>
-    public Task<StreamSubscriptionHandle<T>> AddEmptyStreamHandler(Action<IAsyncObserver<T>> onAttachingObserver = null)
+    /// <summary>
+    /// Create an empty handler that can then be used to test resuming streams.
+    /// </summary>
+    /// <param name="onAttachingObserver">action to fire.</param>
+    /// <returns>stream handle.</returns>
+    public Task<StreamSubscriptionHandle<T>> AddEmptyStreamHandler(Action<IAsyncObserver<T>>? onAttachingObserver = null)
     {
         var handle = CreateEmptyStreamHandlerImpl(onAttachingObserver);
         _handlers.Add(handle);
@@ -45,31 +65,35 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
         return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
     }
 
-    public int CompareTo(IAsyncStream<T> other) =>
-        throw new NotImplementedException();
+    /// <inheritdoc/>
+    public int CompareTo(IAsyncStream<T>? other) => 0;
 
-    [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-    public bool Equals(IAsyncStream<T> other) =>
-        throw new NotImplementedException();
+    /// <inheritdoc/>
+    public bool Equals(IAsyncStream<T>? other) => ReferenceEquals(this, other);
 
+    /// <inheritdoc/>
     public Task<IList<StreamSubscriptionHandle<T>>> GetAllSubscriptionHandles() =>
         Task.FromResult<IList<StreamSubscriptionHandle<T>>>(new List<StreamSubscriptionHandle<T>>(_handlers));
 
+    /// <inheritdoc/>
     public Task OnCompletedAsync() =>
         Task.WhenAll(_observers.ToList().Select(o => o.OnCompletedAsync()));
 
+    /// <inheritdoc/>
     public Task OnErrorAsync(Exception ex) =>
         Task.WhenAll(_observers.ToList().Select(o => o.OnErrorAsync(ex)));
 
-    public Task OnNextAsync(T item, StreamSequenceToken token = null)
+    /// <inheritdoc/>
+    public Task OnNextAsync(T item, StreamSequenceToken? token = null)
     {
         Sends++;
         _mockStream.Object.OnNextAsync(item, token);
         return Task.WhenAll(_observers.ToList().Select(o => o.OnNextAsync(item, token)));
     }
 
-    [SuppressMessage("Design", "CA1031:Do not catch general exception types")]
-    public async Task OnNextBatchAsync(IEnumerable<T> batch, StreamSequenceToken token = null)
+    /// <inheritdoc/>
+    [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "intentional")]
+    public async Task OnNextBatchAsync(IEnumerable<T>? batch, StreamSequenceToken? token = null)
     {
         if (batch == null)
         {
@@ -95,6 +119,7 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
         }
     }
 
+    /// <inheritdoc/>
     public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer)
     {
         if (observer == null)
@@ -109,41 +134,55 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
         return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
     }
 
-    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer, StreamSequenceToken token, string filterData = null) =>
+    /// <inheritdoc/>
+    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer, StreamSequenceToken? token, string? filterData = null) =>
         throw new NotImplementedException();
 
-    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T> observer) =>
+    /// <inheritdoc/>
+    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T>? observer) =>
         throw new NotImplementedException();
 
-    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T> observer, StreamSequenceToken token) =>
+    /// <inheritdoc/>
+    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T>? observer, StreamSequenceToken? token) =>
         throw new NotImplementedException();
 
+    /// <summary>
+    /// Verify that the stream was sent.
+    /// </summary>
+    /// <param name="check">item to check.</param>
     public void VerifySend(Func<T, bool> check) =>
         VerifySend(check, Times.Once());
 
+    /// <summary>
+    /// Verify that the stream was sent the specified item N times.
+    /// </summary>
+    /// <param name="check">item to check.</param>
+    /// <param name="times">number of times.</param>
     public void VerifySend(Func<T, bool> check, Times times) =>
         _mockStream.Verify(s => s.OnNextAsync(It.Is<T>(a => check(a)), It.IsAny<StreamSequenceToken>()), times);
 
     private TestStreamSubscriptionHandle<T> CreateEmptyStreamHandlerImpl(
-        Action<IAsyncObserver<T>> onAttachingObserver = null)
+        Action<IAsyncObserver<T>>? onAttachingObserver = null)
     {
-        TestStreamSubscriptionHandle<T> handle = null;
+        TestStreamSubscriptionHandle<T>? handle = null;
 
         handle = new TestStreamSubscriptionHandle<T>(
             StreamId,
             ProviderName,
             observer =>
             {
-                _handlers.Remove(handle);
+                _handlers.Remove(handle!);
                 if (observer != null)
                 {
                     _observers.Remove(observer);
                 }
-            }, observer =>
+            },
+            observer =>
             {
                 onAttachingObserver?.Invoke(observer);
                 _observers.Add(observer);
-            }, observer =>
+            },
+            observer =>
             {
                 _observers.Remove(observer);
             });

@@ -87,6 +87,7 @@ public sealed class TestKitSilo
     ///     Reason which will passed to the Grian <seealso cref="DeactivationReason"/>.
     /// </param>
     /// <param name="cancellationToken">Token which will passed to the grain.</param>
+    /// <returns>Task.</returns>
     public async Task DeactivateAsync(Grain grain, DeactivationReason? deactivationReason = null, CancellationToken cancellationToken = default)
     {
         if (grain == null)
