@@ -12,9 +12,11 @@ public sealed class TestStreamProvider : IStreamProvider
     public TestStreamProvider(TestKitOptions options) =>
         _options = options ?? throw new ArgumentNullException(nameof(options));
 
+    /// <inheritdoc/>
     public bool IsRewindable { get; }
 
-    public string Name { get; private set; } = "";
+    /// <inheritdoc/>
+    public string Name { get; private set; } = string.Empty;
 
     public TestStream<T> AddStreamProbe<T>(StreamId streamId)
     {
@@ -23,11 +25,12 @@ public sealed class TestStreamProvider : IStreamProvider
         return stream;
     }
 
+    /// <inheritdoc/>
     public IAsyncStream<T> GetStream<T>(StreamId streamId)
     {
         if (_streams.TryGetValue(streamId, out var stream))
         {
-            return stream as IAsyncStream<T>;
+            return (IAsyncStream<T>)stream;
         }
 
         if (_options.StrictStreamProbes)
@@ -36,7 +39,7 @@ public sealed class TestStreamProvider : IStreamProvider
         }
 
         stream = AddStreamProbe<T>(streamId);
-        return stream as IAsyncStream<T>;
+        return (IAsyncStream<T>)stream;
     }
 
     public Task Init(string name)

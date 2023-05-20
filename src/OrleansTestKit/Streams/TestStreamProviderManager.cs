@@ -7,7 +7,7 @@ public sealed class TestStreamProviderManager : IKeyedServiceCollection<string, 
 {
     private readonly TestKitOptions _options;
 
-    private readonly Dictionary<string, TestStreamProvider> _streamProviders = new Dictionary<string, TestStreamProvider>();
+    private readonly Dictionary<string, TestStreamProvider> _streamProviders = new();
 
     public TestStreamProviderManager(TestKitOptions options) =>
         _options = options ?? throw new ArgumentNullException(nameof(options));

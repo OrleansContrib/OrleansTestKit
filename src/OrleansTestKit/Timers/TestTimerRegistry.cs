@@ -20,8 +20,7 @@ public sealed class TestTimerRegistry : ITimerRegistry
         }
     }
 
-    public Task FireAsync(int index) =>
-        _timers[index].FireAsync();
+    public Task FireAsync(int index) => _timers[index].FireAsync();
 
     public IDisposable RegisterTimer(IGrainContext grainContext, Func<object, Task> asyncCallback, object state, TimeSpan dueTime, TimeSpan period)
     {

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Orleans.TestKit;
+﻿namespace Orleans.TestKit;
 
 public static class TypeHelper
 {
@@ -8,8 +6,9 @@ public static class TypeHelper
     ///     Alternative version of <see cref="Type.IsSubclassOf"/> that supports raw generic types (generic types
     ///     without any type parameters).
     /// </summary>
-    /// <param name="baseType">The base type class for which the check is made.</param>
     /// <param name="toCheck">To type to determine for whether it derives from <paramref name="baseType"/>.</param>
+    /// <param name="baseType">The base type class for which the check is made.</param>
+    /// <returns>Result of the check.</returns>
     public static bool IsSubclassOfRawGeneric(this Type toCheck, Type baseType)
     {
         if (toCheck == null)
@@ -30,7 +29,7 @@ public static class TypeHelper
                 return true;
             }
 
-            toCheck = toCheck?.BaseType;
+            toCheck = toCheck?.BaseType!;
         }
 
         return false;
