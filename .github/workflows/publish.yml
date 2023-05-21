@@ -22,7 +22,7 @@ jobs:
             curl --header 'Accept: application/octet-stream' --header "Authorization: token ${GITHUB_TOKEN}" --location --remote-header-name --remote-name "${url}"
           done
           nupkg_files=(*.nupkg)
-          echo "::set-output name=nupkg_name::$( basename ${nupkg_files[-1]} )"
+          echo "nupkg_name=$( basename ${nupkg_files[-1]} )" >> "${GITHUB_OUTPUT}"
       - name: Publish NuGet Packages
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
