@@ -12,8 +12,8 @@ internal class TestStorage<TState> : IStorageStats, IStorage<TState>, IPersisten
         InitializeState();
     }
 
-    public TestStorage(TState state) : this() =>
-        State = state;
+    public TestStorage(TState state)
+        : this() => State = state;
 
     public string Etag =>
         throw new NotImplementedException();

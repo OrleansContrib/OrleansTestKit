@@ -38,13 +38,11 @@ public sealed class TestGrainFactory : IGrainFactory
         where TGrainInterface : IGrainWithStringKey =>
         GetProbe<TGrainInterface>(IdSpan.Create(primaryKey), grainClassNamePrefix);
 
-    public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string? keyExtension,
-        string? grainClassNamePrefix = null)
+    public TGrainInterface GetGrain<TGrainInterface>(Guid primaryKey, string? keyExtension, string? grainClassNamePrefix = null)
         where TGrainInterface : IGrainWithGuidCompoundKey =>
         GetProbe<TGrainInterface>(GrainIdKeyExtensions.CreateGuidKey(primaryKey, keyExtension), grainClassNamePrefix);
 
-    public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string keyExtension,
-        string? grainClassNamePrefix = null)
+    public TGrainInterface GetGrain<TGrainInterface>(long primaryKey, string keyExtension, string? grainClassNamePrefix = null)
         where TGrainInterface : IGrainWithIntegerCompoundKey =>
         GetProbe<TGrainInterface>(GrainIdKeyExtensions.CreateIntegerKey(primaryKey, keyExtension), grainClassNamePrefix);
 
@@ -88,7 +86,7 @@ public sealed class TestGrainFactory : IGrainFactory
     internal void AddProbe<T>(Func<IdSpan, IMock<T>> factory)
         where T : class, IGrain
     {
-        var adaptedFactory = new Func<IdSpan, T>(grainIdentity => factory(grainIdentity)?.Object);
+        var adaptedFactory = new Func<IdSpan, T>(grainIdentity => factory(grainIdentity).Object);
         AddProbe<T>(adaptedFactory);
     }
 

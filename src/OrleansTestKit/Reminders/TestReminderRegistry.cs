@@ -8,7 +8,9 @@ public sealed class TestReminderRegistry : IReminderRegistry
 {
     private readonly Dictionary<string, TestReminder> _reminders = new();
 
-    private IRemindable _grain;
+    private IRemindable? _grain;
+
+    private IRemindable Grain => _grain ?? throw new InvalidOperationException($"You must SetGrainTarget before invoking other methods");
 
     public Mock<IReminderRegistry> Mock { get; } = new();
 
@@ -16,7 +18,7 @@ public sealed class TestReminderRegistry : IReminderRegistry
     {
         foreach (var reminderName in _reminders.Keys)
         {
-            await _grain.ReceiveReminder(reminderName, tickStatus);
+            await Grain.ReceiveReminder(reminderName, tickStatus);
         }
     }
 
@@ -32,15 +34,12 @@ public sealed class TestReminderRegistry : IReminderRegistry
             throw new ArgumentException($"No reminder named {reminderName} found");
         }
 
-        return _grain.ReceiveReminder(reminderName, tickStatus);
+        return Grain.ReceiveReminder(reminderName, tickStatus);
     }
 
-    public async Task<IGrainReminder> GetReminder(GrainId callingGrainId, string reminderName)
+    public async Task<IGrainReminder?> GetReminder(GrainId callingGrainId, string reminderName)
     {
-        if (reminderName == null)
-        {
-            throw new ArgumentNullException(nameof(reminderName));
-        }
+        ArgumentNullException.ThrowIfNull(reminderName);
 
         await Mock.Object.GetReminder(callingGrainId, reminderName);
         return !_reminders.TryGetValue(reminderName, out var reminder) ? null : reminder;

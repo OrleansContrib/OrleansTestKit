@@ -2,59 +2,54 @@
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Core;
 using Orleans.Runtime;
+using Orleans.TestKit.Reminders;
 using Orleans.TestKit.Storage;
 
 // Took the Get Factory Method from the Orleans Implementation :
 // https://github.com/dotnet/orleans/blob/10af0f4af588cd4aa45cb3e250dfbffa389d59c7/src/Orleans.Runtime/Facet/ConstructorArgumentFactory.cs
-
 namespace Orleans.TestKit;
 
+/// <summary>
+/// Contains necessary logic for creating grains in a unit test context -- emulates the Orleans runtime behavior of triggering lifecycle events, etc.
+/// </summary>
 public sealed class TestGrainCreator
 {
-    private const string GRAINCONTEXT_PROPERTYNAME = "GrainContext";
-
-    private const string RUNTIME_PROPERTYNAME = "Runtime";
-
-    private static readonly Type FacetMarkerInterfaceType = typeof(IFacetMetadata);
-
-    private static readonly MethodInfo GetFactoryMethod = typeof(TestGrainCreator).GetMethod("GetFactory", BindingFlags.NonPublic | BindingFlags.Static);
-
-    private readonly PropertyInfo _contextProperty;
-
-    private readonly IGrainRuntime _runtime;
-
-    private readonly PropertyInfo _runtimeProperty;
+    private static readonly MethodInfo GetFactoryMethod = typeof(TestGrainCreator).GetMethod("GetFactory", BindingFlags.NonPublic | BindingFlags.Static)!;
 
     private readonly IServiceProvider _serviceProvider;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestGrainCreator"/> class.
+    /// </summary>
+    /// <param name="runtime">The grain runtime.</param>
+    /// <param name="serviceProvider">Service provider.</param>
+    /// <exception cref="ArgumentNullException">Both runtime and services should be not null.</exception>
     public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
     {
-        _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
+        ArgumentNullException.ThrowIfNull(runtime);
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(runtime));
-        _contextProperty = typeof(Grain).GetProperty(GRAINCONTEXT_PROPERTYNAME, BindingFlags.Instance | BindingFlags.NonPublic);
-        _runtimeProperty = typeof(Grain).GetProperty(RUNTIME_PROPERTYNAME, BindingFlags.Instance | BindingFlags.NonPublic);
     }
 
+    /// <summary>
+    /// Create a grain instance emulating Orleans runtime behavior.
+    /// </summary>
+    /// <typeparam name="T">The grain instance type to create.</typeparam>
+    /// <param name="context">The grain context.</param>
+    /// <returns>The grain.</returns>
+    /// <exception cref="ArgumentNullException">context is required.</exception>
     public Grain CreateGrainInstance<T>(IGrainContext context)
     {
-        if (context == null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(context);
+
+        using var runtimeContextScope = RuntimeContextManager.StartExecutionContext(context);
 
         var (instances, types) = GetConstructorParameters(typeof(T), context);
         var factory = ActivatorUtilities.CreateFactory(typeof(T), types.ToArray());
         var grain = (Grain)factory.Invoke(_serviceProvider, instances.ToArray());
+
         var participant = grain as ILifecycleParticipant<IGrainLifecycle>;
 
         participant?.Participate(context.ObservableLifecycle);
-
-        // Set the runtime and identity. This is equivalent to what Orleans' GrainCreator does when creating new grains.
-        // It is messier but easier than trying to wrangle the values in via a constructor which may or may exist on
-        // types inheriting from Grain.
-        var runtimeBackfield = _runtimeProperty.DeclaringType.GetField($"<{_runtimeProperty.Name}>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-        runtimeBackfield.SetValue(grain, _runtime);
-        _contextProperty.SetValue(grain, context);
 
         return grain;
     }
@@ -62,32 +57,20 @@ public sealed class TestGrainCreator
     /// <summary>
     ///     https://github.com/dotnet/orleans/blob/10af0f4af588cd4aa45cb3e250dfbffa389d59c7/src/Orleans.Runtime/Facet/ConstructorArgumentFactory.cs.
     /// </summary>
-    /// <typeparam name="TMetadata"></typeparam>
-    /// <param name="services"></param>
-    /// <param name="parameter"></param>
-    /// <param name="metadata"></param>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    /// <exception cref="OrleansException"></exception>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection")]
     private static Factory<IGrainContext, object> GetFactory<TMetadata>(IServiceProvider services, ParameterInfo parameter, IFacetMetadata metadata, Type type)
          where TMetadata : IFacetMetadata
     {
-        var factoryMapper = services.GetService<IAttributeToFactoryMapper<TMetadata>>();
-        if (factoryMapper == null)
-        {
-            throw new OrleansException($"Missing attribute mapper for attribute {metadata.GetType()} used in grain constructor for grain type {type}.");
-        }
+        var factoryMapper = services.GetService<IAttributeToFactoryMapper<TMetadata>>()
+            ?? throw new OrleansException($"Missing attribute mapper for attribute {metadata.GetType()} used in grain constructor for grain type {type}.");
 
-        var factory = factoryMapper.GetFactory(parameter, (TMetadata)metadata);
-        if (factory == null)
-        {
-            throw new OrleansException($"Attribute mapper {factoryMapper.GetType()} failed to create a factory for grain type {type}.");
-        }
+        var factory = factoryMapper.GetFactory(parameter, (TMetadata)metadata)
+            ?? throw new OrleansException($"Attribute mapper {factoryMapper.GetType()} failed to create a factory for grain type {type}.");
 
         return factory;
     }
 
-    private void CreateIStorageParameter(ParameterInfo parameter, ref List<object> instances, ref HashSet<Type> types)
+    private static void CreateIStorageParameter(ParameterInfo parameter, ICollection<object> instances, HashSet<Type> types)
     {
         var stateType = parameter.ParameterType.GenericTypeArguments[0];
         var storageType = typeof(TestStorage<>).MakeGenericType(stateType);
@@ -95,7 +78,7 @@ public sealed class TestGrainCreator
         try
         {
             var state = Activator.CreateInstance(stateType);
-            var storage = Activator.CreateInstance(storageType, state);
+            var storage = Activator.CreateInstance(storageType, state)!;
 
             // cache argument factory
             instances.Add(storage);
@@ -132,7 +115,7 @@ public sealed class TestGrainCreator
 
                 var attribute = parameter
                     .GetCustomAttributes()
-                    .FirstOrDefault(x => FacetMarkerInterfaceType.IsInstanceOfType(x));
+                    .FirstOrDefault(x => typeof(IFacetMetadata).IsInstanceOfType(x));
 
                 // avoid duplicate instances of same parameter type when multiple constructors are available
                 if (types.Contains(parameter.ParameterType))
@@ -143,7 +126,7 @@ public sealed class TestGrainCreator
                 if (attribute != null)
                 {
                     var getFactory = GetFactoryMethod.MakeGenericMethod(attribute.GetType());
-                    var argumentFactory = (Factory<IGrainContext, object>)getFactory.Invoke(this, new object[] { _serviceProvider, parameter, attribute, grainType });
+                    var argumentFactory = (Factory<IGrainContext, object>)getFactory.Invoke(this, new object[] { _serviceProvider, parameter, attribute, grainType })!;
 
                     // cache argument factory
                     instances.Add(argumentFactory(context));
@@ -158,7 +141,7 @@ public sealed class TestGrainCreator
                     {
                         if (interf.IsGenericType && interf.GetGenericTypeDefinition() == typeof(IStorage<>))
                         {
-                            CreateIStorageParameter(parameter, ref instances, ref types);
+                            CreateIStorageParameter(parameter, instances, types);
                             continue;
                         }
                     }

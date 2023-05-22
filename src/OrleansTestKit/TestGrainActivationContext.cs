@@ -1,44 +1,64 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Orleans.Runtime;
+﻿using Orleans.Runtime;
 
 namespace Orleans.TestKit;
 
+/// <summary>
+/// Grain context used for tests.
+/// </summary>
 public sealed class TestGrainActivationContext : IGrainContext
 {
+    /// <inheritdoc/>
     public ActivationId ActivationId { get; set; }
 
-    public IServiceProvider ActivationServices { get; set; }
+    /// <inheritdoc/>
+    public IServiceProvider ActivationServices { get; set; } = default!;
 
-    public GrainAddress Address { get; set; }
+    /// <inheritdoc/>
+    public GrainAddress Address { get; set; } = default!;
 
-    public Task Deactivated { get; set; }
+    /// <inheritdoc/>
+    public Task Deactivated { get; set; } = Task.CompletedTask;
 
-    public GrainId GrainId { get; set; }
+    /// <inheritdoc/>
+    public GrainId GrainId { get; set; } = default!;
 
-    public IAddressable GrainIdentity { get; set; }
+    public IAddressable GrainIdentity { get; set; } = default!;
 
-    [SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations")]
-    public object GrainInstance => throw new NotImplementedException();
+    /// <inheritdoc/>
+    public object GrainInstance { get; set; } = default!;
 
-    public GrainReference GrainReference { get; set; }
+    /// <inheritdoc/>
+    public GrainReference GrainReference { get; set; } = default!;
 
-    public Type GrainType { get; set; }
+    /// <summary>
+    /// Gets or sets the grain type used for this test context.
+    /// </summary>
+    public Type GrainType { get; set; } = default!;
 
-    public IGrainLifecycle ObservableLifecycle { get; set; }
+    /// <inheritdoc/>
+    public IGrainLifecycle ObservableLifecycle { get; set; } = default!;
 
-    public IWorkItemScheduler Scheduler { get; set; }
+    /// <inheritdoc/>
+    public IWorkItemScheduler Scheduler { get; set; } = default!;
 
+    /// <inheritdoc/>
     public void Activate(Dictionary<string, object> requestContext, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public void Deactivate(DeactivationReason deactivationReason, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
 
-    public bool Equals(IGrainContext other) => throw new NotImplementedException();
+    /// <inheritdoc/>
+    public bool Equals(IGrainContext? other) => ReferenceEquals(this, other);
 
+    /// <inheritdoc/>
     public TComponent GetComponent<TComponent>() where TComponent : class => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public TTarget GetTarget<TTarget>() where TTarget : class => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public void ReceiveMessage(object message) => throw new NotImplementedException();
 
+    /// <inheritdoc/>
     public void SetComponent<TComponent>(TComponent value) where TComponent : class => throw new NotImplementedException();
 }

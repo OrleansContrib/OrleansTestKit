@@ -50,6 +50,7 @@ internal sealed class TestStreamSubscriptionHandle<T> : StreamSubscriptionHandle
         {
             throw new Exception("You can only have one observer per handler");
         }
+
         _observer = observer;
         _onAttachingObserver?.Invoke(observer);
     }
@@ -60,6 +61,7 @@ internal sealed class TestStreamSubscriptionHandle<T> : StreamSubscriptionHandle
         {
             return;
         }
+
         _onDetachingObserver?.Invoke(_observer);
         _observer = null;
     }
