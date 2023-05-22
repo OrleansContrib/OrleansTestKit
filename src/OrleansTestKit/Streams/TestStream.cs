@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Moq;
+using Orleans.Providers.Streams.Common;
 using Orleans.Runtime;
 using Orleans.Streams;
 
@@ -17,6 +18,7 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     private readonly Mock<IAsyncStream<T>> _mockStream = new();
 
     private readonly List<IAsyncObserver<T>> _observers = new();
+    private readonly List<IAsyncBatchObserver<T>> _batchObservers = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestStream{T}"/> class.
@@ -50,7 +52,7 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     /// <summary>
     /// Gets the count of subscribers.
     /// </summary>
-    public int Subscribed => _observers.Count;
+    public int Subscribed => _observers.Count + _batchObservers.Count;
 
     /// <summary>
     /// Create an empty handler that can then be used to test resuming streams.
@@ -59,8 +61,7 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     /// <returns>stream handle.</returns>
     public Task<StreamSubscriptionHandle<T>> AddEmptyStreamHandler(Action<IAsyncObserver<T>>? onAttachingObserver = null)
     {
-        var handle = CreateEmptyStreamHandlerImpl(onAttachingObserver);
-        _handlers.Add(handle);
+        var handle = CreateEmptyStreamHandlerImpl(_observers, onAttachingObserver);
 
         return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
     }
@@ -76,12 +77,18 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
         Task.FromResult<IList<StreamSubscriptionHandle<T>>>(new List<StreamSubscriptionHandle<T>>(_handlers));
 
     /// <inheritdoc/>
-    public Task OnCompletedAsync() =>
-        Task.WhenAll(_observers.ToList().Select(o => o.OnCompletedAsync()));
+    public async Task OnCompletedAsync()
+    {
+        await Task.WhenAll(_observers.ToList().Select(o => o.OnCompletedAsync()));
+        await Task.WhenAll(_batchObservers.ToList().Select(o => o.OnCompletedAsync()));
+    }
 
     /// <inheritdoc/>
-    public Task OnErrorAsync(Exception ex) =>
-        Task.WhenAll(_observers.ToList().Select(o => o.OnErrorAsync(ex)));
+    public async Task OnErrorAsync(Exception ex)
+    {
+        await Task.WhenAll(_observers.ToList().Select(o => o.OnErrorAsync(ex)));
+        await Task.WhenAll(_batchObservers.ToList().Select(o => o.OnErrorAsync(ex)));
+    }
 
     /// <inheritdoc/>
     public Task OnNextAsync(T item, StreamSequenceToken? token = null)
@@ -93,19 +100,24 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
 
     /// <inheritdoc/>
     [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "intentional")]
-    public async Task OnNextBatchAsync(IEnumerable<T>? batch, StreamSequenceToken? token = null)
+    public async Task OnNextBatchAsync(IEnumerable<T> batch, StreamSequenceToken? token = null)
     {
-        if (batch == null)
-        {
-            throw new ArgumentNullException(nameof(batch));
-        }
+        if (batch is null)
+            return;
+
+        token ??= new EventSequenceTokenV2(0);
+
+        await _mockStream.Object.OnNextBatchAsync(batch, token);
+
+        var sequentialItems = batch.Select((x, i) => new SequentialItem<T>(x, new EventSequenceTokenV2(token.SequenceNumber, i))).ToArray();
 
         var innerExceptions = new List<Exception>();
-        foreach (var item in batch)
+
+        foreach (var item in sequentialItems)
         {
             try
             {
-                await OnNextAsync(item, token).ConfigureAwait(false);
+                await OnNextAsync(item.Item, item.Token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -113,45 +125,67 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
             }
         }
 
-        if (innerExceptions.Count > 0)
+        foreach (var batchObserver in _batchObservers)
+        {
+            try
+            {
+                await batchObserver.OnNextAsync(sequentialItems);
+            }
+            catch (Exception ex)
+            {
+                innerExceptions.Add(ex);
+            }
+        }
+
+        if (innerExceptions.Any())
         {
             throw new AggregateException(innerExceptions);
         }
     }
 
     /// <inheritdoc/>
-    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer)
+    public async Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer)
     {
-        if (observer == null)
-        {
-            throw new ArgumentNullException(nameof(observer));
-        }
+        ArgumentNullException.ThrowIfNull(observer);
 
-        var handle = CreateEmptyStreamHandlerImpl();
-        handle.AttachObserver(observer);
-        _handlers.Add(handle);
+        var handle = CreateEmptyStreamHandlerImpl(_observers);
 
-        return Task.FromResult<StreamSubscriptionHandle<T>>(handle);
+        return await handle.ResumeAsync(observer);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// This method does not support subscribing to a stream with a filter or from a token -- it merely calls into the default method
+    /// </summary>
+    /// <param name="observer">The observer.</param>
+    /// <param name="token">The token (not used)</param>
+    /// <param name="filterData">The filterData (not used)</param>
+    /// <returns>The stream handle</returns>
     public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncObserver<T> observer, StreamSequenceToken? token, string? filterData = null) =>
-        throw new NotImplementedException();
+        SubscribeAsync(observer);
 
     /// <inheritdoc/>
-    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T>? observer) =>
-        throw new NotImplementedException();
+    public async Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T>? observer)
+    {
+        ArgumentNullException.ThrowIfNull(observer);
 
-    /// <inheritdoc/>
-    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T>? observer, StreamSequenceToken? token) =>
-        throw new NotImplementedException();
+        var handle = CreateEmptyStreamHandlerImpl(_batchObservers);
+
+        return await handle.ResumeAsync(observer);
+    }
+
+    /// <summary>
+    /// This method does not support subscribing from a token -- it merely calls into the default method
+    /// </summary>
+    /// <param name="observer">The observer.</param>
+    /// <param name="token">The token (not used)</param>
+    /// <returns>The stream handle</returns>
+    public Task<StreamSubscriptionHandle<T>> SubscribeAsync(IAsyncBatchObserver<T>? observer, StreamSequenceToken? token) => SubscribeAsync(observer);
 
     /// <summary>
     /// Verify that the stream was sent.
     /// </summary>
     /// <param name="check">item to check.</param>
-    public void VerifySend(Func<T, bool> check) =>
-        VerifySend(check, Times.Once());
+    public void VerifySend(Func<T, bool> check) => VerifySend(check, Times.Once());
 
     /// <summary>
     /// Verify that the stream was sent the specified item N times.
@@ -161,31 +195,44 @@ public sealed class TestStream<T> : IAsyncStream<T>, IStreamIdentity
     public void VerifySend(Func<T, bool> check, Times times) =>
         _mockStream.Verify(s => s.OnNextAsync(It.Is<T>(a => check(a)), It.IsAny<StreamSequenceToken>()), times);
 
-    private TestStreamSubscriptionHandle<T> CreateEmptyStreamHandlerImpl(
-        Action<IAsyncObserver<T>>? onAttachingObserver = null)
-    {
-        TestStreamSubscriptionHandle<T>? handle = null;
+    /// <summary>
+    /// Verify that the stream was sent.
+    /// </summary>
+    public void VerifySendBatch() => VerifySendBatch(Times.Once());
 
-        handle = new TestStreamSubscriptionHandle<T>(
-            StreamId,
-            ProviderName,
-            observer =>
+    /// <summary>
+    /// Verify that the stream was sent the specified item N times.
+    /// </summary>
+    /// <param name="times">number of times.</param>
+    public void VerifySendBatch(Times times) =>
+        _mockStream.Verify(s => s.OnNextBatchAsync(It.IsAny<IEnumerable<T>>(), It.IsAny<StreamSequenceToken>()), times);
+
+    private TestStreamSubscriptionHandle<TObserver, T> CreateEmptyStreamHandlerImpl<TObserver>(List<TObserver> observers, Action<TObserver>? onAttachingObserver = null)
+        where TObserver : class
+    {
+        TestStreamSubscriptionHandle<TObserver, T> handle = null!;
+
+        handle = new TestStreamSubscriptionHandle<TObserver, T>(StreamId, ProviderName,
+            unsubscribe: observer =>
             {
                 _handlers.Remove(handle!);
                 if (observer != null)
                 {
-                    _observers.Remove(observer);
+                    observers.Remove(observer);
                 }
             },
-            observer =>
+            onAttaching: observer =>
             {
                 onAttachingObserver?.Invoke(observer);
-                _observers.Add(observer);
+                observers.Add(observer);
             },
-            observer =>
+            onDetaching: observer =>
             {
-                _observers.Remove(observer);
-            });
+                observers.Remove(observer);
+            }
+        );
+
+        _handlers.Add(handle);
 
         return handle;
     }
