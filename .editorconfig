@@ -544,3 +544,6 @@ tab_width = 4
 end_of_line = crlf
 dotnet_diagnostic.CA1002.severity = silent
 dotnet_diagnostic.CA1030.severity = silent
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = silent

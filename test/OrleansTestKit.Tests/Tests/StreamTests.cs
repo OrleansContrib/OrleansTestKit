@@ -11,21 +11,21 @@ public class StreamTests : TestKitBase
     [Fact]
     public async Task AddNonReferenceTypeStreamProbe()
     {
-        var stream = Silo.AddStreamProbe<(string Message, int Id)>(Guid.Empty, null);
+        var stream = Silo.AddStreamProbe<ChattyMessage>(Guid.Empty, null);
 
         var chatty = await Silo.CreateGrainAsync<Chatty>(4);
         await chatty.Subscribe();
 
         const string msg = "Hello Chat";
         const int id = 2;
-        await stream.OnNextAsync((msg, id));
+        await stream.OnNextAsync(new(msg, id));
 
         stream.Sends.Should().Be(1);
         stream.VerifySend(m => m.Message == msg);
         stream.VerifySend(m => m.Id == id);
 
         var message = await chatty.GetMessage();
-        Assert.NotEqual(default((string Message, int Id)), message);
+        Assert.NotEqual(default, message);
         Assert.Equal(msg, message.Message);
         Assert.Equal(id, message.Id);
     }
@@ -60,7 +60,7 @@ public class StreamTests : TestKitBase
     [Fact]
     public async Task GrainIsUnsubscribed()
     {
-        var stream = Silo.AddStreamProbe<(string Message, int Id)>(Guid.Empty, null);
+        var stream = Silo.AddStreamProbe<ChattyMessage>(Guid.Empty, null);
 
         var chatty = await Silo.CreateGrainAsync<Chatty>(4);
         await chatty.Subscribe();
@@ -69,7 +69,7 @@ public class StreamTests : TestKitBase
 
         const string msg = "Goodbye";
         const int id = 3;
-        await stream.OnNextAsync((msg, id));
+        await stream.OnNextAsync(new(msg, id));
 
         stream.Sends.Should().Be(1);
         stream.VerifySend(m => m.Message == msg);

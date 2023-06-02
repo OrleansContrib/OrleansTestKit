@@ -15,6 +15,9 @@ public sealed class TestStreamProviderManager : IKeyedServiceCollection<string, 
     public TestStream<T> AddStreamProbe<T>(Guid streamId, string ns, string providerName) =>
         AddStreamProbe<T>(StreamId.Create(ns, streamId), providerName);
 
+    public TestStream<T> AddStreamProbe<T>(string streamId, string ns, string providerName) =>
+        AddStreamProbe<T>(StreamId.Create(ns, streamId), providerName);
+
     public TestStream<T> AddStreamProbe<T>(StreamId streamId, string providerName)
     {
         var provider = GetOrAdd(providerName);
