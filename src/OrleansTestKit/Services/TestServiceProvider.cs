@@ -31,7 +31,7 @@ public sealed class TestServiceProvider : IServiceProvider
     {
         ArgumentNullException.ThrowIfNull(instance);
 
-        _services.Add(typeof(T), instance);
+        _services[typeof(T)] = instance;
         return instance;
     }
 
