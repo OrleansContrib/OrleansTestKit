@@ -75,57 +75,7 @@ public sealed class TestKitSilo
     /// <summary>Gets the manager of all test silo timers.</summary>
     public TestTimerRegistry TimerRegistry { get; }
 
-    /// <summary>
-    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
-    /// </summary>
-    /// <typeparam name="T">The grain type (class not interface)</typeparam>
-    /// <param name="id">The grain's long id</param>
-    /// <returns>The grain</returns>
-    public Task<T> CreateGrainAsync<T>(long id)
-        where T : Grain, IGrainWithIntegerKey =>
-        CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id));
 
-    /// <summary>
-    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
-    /// </summary>
-    /// <typeparam name="T">The grain type (class not interface)</typeparam>
-    /// <param name="id">The grain's id</param>
-    /// <returns>The grain</returns>
-    public Task<T> CreateGrainAsync<T>(Guid id)
-        where T : Grain, IGrainWithGuidKey =>
-        CreateGrainAsync<T>(GrainIdKeyExtensions.CreateGuidKey(id));
-
-    /// <summary>
-    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
-    /// </summary>
-    /// <typeparam name="T">The grain type (class not interface)</typeparam>
-    /// <param name="id">The grain's id</param>
-    /// <returns>The grain</returns>
-    public Task<T> CreateGrainAsync<T>(string id)
-        where T : Grain, IGrainWithStringKey
-        => CreateGrainAsync<T>(IdSpan.Create(id));
-
-    /// <summary>
-    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
-    /// </summary>
-    /// <typeparam name="T">The grain type (class not interface)</typeparam>
-    /// <param name="id">The grain's id</param>
-    /// <param name="keyExtension">The key extension</param>
-    /// <returns>The grain</returns>
-    public Task<T> CreateGrainAsync<T>(Guid id, string keyExtension)
-        where T : Grain, IGrainWithGuidCompoundKey
-        => CreateGrainAsync<T>(GrainIdKeyExtensions.CreateGuidKey(id, keyExtension));
-
-    /// <summary>
-    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
-    /// </summary>
-    /// <typeparam name="T">The grain type (class not interface)</typeparam>
-    /// <param name="id">The grain's id</param>
-    /// <param name="keyExtension">The key extension</param>
-    /// <returns>The grain</returns>
-    public Task<T> CreateGrainAsync<T>(long id, string keyExtension)
-        where T : Grain, IGrainWithIntegerCompoundKey
-        => CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id, keyExtension));
 
     /// <summary>Deactivate the given <see cref="Grain"/>.</summary>
     /// <param name="grain">Grain to Deactivate.</param>
@@ -202,7 +152,15 @@ public sealed class TestKitSilo
     public void VerifyRuntime(Expression<Action<IGrainRuntime>> expression, Func<Times> times) =>
         GrainRuntime.Mock.Verify(expression, times);
 
-    private async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default)
+    /// <summary>
+    /// The core grain creation method -- all strongly typed CreateGrainAsync extensions route to this
+    /// </summary>
+    /// <typeparam name="T">The grain type</typeparam>
+    /// <param name="identity">The grain identity</param>
+    /// <param name="cancellation">Cancellation token</param>
+    /// <returns>The grain</returns>
+    /// <exception cref="Exception">Only one grain can be created or a failure occurred</exception>
+    public async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default)
         where T : Grain
     {
         if (_isGrainCreated)
