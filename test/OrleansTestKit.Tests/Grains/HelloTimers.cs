@@ -2,13 +2,13 @@
 
 public class HelloTimers : Grain<HelloTimersState>, IGrainWithIntegerKey
 {
-    private IDisposable _secretTimer;
+    private IDisposable? _secretTimer;
 
-    private IDisposable _timer0;
+    private IDisposable _timer0 = default!;
 
-    private IDisposable _timer1;
+    private IDisposable _timer1 = default!;
 
-    private IDisposable _timer2;
+    private IDisposable _timer2 = default!;
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {

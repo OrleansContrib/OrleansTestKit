@@ -36,8 +36,7 @@ public class GrainProbeTests : TestKitBase
         {
             var nextProbe = probeQueue.Dequeue();
 
-            A.CallTo(() => nextProbe.WhatsMyId())
-                .Returns(identity.ToString());
+            A.CallTo(() => nextProbe.WhatsMyId()).Returns(identity.ToString()!);
 
             return nextProbe;
         });
@@ -65,8 +64,7 @@ public class GrainProbeTests : TestKitBase
         {
             var nextProbe = probeQueue.Dequeue();
 
-            nextProbe.Setup(probe => probe.WhatsMyId())
-                .ReturnsAsync(identity.ToString);
+            nextProbe.Setup(probe => probe.WhatsMyId()).ReturnsAsync(identity.ToString()!);
 
             return nextProbe;
         });
@@ -91,7 +89,7 @@ public class GrainProbeTests : TestKitBase
         {
             var nextProbe = probeQueue.Dequeue();
 
-            nextProbe.WhatsMyId().Returns(identity.ToString());
+            nextProbe.WhatsMyId().Returns(identity.ToString()!);
 
             return nextProbe;
         });

@@ -2,9 +2,9 @@
 
 namespace TestGrains;
 
-public class HelloReminders : Grain, IGrainWithIntegerKey, IRemindable
+public sealed class HelloReminders : Grain, IGrainWithIntegerKey, IRemindable
 {
-    public readonly List<string> FiredReminders = new();
+    public List<string> FiredReminders { get; } = new();
 
     Task IRemindable.ReceiveReminder(string reminderName, TickStatus status)
     {

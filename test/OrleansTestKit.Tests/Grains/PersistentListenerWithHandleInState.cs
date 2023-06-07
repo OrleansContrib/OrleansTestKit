@@ -6,9 +6,9 @@ namespace TestGrains;
 
 public class PersistentListenerStateWithHandle
 {
-    public StreamSubscriptionHandle<ChatMessage> ChatMessageStreamSubscriptionHandle = null;
+    public StreamSubscriptionHandle<ChatMessage>? ChatMessageStreamSubscriptionHandle { get; set; }
 
-    public int ReceivedCount = 0;
+    public int ReceivedCount { get; set; }
 }
 
 public class PersistentListenerWithHandleInState : Grain, IListener
