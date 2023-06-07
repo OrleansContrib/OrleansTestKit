@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Moq;
 using Orleans.Runtime;
 using Orleans.Streams;
@@ -14,7 +13,7 @@ namespace Orleans.TestKit;
 
 public sealed class TestKitSilo
 {
-    private readonly Collection<IGrainBase> _activatedGrains = new();
+    private readonly List<IGrainBase> _activatedGrains = new();
 
     private readonly TestGrainCreator _grainCreator;
 
