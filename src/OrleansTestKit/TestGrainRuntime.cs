@@ -6,11 +6,14 @@ using Orleans.Timers;
 
 namespace Orleans.TestKit;
 
-internal sealed class TestGrainRuntime : IGrainRuntime
+/// <summary>
+/// A test instance of the grain runtime that respects the TestKitSilo's storage manager
+/// </summary>
+public sealed class TestGrainRuntime : IGrainRuntime
 {
     private readonly StorageManager _storageManager;
 
-    public TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IReminderRegistry reminderRegistry, IServiceProvider serviceProvider, StorageManager storageManager)
+    internal TestGrainRuntime(IGrainFactory grainFactory, ITimerRegistry timerRegistry, IReminderRegistry reminderRegistry, IServiceProvider serviceProvider, StorageManager storageManager)
     {
         GrainFactory = grainFactory ?? throw new ArgumentNullException(nameof(grainFactory));
         TimerRegistry = timerRegistry ?? throw new ArgumentNullException(nameof(timerRegistry));
@@ -19,22 +22,32 @@ internal sealed class TestGrainRuntime : IGrainRuntime
         _storageManager = storageManager ?? throw new ArgumentNullException(nameof(storageManager));
     }
 
+    /// <inheritdoc/>
     public IGrainFactory GrainFactory { get; }
 
+    /// <summary>
+    /// The underlying mock used for verification etc
+    /// </summary>
     public Mock<IGrainRuntime> Mock { get; } = new Mock<IGrainRuntime>();
 
+    /// <summary>
+    /// The test reminder registry
+    /// </summary>
     public IReminderRegistry ReminderRegistry { get; }
 
-    public string ServiceId => "TestService";
-
+    /// <inheritdoc/>
     public IServiceProvider ServiceProvider { get; }
 
+    /// <inheritdoc/>
     public SiloAddress SiloAddress => SiloAddress.Zero;
 
+    /// <inheritdoc/>
     public string SiloIdentity => "TestSilo";
 
+    /// <inheritdoc/>
     public ITimerRegistry TimerRegistry { get; }
 
+    /// <inheritdoc/>
     public void DeactivateOnIdle(IGrainContext grain)
     {
         if (grain == null)
@@ -45,6 +58,7 @@ internal sealed class TestGrainRuntime : IGrainRuntime
         Mock.Object.DeactivateOnIdle(grain);
     }
 
+    /// <inheritdoc/>
     public void DelayDeactivation(IGrainContext grain, TimeSpan timeSpan)
     {
         if (grain == null)
@@ -55,6 +69,7 @@ internal sealed class TestGrainRuntime : IGrainRuntime
         Mock.Object.DelayDeactivation(grain, timeSpan);
     }
 
+    /// <inheritdoc/>
     public IStorage<TGrainState> GetStorage<TGrainState>(IGrainContext grain) =>
         _storageManager.GetStorage<TGrainState>();
 }
