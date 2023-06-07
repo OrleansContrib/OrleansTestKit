@@ -164,9 +164,9 @@ public sealed class TestKitSilo
         where T : Grain
     {
         var grainId = GrainId.Create(new GrainType(identity), identity);
-        var context = ServiceProvider.GetService<IGrainContext>();
+        var context = ServiceProvider.GetService<IGrainContext>() as TestGrainActivationContext;
 
-        if (context is null || context.GrainId != grainId)
+        if (context is null || context.GrainId != grainId || context.GrainType != typeof(T))
         {
             // we have not registered a context yet OR we have registered a context but it is for a different grain and we need to re-create
             context = new TestGrainActivationContext
@@ -180,7 +180,7 @@ public sealed class TestKitSilo
             };
 
             // make context injectable so grain dependency components can inject IGrainContext directly themselves
-            ServiceProvider.AddService(context);
+            ServiceProvider.AddService<IGrainContext>(context);
         }
 
         return context;
