@@ -14,11 +14,11 @@ public class CustomStorage<TState> : IStorageStats, IStorage<TState>
         InitializeState();
     }
 
-    public string Etag => throw new System.NotImplementedException();
+    public string Etag => "not implemented";
 
     public virtual bool RecordExists { get; set; }
 
-    public TState State { get; set; }
+    public TState State { get; set; } = default!;
 
     public TestStorageStats Stats { get; }
 
@@ -105,7 +105,7 @@ public class StorageTests : TestKitBase
         var greetings = (await grain.GetGreetings()).ToList();
 
         // Assert
-        var stats = this.Silo.StorageStats();
+        var stats = this.Silo.StorageStats()!;
         stats.Clears.Should().Be(0);
         stats.Reads.Should().Be(0);
         stats.Writes.Should().Be(2);
@@ -158,7 +158,7 @@ public class StorageTests : TestKitBase
     public async Task GreetingArchiveGrain_GetGreetings_WithCustomStateFactory()
     {
         // Arrange
-        this.Silo.Options.StorageFactory = type => Activator.CreateInstance(typeof(CustomStorage<>).MakeGenericType(type));
+        this.Silo.Options.StorageFactory = type => Activator.CreateInstance(typeof(CustomStorage<>).MakeGenericType(type))!;
 
         const long id = 1000;
 
@@ -222,7 +222,7 @@ public class StorageTests : TestKitBase
         var greetings = (await grain.GetGreetings()).ToList();
 
         // Assert
-        var stats = this.Silo.StorageStats();
+        var stats = this.Silo.StorageStats()!;
         stats.Clears.Should().Be(1);
         stats.Reads.Should().Be(0);
         stats.Writes.Should().Be(0);

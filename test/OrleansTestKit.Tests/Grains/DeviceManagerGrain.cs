@@ -15,7 +15,7 @@ public class DeviceManagerGrain : Grain, IDeviceManager
                 return Task.FromResult(GrainFactory.GetGrain<IDevice>(deviceType, "TestGrains.DeviceAndroidGrain"));
 
             default:
-                throw new Exception($"Unknown device type {deviceType}");
+                throw new InvalidOperationException($"Unknown device type {deviceType}");
         }
     }
 

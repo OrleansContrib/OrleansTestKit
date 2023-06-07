@@ -4,9 +4,7 @@ namespace TestGrains;
 
 public sealed class GuidCompoundKeyGrain : Grain, IGuidCompoundKeyGrain
 {
-    private string _keyExt;
-
-    public Task<(Guid, string)> GetKey() => Task.FromResult((this.GetPrimaryKey(out _keyExt), _keyExt));
+    public Task<(Guid, string)> GetKey() => Task.FromResult((this.GetPrimaryKey(out var keyExt), keyExt));
 }
 
 public sealed class GuidKeyGrain : Grain, IGuidKeyGrain
@@ -16,9 +14,7 @@ public sealed class GuidKeyGrain : Grain, IGuidKeyGrain
 
 public sealed class IntegerCompoundKeyGrain : Grain, IIntegerCompoundKeyGrain
 {
-    private string _keyExt;
-
-    public Task<(long, string)> GetKey() => Task.FromResult((this.GetPrimaryKeyLong(out _keyExt), _keyExt));
+    public Task<(long, string)> GetKey() => Task.FromResult((this.GetPrimaryKeyLong(out var keyExt), keyExt));
 }
 
 public sealed class IntegerKeyGrain : Grain, IIntegerKeyGrain

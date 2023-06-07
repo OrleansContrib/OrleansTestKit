@@ -6,7 +6,7 @@ namespace TestGrains;
 
 public class PersistentListenerStateWithoutHandle
 {
-    public int ReceivedCount = 0;
+    public int ReceivedCount { get; set; }
 }
 
 public class PersistentListenerWithoutHandleInState : Grain, IListener
