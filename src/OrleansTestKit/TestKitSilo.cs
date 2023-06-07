@@ -11,6 +11,9 @@ using Orleans.Timers;
 
 namespace Orleans.TestKit;
 
+/// <summary>
+/// The central abstraction for the OrleansTestKit -- stands up multiple services and provides a centralized abstraction for interacting with test grains
+/// </summary>
 public sealed class TestKitSilo
 {
     private readonly List<IGrainBase> _activatedGrains = new();
@@ -19,14 +22,15 @@ public sealed class TestKitSilo
 
     private readonly TestGrainLifecycle _grainLifecycle = new();
 
-    private readonly TestGrainRuntime _grainRuntime;
-
     /// <summary>
     ///     Flag indicating if a grain has already been created in this test silo. Since this is all mocked up only the
     ///     grain under test should be real, therefore only a single grain should ever be created.
     /// </summary>
     private bool _isGrainCreated;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestKitSilo"/> class.
+    /// </summary>
     public TestKitSilo()
     {
         GrainFactory = new TestGrainFactory(Options);
@@ -37,10 +41,15 @@ public sealed class TestKitSilo
         StreamProviderManager = new TestStreamProviderManager(Options);
         ServiceProvider.AddService<IKeyedServiceCollection<string, IStreamProvider>>(StreamProviderManager);
         ServiceProvider.AddService<IReminderRegistry>(ReminderRegistry);
-        _grainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
-        ServiceProvider.AddService<IGrainRuntime>(_grainRuntime);
-        _grainCreator = new TestGrainCreator(_grainRuntime, ServiceProvider);
+        GrainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
+        ServiceProvider.AddService<IGrainRuntime>(GrainRuntime);
+        _grainCreator = new TestGrainCreator(GrainRuntime, ServiceProvider);
     }
+
+    /// <summary>
+    /// Gets the silo's grain runtime instance that is injected into the created grain
+    /// </summary>
+    public TestGrainRuntime GrainRuntime { get; }
 
     /// <summary>
     ///     Gets the silo grain factory used by the test grain with creating other grains This should only be used by
@@ -66,22 +75,54 @@ public sealed class TestKitSilo
     /// <summary>Gets the manager of all test silo timers.</summary>
     public TestTimerRegistry TimerRegistry { get; }
 
+    /// <summary>
+    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
+    /// </summary>
+    /// <typeparam name="T">The grain type (class not interface)</typeparam>
+    /// <param name="id">The grain's long id</param>
+    /// <returns>The grain</returns>
     public Task<T> CreateGrainAsync<T>(long id)
         where T : Grain, IGrainWithIntegerKey =>
         CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id));
 
+    /// <summary>
+    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
+    /// </summary>
+    /// <typeparam name="T">The grain type (class not interface)</typeparam>
+    /// <param name="id">The grain's id</param>
+    /// <returns>The grain</returns>
     public Task<T> CreateGrainAsync<T>(Guid id)
         where T : Grain, IGrainWithGuidKey =>
         CreateGrainAsync<T>(GrainIdKeyExtensions.CreateGuidKey(id));
 
+    /// <summary>
+    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
+    /// </summary>
+    /// <typeparam name="T">The grain type (class not interface)</typeparam>
+    /// <param name="id">The grain's id</param>
+    /// <returns>The grain</returns>
     public Task<T> CreateGrainAsync<T>(string id)
         where T : Grain, IGrainWithStringKey
         => CreateGrainAsync<T>(IdSpan.Create(id));
 
+    /// <summary>
+    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
+    /// </summary>
+    /// <typeparam name="T">The grain type (class not interface)</typeparam>
+    /// <param name="id">The grain's id</param>
+    /// <param name="keyExtension">The key extension</param>
+    /// <returns>The grain</returns>
     public Task<T> CreateGrainAsync<T>(Guid id, string keyExtension)
         where T : Grain, IGrainWithGuidCompoundKey
         => CreateGrainAsync<T>(GrainIdKeyExtensions.CreateGuidKey(id, keyExtension));
 
+    /// <summary>
+    /// Create a grain - will be injected with a grain context and participate in grain lifecycle
+    /// </summary>
+    /// <typeparam name="T">The grain type (class not interface)</typeparam>
+    /// <param name="id">The grain's id</param>
+    /// <param name="keyExtension">The key extension</param>
+    /// <returns>The grain</returns>
     public Task<T> CreateGrainAsync<T>(long id, string keyExtension)
         where T : Grain, IGrainWithIntegerCompoundKey
         => CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id, keyExtension));
@@ -128,6 +169,12 @@ public sealed class TestKitSilo
     /// <returns><see cref="GrainId"/>.</returns>
     public GrainId GetGrainId(Grain grain) => GrainId.Parse(grain.IdentityString);
 
+    /// <summary>
+    /// Used for interacting with test reminders -- this will be removed in a later version as Orleans has alleviated the need for this.
+    /// </summary>
+    /// <param name="grain">The grain to create the context for</param>
+    /// <param name="token">Cancellation token</param>
+    /// <returns>A disposable to denote when the context is finished.</returns>
     public async Task<IDisposable> GetReminderActivationContext(Grain grain, CancellationToken token = default)
     {
         var handler = new ReminderContextHandler();
@@ -146,8 +193,14 @@ public sealed class TestKitSilo
         return handler;
     }
 
+    /// <summary>
+    /// Verify the grain runtime object's mock
+    /// </summary>
+    /// <param name="expression">The expression to use</param>
+    /// <param name="times">Number of times expected</param>
+    [Obsolete("Use the Runtime property instead. This will be removed in a future version.")]
     public void VerifyRuntime(Expression<Action<IGrainRuntime>> expression, Func<Times> times) =>
-        _grainRuntime.Mock.Verify(expression, times);
+        GrainRuntime.Mock.Verify(expression, times);
 
     private async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default)
         where T : Grain
