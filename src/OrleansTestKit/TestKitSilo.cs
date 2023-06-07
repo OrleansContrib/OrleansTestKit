@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Orleans.Runtime;
 using Orleans.Streams;
@@ -127,6 +128,7 @@ public sealed class TestKitSilo
     /// <returns>A disposable to denote when the context is finished.</returns>
     public async Task<IDisposable> GetReminderActivationContext(Grain grain, CancellationToken token = default)
     {
+        // TODO -- v5, mark this as obsolete when we support Orleans 8 only.
         var handler = new ReminderContextHandler();
 
         try
@@ -153,6 +155,38 @@ public sealed class TestKitSilo
         GrainRuntime.Mock.Verify(expression, times);
 
     /// <summary>
+    /// Gets or adds a grain context for the current ID - useful if needing to create a context earlier in the lifecycle (pre-grain creation)
+    /// </summary>
+    /// <typeparam name="T">The grain type</typeparam>
+    /// <param name="identity"></param>
+    /// <returns></returns>
+    public IGrainContext GetOrAddGrainContext<T>(IdSpan identity)
+        where T : Grain
+    {
+        var grainId = GrainId.Create(new GrainType(identity), identity);
+        var context = ServiceProvider.GetService<IGrainContext>();
+
+        if (context is null || context.GrainId != grainId)
+        {
+            // we have not registered a context yet OR we have registered a context but it is for a different grain and we need to re-create
+            context = new TestGrainActivationContext
+            {
+                GrainId = grainId,
+                ActivationServices = ServiceProvider,
+
+                // GrainIdentity = identity,
+                GrainType = typeof(T),
+                ObservableLifecycle = _grainLifecycle,
+            };
+
+            // make context injectable so grain dependency components can inject IGrainContext directly themselves
+            ServiceProvider.AddService(context);
+        }
+
+        return context;
+    }
+
+    /// <summary>
     /// The core grain creation method -- all strongly typed CreateGrainAsync extensions route to this
     /// </summary>
     /// <typeparam name="T">The grain type</typeparam>
@@ -170,18 +204,8 @@ public sealed class TestKitSilo
         }
 
         _isGrainCreated = true;
-        var grainContext = new TestGrainActivationContext
-        {
-            GrainId = GrainId.Create(new GrainType(identity), identity),
-            ActivationServices = ServiceProvider,
 
-            // GrainIdentity = identity,
-            GrainType = typeof(T),
-            ObservableLifecycle = _grainLifecycle,
-        };
-
-        // make context injectable so grain dependency components can inject IGrainContext directly themselves
-        ServiceProvider.AddService<IGrainContext>(grainContext);
+        var grainContext = GetOrAddGrainContext<T>(identity);
 
         // Create a stateless grain
         var grain = _grainCreator.CreateGrainInstance<T>(grainContext);
