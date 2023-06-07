@@ -2,55 +2,62 @@
 
 namespace Orleans.TestKit.Services;
 
+/// <summary>
+/// The test service provider
+/// </summary>
 public sealed class TestServiceProvider : IServiceProvider
 {
     private readonly TestKitOptions _options;
+    private readonly Dictionary<Type, object> _services = new();
 
-    private readonly Dictionary<Type, object> _services;
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestServiceProvider"/> class.
+    /// </summary>
+    /// <param name="options">The test kit options to use</param>
     public TestServiceProvider(TestKitOptions options)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _services = new Dictionary<Type, object>();
+        ArgumentNullException.ThrowIfNull(options);
+        _options = options;
     }
 
+    /// <summary>
+    /// Adds or updates a service to the provider
+    /// </summary>
+    /// <typeparam name="T">The service type</typeparam>
+    /// <param name="instance">The instance to add</param>
+    /// <returns>The instance</returns>
+    /// <exception cref="ArgumentNullException">Instance must be not null</exception>
     public T AddService<T>(T instance)
     {
-        if (instance is null)
-        {
-            throw new ArgumentNullException(nameof(instance));
-        }
+        ArgumentNullException.ThrowIfNull(instance);
 
         _services.Add(typeof(T), instance);
         return instance;
     }
 
-    public Mock<T> AddServiceProbe<T>(Mock<T> mock)
-        where T : class
+    /// <summary>
+    /// Adds a mock to the service provider
+    /// </summary>
+    /// <typeparam name="T">The underlying service type</typeparam>
+    /// <param name="mock">The mock to add</param>
+    /// <returns>The mock</returns>
+    public Mock<T> AddServiceProbe<T>(Mock<T> mock) where T : class
     {
-        if (mock == null)
-        {
-            throw new ArgumentNullException(nameof(mock));
-        }
-
-        _services.Add(typeof(T), mock.Object);
+        AddService(mock.Object);
         return mock;
     }
 
-    public Mock<T> AddServiceProbe<T>()
-        where T : class
-    {
-        var mock = new Mock<T>();
-        _services.Add(typeof(T), mock.Object);
-        return mock;
-    }
+    /// <summary>
+    /// Adds a mock to the service provider
+    /// </summary>
+    /// <typeparam name="T">The underlying service type</typeparam>
+    /// <returns>The newly created mock</returns>
+    public Mock<T> AddServiceProbe<T>() where T : class => AddServiceProbe(new Mock<T>());
 
+    /// <inheritdoc/>
     public object GetService(Type serviceType)
     {
-        if (serviceType == null)
-        {
-            throw new ArgumentNullException(nameof(serviceType));
-        }
+        ArgumentNullException.ThrowIfNull(serviceType);
 
         if (_services.TryGetValue(serviceType, out var service))
         {
