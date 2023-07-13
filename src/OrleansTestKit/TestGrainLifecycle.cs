@@ -8,6 +8,9 @@ internal sealed class TestGrainLifecycle : IGrainLifecycle
 {
     private readonly Collection<(int Stage, ILifecycleObserver Observer)> _observers = new();
 
+    public void AddMigrationParticipant(IGrainMigrationParticipant participant) { }
+    public void RemoveMigrationParticipant(IGrainMigrationParticipant participant) { }
+
     public IDisposable Subscribe(string observerName, int stage, ILifecycleObserver observer)
     {
         if (observer == null)
