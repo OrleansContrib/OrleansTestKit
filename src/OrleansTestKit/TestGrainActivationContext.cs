@@ -57,7 +57,13 @@ public sealed class TestGrainActivationContext : IGrainContext
     public TTarget GetTarget<TTarget>() where TTarget : class => throw new NotImplementedException();
 
     /// <inheritdoc/>
+    public void Migrate(Dictionary<string, object> requestContext, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
+
+    /// <inheritdoc/>
     public void ReceiveMessage(object message) => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public void Rehydrate(IRehydrationContext context) => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public void SetComponent<TComponent>(TComponent value) where TComponent : class => throw new NotImplementedException();
