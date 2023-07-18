@@ -2,6 +2,8 @@
 
 public class HelloTimers : Grain<HelloTimersState>, IGrainWithIntegerKey
 {
+    private readonly object _state = new();
+
     private IDisposable? _secretTimer;
 
     private IDisposable _timer0 = default!;
@@ -12,9 +14,9 @@ public class HelloTimers : Grain<HelloTimersState>, IGrainWithIntegerKey
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        _timer0 = RegisterTimer(_ => OnTimer0(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-        _timer1 = RegisterTimer(_ => OnTimer1(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-        _timer2 = RegisterTimer(_ => OnTimer2(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        _timer0 = RegisterTimer(_ => OnTimer0(), _state, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        _timer1 = RegisterTimer(_ => OnTimer1(), _state, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        _timer2 = RegisterTimer(_ => OnTimer2(), _state, TimeSpan.Zero, TimeSpan.FromSeconds(1));
 
         return base.OnActivateAsync(cancellationToken);
     }
@@ -29,14 +31,14 @@ public class HelloTimers : Grain<HelloTimersState>, IGrainWithIntegerKey
 
     public Task RegisterSecretTimer()
     {
-        _secretTimer = RegisterTimer(_ => OnSecretTimer(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        _secretTimer = RegisterTimer(_ => OnSecretTimer(), _state, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         return Task.CompletedTask;
     }
 
     private Task OnSecretTimer()
     {
         _secretTimer?.Dispose();
-        _secretTimer = RegisterTimer(_ => OnSecretTimer(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        _secretTimer = RegisterTimer(_ => OnSecretTimer(), _state, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         return Task.CompletedTask;
     }
 
@@ -56,7 +58,7 @@ public class HelloTimers : Grain<HelloTimersState>, IGrainWithIntegerKey
     {
         State.Timer2Fired = true;
         _timer2.Dispose();
-        _timer2 = RegisterTimer(_ => OnTimer2(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        _timer2 = RegisterTimer(_ => OnTimer2(), _state, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         return Task.CompletedTask;
     }
 }
