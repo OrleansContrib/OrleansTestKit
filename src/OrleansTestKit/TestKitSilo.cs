@@ -1,7 +1,9 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Orleans.Metadata;
 using Orleans.Runtime;
+using Orleans.Serialization;
 using Orleans.Streams;
 using Orleans.TestKit.Reminders;
 using Orleans.TestKit.Services;
@@ -22,6 +24,10 @@ public sealed class TestKitSilo
     private readonly TestGrainCreator _grainCreator;
 
     private readonly TestGrainLifecycle _grainLifecycle = new();
+
+    private readonly GrainTypeResolver _grainTypeResolver;
+
+    private readonly TestGrainRuntime _grainRuntime;
 
     /// <summary>
     ///     Flag indicating if a grain has already been created in this test silo. Since this is all mocked up only the
@@ -45,6 +51,14 @@ public sealed class TestKitSilo
         GrainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
         ServiceProvider.AddService<IGrainRuntime>(GrainRuntime);
         _grainCreator = new TestGrainCreator(GrainRuntime, ServiceProvider);
+
+        var provider = new ServiceCollection()
+            .AddSingleton<GrainTypeResolver>()
+            .AddSingleton<IGrainTypeProvider, AttributeGrainTypeProvider>()
+            .AddSerializer()
+            .BuildServiceProvider();
+
+        _grainTypeResolver = provider.GetRequiredService<GrainTypeResolver>();
     }
 
     /// <summary>
@@ -75,8 +89,6 @@ public sealed class TestKitSilo
 
     /// <summary>Gets the manager of all test silo timers.</summary>
     public TestTimerRegistry TimerRegistry { get; }
-
-
 
     /// <summary>Deactivate the given <see cref="Grain"/>.</summary>
     /// <param name="grain">Grain to Deactivate.</param>
@@ -163,7 +175,8 @@ public sealed class TestKitSilo
     public IGrainContext GetOrAddGrainContext<T>(IdSpan identity)
         where T : Grain
     {
-        var grainId = GrainId.Create(new GrainType(identity), identity);
+        var grainType = _grainTypeResolver.GetGrainType(typeof(T));
+        var grainId = GrainId.Create(grainType, identity);
         var context = ServiceProvider.GetService<IGrainContext>() as TestGrainActivationContext;
 
         if (context is null || context.GrainId != grainId || context.GrainType != typeof(T))

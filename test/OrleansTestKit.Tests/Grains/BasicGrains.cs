@@ -41,3 +41,9 @@ public sealed class StringKeyGrain : Grain, IStringKeyGrain
 {
     public Task<string> GetKey() => Task.FromResult(this.GetPrimaryKeyString());
 }
+
+[GrainType("special-alias")]
+public sealed class AliasGrain : Grain, IAliasGrain
+{
+    public Task<long> GetKey() => Task.FromResult(this.GetPrimaryKeyLong());
+}

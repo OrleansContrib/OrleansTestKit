@@ -24,3 +24,8 @@ public interface IStringKeyGrain : IGrainWithStringKey
 {
     Task<string> GetKey();
 }
+
+public interface IAliasGrain : IGrainWithIntegerKey
+{
+    Task<long> GetKey();
+}
