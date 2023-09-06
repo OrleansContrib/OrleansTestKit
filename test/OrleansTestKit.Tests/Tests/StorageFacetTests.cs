@@ -1,7 +1,6 @@
-﻿using System.Reflection;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
-using Orleans.Runtime;
+using Orleans.Core;
 using Orleans.Storage;
 using TestGrains;
 using TestInterfaces;
@@ -19,13 +18,7 @@ public class StorageFacetTests : TestKitBase
         // Arrange
         var state = new ColorGrainState();
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState<ColorGrainState>("State");
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -40,19 +33,9 @@ public class StorageFacetTests : TestKitBase
     public async Task GetColor_WithState_ReturnsColor()
     {
         // Arrange
-        var state = new ColorGrainState
-        {
-            Color = Color.Red,
-            Id = GrainId,
-        };
+        var state = new ColorGrainState { Color = Color.Red, Id = GrainId };
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState("State", state: state);
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -69,13 +52,7 @@ public class StorageFacetTests : TestKitBase
         // Arrange
         var state = new ColorGrainState();
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState("State", state: state);
 
         // Act
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
@@ -91,14 +68,7 @@ public class StorageFacetTests : TestKitBase
         // Arrange
         var state = new ColorGrainState();
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-        mockState.Setup(o => o.ClearStateAsync());
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState("State", state: state);
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -112,27 +82,17 @@ public class StorageFacetTests : TestKitBase
         // Note that the following assert ties this test to the _implementation_ details. Generally, one should try to
         // avoid tying the test to the implementation details. It can lead to more brittle tests. However, one may
         // choose to accept this as a trade-off when the implementation detail represents an important behavior.
-        mockState.Verify(o => o.ClearStateAsync(), Times.Never);
+        var storageStats = Silo.StorageManager.GetStorageStats("State");
+        storageStats.Clears.Should().Be(0);
     }
 
     [Fact]
     public async Task ResetColor_WithState_ClearsState()
     {
         // Arrange
-        var state = new ColorGrainState
-        {
-            Color = Color.Red,
-            Id = GrainId,
-        };
+        var state = new ColorGrainState { Color = Color.Red, Id = GrainId };
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-        mockState.Setup(o => o.ClearStateAsync());
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState("State", state: state);
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -140,7 +100,8 @@ public class StorageFacetTests : TestKitBase
         await grain.ResetColor();
 
         // Assert
-        mockState.Verify(o => o.ClearStateAsync(), Times.Once);
+        var storageStats = Silo.StorageManager.GetStorageStats("State");
+        storageStats.Clears.Should().Be(1);
     }
 
     [Fact]
@@ -149,14 +110,7 @@ public class StorageFacetTests : TestKitBase
         // Arrange
         var state = new ColorGrainState();
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-        mockState.Setup(o => o.WriteStateAsync());
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState("State", state: state);
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -174,16 +128,7 @@ public class StorageFacetTests : TestKitBase
     public async Task SetColor_WithInvalidColor_ThrowsArgumentException(Color color)
     {
         // Arrange
-        var state = new ColorGrainState();
-
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-        mockState.Setup(o => o.WriteStateAsync());
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState<ColorGrainState>("State");
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
         Action action = () => grain.SetColor(color);
@@ -199,14 +144,11 @@ public class StorageFacetTests : TestKitBase
         // Arrange
         var state = new ColorGrainState();
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
+        var mockState = new Mock<IStorage<ColorGrainState>>();
         mockState.SetupGet(o => o.State).Returns(state);
         mockState.Setup(o => o.WriteStateAsync()).Throws<InconsistentStateException>();
 
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentStateStorage("State", storage: mockState.Object);
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
         Action action = () => grain.SetColor(Color.Green);
@@ -219,20 +161,9 @@ public class StorageFacetTests : TestKitBase
     public async Task SetColor_WithState_SetsState()
     {
         // Arrange
-        var state = new ColorGrainState
-        {
-            Color = Color.Red,
-            Id = GrainId,
-        };
+        var state = new ColorGrainState { Color = Color.Red, Id = GrainId };
 
-        var mockState = new Mock<IPersistentState<ColorGrainState>>();
-        mockState.SetupGet(o => o.State).Returns(state);
-        mockState.Setup(o => o.ClearStateAsync());
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o => o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>())).Returns(context => mockState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState("State", state: state);
 
         var grain = await Silo.CreateGrainAsync<ColorGrain>(GrainId);
 
@@ -242,5 +173,78 @@ public class StorageFacetTests : TestKitBase
         // Assert
         state.Color.Should().Be(Color.Blue);
         state.Id.Should().Be(GrainId);
+    }
+
+    [Fact]
+    public async Task GetColor_WithGrainState_ReturnsColor()
+    {
+        // Arrange
+        var state = new ColorGrainState { Color = Color.Red, Id = GrainId };
+
+        Silo.AddGrainState<ColorRankingGrain, ColorGrainState>(state);
+
+        var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+        // Act
+        var color = await grain.GetLeastFavouriteColor();
+        color.Should().Be(Color.Red);
+    }
+
+    [Fact]
+    public async Task SetLeastFavouriteColor_WithDefaultGrainState_SetsState()
+    {
+        var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+        // Act
+        await grain.SetLeastFavouriteColor(Color.Blue);
+
+        var storage = Silo.StorageManager.GetGrainStorage<ColorRankingGrain, ColorGrainState>();
+        var state = storage.State;
+
+        state.Color.Should().Be(Color.Blue);
+        state.Id.Should().Be(GrainId);
+    }
+
+    [Fact]
+    public async Task GetLeastFavouriteColor_WithGrainState_ReturnsColor()
+    {
+        // Arrange
+        var state = new ColorGrainState { Color = Color.Red, Id = GrainId };
+
+        Silo.AddGrainState<ColorRankingGrain, ColorGrainState>(state);
+
+        var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+        // Act
+        var color = await grain.GetLeastFavouriteColor();
+        color.Should().Be(Color.Red);
+    }
+
+    [Fact]
+    public async Task SetFavouriteColor_WithState_SetsState()
+    {
+        var persistentState =
+            Silo.AddPersistentState("Default", state: new ColorGrainState { Id = GrainId, Color = Color.Red });
+
+        var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+        // Act
+        await grain.SetFavouriteColor(Color.Blue);
+
+        var state = persistentState.State;
+        state.Color.Should().Be(Color.Blue);
+        state.Id.Should().Be(GrainId);
+    }
+
+    [Fact]
+    public async Task GetFavouriteColor_WithState_ReturnsColor()
+    {
+        Silo.AddPersistentState("Default", state: new ColorGrainState { Id = GrainId, Color = Color.Blue });
+
+        var grain = await Silo.CreateGrainAsync<ColorRankingGrain>(GrainId);
+
+        // Act
+        var color = await grain.GetFavouriteColor();
+        color.Should().Be(Color.Blue);
     }
 }

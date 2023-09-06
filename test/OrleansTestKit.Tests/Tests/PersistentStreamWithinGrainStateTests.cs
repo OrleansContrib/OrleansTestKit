@@ -10,8 +10,6 @@ namespace Orleans.TestKit.Tests;
 
 public class PersistentStreamWithinGrainStateTests : TestKitBase
 {
-    private readonly Mock<IPersistentState<PersistentListenerStateWithHandle>> _persistentState;
-
     private readonly PersistentListenerStateWithHandle _stateWithHandle;
 
     private readonly TestStream<ChatMessage> _stream;
@@ -20,15 +18,8 @@ public class PersistentStreamWithinGrainStateTests : TestKitBase
     {
         _stateWithHandle = new PersistentListenerStateWithHandle();
 
-        _persistentState = new Mock<IPersistentState<PersistentListenerStateWithHandle>>();
-        _persistentState.SetupGet(o => o.State).Returns(_stateWithHandle);
-
-        var mockMapper = new Mock<IAttributeToFactoryMapper<PersistentStateAttribute>>();
-        mockMapper.Setup(o =>
-                o.GetFactory(It.IsAny<ParameterInfo>(), It.IsAny<PersistentStateAttribute>()))
-            .Returns(context => _persistentState.Object);
-
-        Silo.AddService(mockMapper.Object);
+        Silo.AddPersistentState(
+            "listenerStateWithHandler", state: _stateWithHandle);
 
         _stream = Silo.AddStreamProbe<ChatMessage>(Guid.Empty, null, "Default");
     }
@@ -71,6 +62,8 @@ public class PersistentStreamWithinGrainStateTests : TestKitBase
         //Assert
         Assert.Equal(1, _stream.Subscribed);
         Assert.NotNull(_stateWithHandle.ChatMessageStreamSubscriptionHandle);
-        _persistentState.Verify(x => x.WriteStateAsync(), Times.Once);
+        
+        var stats = Silo.StorageManager.GetStorageStats("listenerStateWithHandler");
+        Assert.Equal(1, stats.Writes);
     }
 }
