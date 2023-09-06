@@ -216,6 +216,9 @@ public sealed class TestKitSilo
                 "A grain has already been created in this silo. Only 1 grain per test silo should ever be created. Add grain probes for supporting grains.");
         }
 
+        // Add state attribute mapping for storage facets
+        this.AddService<IAttributeToFactoryMapper<PersistentStateAttribute>>(StorageManager.StateAttributeFactoryMapper);
+
         _isGrainCreated = true;
 
         var grainContext = GetOrAddGrainContext<T>(identity);

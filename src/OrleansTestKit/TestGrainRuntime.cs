@@ -70,6 +70,19 @@ public sealed class TestGrainRuntime : IGrainRuntime
     }
 
     /// <inheritdoc/>
-    public IStorage<TGrainState> GetStorage<TGrainState>(IGrainContext grain) =>
-        _storageManager.GetStorage<TGrainState>();
+    public IStorage<TGrainState> GetStorage<TGrainState>(IGrainContext grainContext)
+    {
+        ArgumentNullException.ThrowIfNull(grainContext);
+
+        // Getting storage from the IGrainContext either use the grain type
+        // from the TestGrainActivationContext if possible otherwise
+        // use GrainInstance.
+        var grainType = grainContext is TestGrainActivationContext testContext
+            ? testContext.GrainType
+            : grainContext.GrainInstance?.GetType();
+
+        ArgumentNullException.ThrowIfNull(grainType);
+
+        return _storageManager.GetStorage<TGrainState>(grainType.FullName!);
+    }
 }
