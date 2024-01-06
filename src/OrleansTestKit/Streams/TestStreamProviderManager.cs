@@ -1,16 +1,21 @@
 ﻿using Orleans.Runtime;
 using Orleans.Streams;
+using Orleans.TestKit.Services;
 
 namespace Orleans.TestKit.Streams;
 
-public sealed class TestStreamProviderManager : IKeyedServiceCollection<string, IStreamProvider>
+public sealed class TestStreamProviderManager
 {
     private readonly TestKitOptions _options;
+    private readonly TestServiceProvider _serviceProvider;
 
     private readonly Dictionary<string, TestStreamProvider> _streamProviders = new();
 
-    public TestStreamProviderManager(TestKitOptions options) =>
+    public TestStreamProviderManager(TestServiceProvider serviceProvider, TestKitOptions options)
+    {
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _options = options ?? throw new ArgumentNullException(nameof(options));
+    }
 
     public TestStream<T> AddStreamProbe<T>(Guid streamId, string ns, string providerName) =>
         AddStreamProbe<T>(StreamId.Create(ns, streamId), providerName);
@@ -44,17 +49,12 @@ public sealed class TestStreamProviderManager : IKeyedServiceCollection<string, 
         return Add(name);
     }
 
-    IStreamProvider IKeyedServiceCollection<string, IStreamProvider>.GetService(IServiceProvider services, string key) =>
-        GetProvider(key);
-
-    IEnumerable<IKeyedService<string, IStreamProvider>> IKeyedServiceCollection<string, IStreamProvider>.GetServices(IServiceProvider services) =>
-        (IEnumerable<IKeyedService<string, IStreamProvider>>)_streamProviders;
-
     private TestStreamProvider Add(string name)
     {
         var provider = new TestStreamProvider(_options);
         provider.Init(name).Wait();
         _streamProviders.Add(name, provider);
+        _serviceProvider.AddKeyedService<IStreamProvider>(name, provider);
         return provider;
     }
 

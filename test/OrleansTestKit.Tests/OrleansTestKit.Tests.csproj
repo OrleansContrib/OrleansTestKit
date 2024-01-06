@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <RootNamespace>Orleans.TestKit.Tests</RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +15,7 @@
     <PackageReference Include="FluentAssertions" Version="6.11.0" />
     <PackageReference Include="Microsoft.CodeCoverage" Version="17.6.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
-    <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.2.0" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" Version="8.0.0" />
     <PackageReference Include="NSubstitute" Version="5.0.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
     <PackageReference Include="xunit" Version="2.5.0" />

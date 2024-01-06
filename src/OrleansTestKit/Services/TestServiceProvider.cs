@@ -1,14 +1,18 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Orleans.Streams;
+using Orleans.TestKit.Streams;
 
 namespace Orleans.TestKit.Services;
 
 /// <summary>
 /// The test service provider
 /// </summary>
-public sealed class TestServiceProvider : IServiceProvider
+public sealed class TestServiceProvider : IServiceProvider, IKeyedServiceProvider
 {
     private readonly TestKitOptions _options;
     private readonly Dictionary<Type, object> _services = new();
+    private readonly Dictionary<(object?, Type), object> _keyedServices = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestServiceProvider"/> class.
@@ -32,6 +36,22 @@ public sealed class TestServiceProvider : IServiceProvider
         ArgumentNullException.ThrowIfNull(instance);
 
         _services[typeof(T)] = instance;
+        return instance;
+    }
+
+    /// <summary>
+    /// Adds or updates a keyed service to the provider
+    /// </summary>
+    /// <typeparam name="T">The service type</typeparam>
+    /// <param name="name">The service key</param>
+    /// <param name="instance">The instance to add</param>
+    /// <returns>The instance</returns>
+    /// <exception cref="ArgumentNullException">Instance must be not null</exception>
+    public T AddKeyedService<T>(string name, T instance)
+    {
+        ArgumentNullException.ThrowIfNull(instance);
+
+        _keyedServices[(name, typeof(T))] = instance;
         return instance;
     }
 
@@ -84,5 +104,55 @@ public sealed class TestServiceProvider : IServiceProvider
 
             return service;
         }
+    }
+
+    public object? GetKeyedService(Type serviceType, object? serviceKey)
+    {
+        ArgumentNullException.ThrowIfNull(serviceType);
+
+        if (_keyedServices.TryGetValue((serviceKey, serviceType), out var service))
+        {
+            return service;
+        }
+
+        // If using strict service probes, throw the exception
+        if (_options.StrictServiceProbes)
+        {
+            throw new Exception($"Service probe does not exist for type {serviceType.Name} and key {serviceKey}. Ensure that it is added before the grain is tested.");
+        }
+        else
+        {
+            if (serviceType == typeof(IStreamProvider))
+            {
+                service = new TestStreamProvider(_options);
+            }
+            else
+            {
+                // Create a new mock
+                if (Activator.CreateInstance(typeof(Mock<>).MakeGenericType(serviceType)) is not IMock<object> mock)
+                {
+                    throw new Exception($"Failed to instantiate {serviceType.Name}.");
+                }
+
+                service = mock.Object;
+            }
+
+            // Save the newly created grain for the next call
+            _keyedServices.Add((serviceKey, serviceType), service);
+
+            return service;
+        }
+    }
+
+    public object GetRequiredKeyedService(Type serviceType, object? serviceKey)
+    {
+        var service = GetKeyedService(serviceType, serviceKey);
+
+        if (service is not object)
+        {
+            throw new Exception($"Service probe does not exist for type {serviceType.Name} and key {serviceKey}. Ensure that it is added before the grain is tested.");
+        }
+
+        return service;
     }
 }
