@@ -24,18 +24,18 @@ It is recommended that you consider developing a mixture of tests based on both 
 
 ## Getting Started
 
-There are two branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 4, a pre-release version supporting Orleans 7. The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
+There are two branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 4, a stable version supporting Orleans 7. The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
 
-If you are using Microsoft Orleans 7, install the latest, pre-release [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
-
-```pwsh
-Install-Package OrleansTestKit -IncludePrerelease
-```
-
-If you are using Microsoft Orleans 3, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
+If you are using Microsoft Orleans 7, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
 
 ```pwsh
 Install-Package OrleansTestKit
+```
+
+If you are using Microsoft Orleans 3, install the latest, stable version less than 4.0 of the [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console, replacing `3.x.x` with the latest version of the NuGet package less than 4.0:
+
+```pwsh
+Install-Package OrleansTestKit -Version 3.x.x
 ```
 
 Refer to the [unit tests](https://github.com/OrleansContrib/OrleansTestKit/tree/main/test) project to learn how to create test fixtures using the Orleans TestKit.
