@@ -1,6 +1,6 @@
 # Orleans TestKit
 
-[![GitHub build status](https://github.com/OrleansContrib/OrleansTestKit/workflows/Continuous%20Integration/badge.svg)](https://github.com/OrleansContrib/OrleansTestKit/actions) [![NuGet pre-release package version](https://img.shields.io/nuget/vpre/OrleansTestKit.svg?style=flat)](https://www.nuget.org/packages/OrleansTestKit/) [![NuGet stable package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](https://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/main/LICENSE) [![Discord](https://img.shields.io/discord/333727978460676096?color=4db798&label=Discord%20Chat&logoColor=4db798)](https://aka.ms/orleans-discord)
+[![GitHub build status](https://github.com/OrleansContrib/OrleansTestKit/workflows/Continuous%20Integration/badge.svg)](https://github.com/OrleansContrib/OrleansTestKit/actions) [![NuGet stable package version](https://img.shields.io/nuget/v/OrleansTestKit.svg?style=flat)](https://www.nuget.org/packages/OrleansTestKit/) [![MIT license](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/OrleansContrib/OrleansTestKit/blob/main/LICENSE) [![Discord](https://img.shields.io/discord/333727978460676096?color=4db798&label=Discord%20Chat&logoColor=4db798)](https://aka.ms/orleans-discord)
 
 - [Orleans TestKit](#orleans-testkit)
   - [About](#about)
@@ -11,6 +11,9 @@
   - [Community](#community)
 
 ## About
+
+> [!NOTE]
+> You are currently viewing Orleans TestKit 4 with support for Microsoft Orleans 7. See Orleans TestKit 8 with support for Microsoft Orleans 8 on the [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch.
 
 The Orleans TestKit is a community-maintained library providing [mock objects](https://wikipedia.org/wiki/Mock_object) that facilitate unit testing grains in applications built on the [Microsoft Orleans](https://learn.microsoft.com/dotnet/orleans/) framework. It provides a _simulated grain activation context_, leveraging [Moq](https://github.com/moq/moq4) to generate test doubles for dependencies such as persistent state, reminders, timers, and streams. By simulating a grain activation context, you focus on testing the behavior of a single grain in isolation.
 
@@ -24,12 +27,18 @@ It is recommended that you consider developing a mixture of tests based on both 
 
 ## Getting Started
 
-There are two branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 4, a stable version supporting Orleans 7. The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
+There are three branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 8, a stable version supporting Orleans 8. The [`4.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/4.x) branch provides Orleans TestKit 4, a stable version supporting Microsoft Orleans 7 (during development, it was known as Orlean 4). The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
 
-If you are using Microsoft Orleans 7, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
+If you are using Microsoft Orleans 8, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
 
 ```pwsh
 Install-Package OrleansTestKit
+```
+
+If you are using Microsoft Orleans 7, install the latest, stable version less than 8.0 of the [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console, replacing `4.x.x` with the latest version of the NuGet package less than 8.0:
+
+```pwsh
+Install-Package OrleansTestKit -Version 4.x.x
 ```
 
 If you are using Microsoft Orleans 3, install the latest, stable version less than 4.0 of the [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console, replacing `3.x.x` with the latest version of the NuGet package less than 4.0:
