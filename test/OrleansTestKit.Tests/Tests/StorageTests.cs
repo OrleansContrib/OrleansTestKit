@@ -78,10 +78,10 @@ public class StorageTests : TestKitBase
         var greetings = (await grain.GetGreetings()).ToList();
 
         // Assert
-        var state = this.Silo.State<GreetingArchiveGrainState>();
+        var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
         state.Greetings.Should().Equal(greeting1, greeting2);
         greetings.Should().Equal(greeting1, greeting2);
-        Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+        Assert.True(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
     }
 
     /// <summary>
@@ -105,13 +105,13 @@ public class StorageTests : TestKitBase
         var greetings = (await grain.GetGreetings()).ToList();
 
         // Assert
-        var stats = this.Silo.StorageStats()!;
+        var stats = this.Silo.StorageStats<GreetingArchiveGrain, GreetingArchiveGrainState>();
         stats.Clears.Should().Be(0);
         stats.Reads.Should().Be(0);
         stats.Writes.Should().Be(2);
 
         greetings.Should().Equal(greeting1, greeting2);
-        Assert.True(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+        Assert.True(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
     }
 
     /// <summary>
@@ -125,7 +125,7 @@ public class StorageTests : TestKitBase
         const long id = 2000;
         const string greeting = "Hola";
 
-        var state = this.Silo.State<GreetingArchiveGrainState>();
+        var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
         state.Greetings.Add(greeting);
 
         var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
@@ -182,7 +182,7 @@ public class StorageTests : TestKitBase
         const long id = 5000;
         const string greeting = "Olá";
 
-        var state = this.Silo.State<GreetingArchiveGrainState>();
+        var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
         state.Greetings.Add(greeting);
 
         var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
@@ -193,11 +193,11 @@ public class StorageTests : TestKitBase
         var greetings = (await grain.GetGreetings()).ToList();
 
         // Assert
-        state = this.Silo.State<GreetingArchiveGrainState>();
+        state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
         state.Greetings.Should().BeEmpty();
 
         greetings.Should().BeEmpty();
-        Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+        Assert.False(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
     }
 
     /// <summary>
@@ -211,7 +211,7 @@ public class StorageTests : TestKitBase
         const long id = 6000;
         const string greeting = "Hallo";
 
-        var state = this.Silo.State<GreetingArchiveGrainState>();
+        var state = this.Silo.State<GreetingArchiveGrain, GreetingArchiveGrainState>();
         state.Greetings.Add(greeting);
 
         var grain = await this.Silo.CreateGrainAsync<GreetingArchiveGrain>(id);
@@ -222,13 +222,13 @@ public class StorageTests : TestKitBase
         var greetings = (await grain.GetGreetings()).ToList();
 
         // Assert
-        var stats = this.Silo.StorageStats()!;
+        var stats = this.Silo.StorageStats<GreetingArchiveGrain, GreetingArchiveGrainState>();
         stats.Clears.Should().Be(1);
         stats.Reads.Should().Be(0);
         stats.Writes.Should().Be(0);
 
         greetings.Should().BeEmpty();
-        Assert.False(this.Silo.StorageManager.GetStorage<GreetingArchiveGrainState>().RecordExists);
+        Assert.False(this.Silo.StorageManager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>().RecordExists);
     }
 
     /// <summary>This test demonstrates how to use the RecordExists flag</summary>
@@ -236,7 +236,7 @@ public class StorageTests : TestKitBase
     public async Task RecordExistsFlagTest()
     {
         var manager = new StorageManager(new TestKitOptions());
-        var state = manager.GetStorage<GreetingArchiveGrainState>();
+        var state = manager.GetGrainStorage<GreetingArchiveGrain, GreetingArchiveGrainState>();
 
         // be default, RecordExists is false
         Assert.False(state.RecordExists);

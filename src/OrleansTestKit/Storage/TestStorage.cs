@@ -1,32 +1,28 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Orleans.Core;
-using Orleans.Runtime;
+﻿using Orleans.Runtime;
 
 namespace Orleans.TestKit.Storage;
 
-internal class TestStorage<TState> : IStorageStats, IStorage<TState>, IPersistentState<TState>
+internal class TestStorage<TState> : IStorageStats, IPersistentState<TState>
 {
-    public TestStorage()
+    public TestStorage() : this(CreateState())
     {
-        Stats = new TestStorageStats() { Reads = -1 };
-        InitializeState();
     }
 
     public TestStorage(TState state)
-        : this() => State = state;
+    {
+        Stats = new TestStorageStats { Reads = -1 };
+        State = state;
+    }
 
-    public string Etag =>
-        throw new NotImplementedException();
+    public string Etag => string.Empty;
 
-    public virtual bool RecordExists { get; set; }
+    public bool RecordExists { get; private set; }
 
     public TState State { get; set; }
 
-    public TestStorageStats Stats { get; }
-
     public Task ClearStateAsync()
     {
-        InitializeState();
+        State = CreateState();
         Stats.Clears++;
         RecordExists = false;
         return Task.CompletedTask;
@@ -45,8 +41,9 @@ internal class TestStorage<TState> : IStorageStats, IStorage<TState>, IPersisten
         return Task.CompletedTask;
     }
 
-    [MemberNotNull(nameof(State))]
-    private void InitializeState()
+    public TestStorageStats Stats { get; }
+
+    private static TState CreateState()
     {
         if (!typeof(TState).IsValueType && typeof(TState).GetConstructor(Type.EmptyTypes) == null)
         {
@@ -54,10 +51,6 @@ internal class TestStorage<TState> : IStorageStats, IStorage<TState>, IPersisten
                 $"No parameterless constructor defined for {typeof(TState).Name}. This is currently not supported");
         }
 
-        State = Activator.CreateInstance<TState>();
-        if (State is null)
-        {
-            throw new Exception($"Failed to instantiate {typeof(TState).Name}.");
-        }
+        return Activator.CreateInstance<TState>();
     }
 }
