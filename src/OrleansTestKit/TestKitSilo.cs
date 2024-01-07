@@ -50,7 +50,8 @@ public sealed class TestKitSilo
         ServiceProvider.AddService<IReminderRegistry>(ReminderRegistry);
         GrainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
         ServiceProvider.AddService<IGrainRuntime>(GrainRuntime);
-        _grainCreator = new TestGrainCreator(GrainRuntime, ServiceProvider);
+		_grainCreator = new TestGrainCreator(GrainRuntime, ReminderRegistry, ServiceProvider);
+
 
         var provider = new ServiceCollection()
             .AddSingleton<GrainTypeResolver>()
@@ -59,7 +60,7 @@ public sealed class TestKitSilo
             .BuildServiceProvider();
 
         _grainTypeResolver = provider.GetRequiredService<GrainTypeResolver>();
-    }
+            }
 
     /// <summary>
     /// Gets the silo's grain runtime instance that is injected into the created grain
@@ -90,6 +91,21 @@ public sealed class TestKitSilo
     /// <summary>Gets the manager of all test silo timers.</summary>
     public TestTimerRegistry TimerRegistry { get; }
 
+    public Task<T> CreateGrainAsync<T>(long id) where T : IGrainBase, IGrainWithIntegerKey =>
+        CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id));
+
+    public Task<T> CreateGrainAsync<T>(Guid id) where T : IGrainBase, IGrainWithGuidKey =>
+        CreateGrainAsync<T>(GrainIdKeyExtensions.CreateGuidKey(id));
+
+    public Task<T> CreateGrainAsync<T>(string id) where T : IGrainBase, IGrainWithStringKey =>
+        CreateGrainAsync<T>(IdSpan.Create(id));
+
+    public Task<T> CreateGrainAsync<T>(Guid id, string keyExtension) where T : IGrainBase, IGrainWithGuidCompoundKey =>
+        CreateGrainAsync<T>(GrainIdKeyExtensions.CreateGuidKey(id, keyExtension));
+
+    public Task<T> CreateGrainAsync<T>(long id, string keyExtension) where T : IGrainBase, IGrainWithIntegerCompoundKey =>
+        CreateGrainAsync<T>(GrainIdKeyExtensions.CreateIntegerKey(id, keyExtension));
+
     /// <summary>Deactivate the given <see cref="Grain"/>.</summary>
     /// <param name="grain">Grain to Deactivate.</param>
     /// <param name="deactivationReason">
@@ -114,18 +130,7 @@ public sealed class TestKitSilo
     /// <param name="grain">Grain to fetch Context from.</param>
     /// <returns><see cref="IGrainContext"/>.</returns>
     /// <exception cref="NotSupportedException">Grain does not derive from <see cref="IGrainBase"/>.</exception>
-    public IGrainContext GetContextFromGrain(Grain grain)
-    {
-        if (grain is IGrainBase grainbase)
-        {
-            return grainbase.GrainContext;
-        }
-        else
-        {
-            throw new NotSupportedException($"Current Grain does not derive from {nameof(IGrainBase)} can therefore not fetch " +
-                $"{nameof(IGrainContext)}");
-        }
-    }
+    public IGrainContext GetContextFromGrain(IGrainBase grain) => grain.GrainContext;
 
     /// <summary>Fetches <see cref="GrainId"/> from current Grain.</summary>
     /// <param name="grain">Grain to fetch Grain Id.</param>
@@ -138,7 +143,7 @@ public sealed class TestKitSilo
     /// <param name="grain">The grain to create the context for</param>
     /// <param name="token">Cancellation token</param>
     /// <returns>A disposable to denote when the context is finished.</returns>
-    public async Task<IDisposable> GetReminderActivationContext(Grain grain, CancellationToken token = default)
+    public async Task<IDisposable> GetReminderActivationContext(IGrainBase grain, CancellationToken token = default)
     {
         // TODO -- v5, mark this as obsolete when we support Orleans 8 only.
         var handler = new ReminderContextHandler();
@@ -173,7 +178,7 @@ public sealed class TestKitSilo
     /// <param name="identity"></param>
     /// <returns></returns>
     public IGrainContext GetOrAddGrainContext<T>(IdSpan identity)
-        where T : Grain
+        where T : IGrainBase
     {
         var grainType = _grainTypeResolver.GetGrainType(typeof(T));
         var grainId = GrainId.Create(grainType, identity);
@@ -208,7 +213,7 @@ public sealed class TestKitSilo
     /// <returns>The grain</returns>
     /// <exception cref="Exception">Only one grain can be created or a failure occurred</exception>
     public async Task<T> CreateGrainAsync<T>(IdSpan identity, CancellationToken cancellation = default)
-        where T : Grain
+        where T : IGrainBase
     {
         if (_isGrainCreated)
         {
@@ -237,17 +242,20 @@ public sealed class TestKitSilo
         await _grainLifecycle.TriggerStartAsync().ConfigureAwait(false);
 
         // Due to update the OnActivate call has to be done manually not all Grains implement ILifecycle anymore
-        if (grain is IGrainBase)
+
+        if (grain is IRemindable)
         {
             // Used to enable reminder context on during activate
-            using var reminderContext = grain is IRemindable
-                ? await GetReminderActivationContext(grain, cancellation).ConfigureAwait(false)
-                : null
-            ;
+            using var reminderContext =
+                 await GetReminderActivationContext(grain, cancellation).ConfigureAwait(false);
 
             await grain.OnActivateAsync(cancellation).ConfigureAwait(false);
             _activatedGrains.Add(grain);
         }
+
+        await grain.OnActivateAsync(cancellation).ConfigureAwait(false);
+        _activatedGrains.Add(grain);
+
 
         return (T)grain;
     }

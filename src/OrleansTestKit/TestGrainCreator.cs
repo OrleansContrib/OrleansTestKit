@@ -9,35 +9,39 @@ using Orleans.TestKit.Storage;
 // https://github.com/dotnet/orleans/blob/10af0f4af588cd4aa45cb3e250dfbffa389d59c7/src/Orleans.Runtime/Facet/ConstructorArgumentFactory.cs
 namespace Orleans.TestKit;
 
-/// <summary>
-/// Contains necessary logic for creating grains in a unit test context -- emulates the Orleans runtime behavior of triggering lifecycle events, etc.
-/// </summary>
+using Orleans.Timers;
+
 public sealed class TestGrainCreator
 {
-    private static readonly MethodInfo GetFactoryMethod = typeof(TestGrainCreator).GetMethod("GetFactory", BindingFlags.NonPublic | BindingFlags.Static)!;
+    private const string GRAINCONTEXT_PROPERTYNAME = "GrainContext";
+
+    private const string RUNTIME_PROPERTYNAME = "Runtime";
+
+    private static readonly Type FacetMarkerInterfaceType = typeof(IFacetMetadata);
+
+    private static readonly MethodInfo GetFactoryMethod = typeof(TestGrainCreator).GetMethod("GetFactory", BindingFlags.NonPublic | BindingFlags.Static);
+
+    private readonly PropertyInfo _contextProperty;
+    private readonly PropertyInfo _contextPropertyBase;
+
+    private readonly IGrainRuntime _runtime;
+    private readonly IReminderRegistry _reminderRegistry;
+
+    private readonly PropertyInfo _runtimeProperty;
 
     private readonly IServiceProvider _serviceProvider;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TestGrainCreator"/> class.
-    /// </summary>
-    /// <param name="runtime">The grain runtime.</param>
-    /// <param name="serviceProvider">Service provider.</param>
-    /// <exception cref="ArgumentNullException">Both runtime and services should be not null.</exception>
-    public TestGrainCreator(IGrainRuntime runtime, IServiceProvider serviceProvider)
+    public TestGrainCreator(IGrainRuntime runtime, IReminderRegistry reminderRegistry, IServiceProvider serviceProvider)
     {
-        ArgumentNullException.ThrowIfNull(runtime);
+        _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
+        _reminderRegistry = reminderRegistry;
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(runtime));
+        _contextProperty = typeof(Grain).GetProperty(GRAINCONTEXT_PROPERTYNAME, BindingFlags.Instance | BindingFlags.NonPublic);
+        _runtimeProperty = typeof(Grain).GetProperty(RUNTIME_PROPERTYNAME, BindingFlags.Instance | BindingFlags.NonPublic);
+        _contextPropertyBase = typeof(IGrainBase).GetProperty(GRAINCONTEXT_PROPERTYNAME, BindingFlags.Instance | BindingFlags.Public);
     }
 
-    /// <summary>
-    /// Create a grain instance emulating Orleans runtime behavior.
-    /// </summary>
-    /// <typeparam name="T">The grain instance type to create.</typeparam>
-    /// <param name="context">The grain context.</param>
-    /// <returns>The grain.</returns>
-    /// <exception cref="ArgumentNullException">context is required.</exception>
-    public Grain CreateGrainInstance<T>(IGrainContext context)
+    public IGrainBase CreateGrainInstance<T>(IGrainContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
 
@@ -45,21 +49,79 @@ public sealed class TestGrainCreator
 
         var (instances, types) = GetConstructorParameters(typeof(T), context);
         var factory = ActivatorUtilities.CreateFactory(typeof(T), types.ToArray());
-        var grain = (Grain)factory.Invoke(_serviceProvider, instances.ToArray());
-
+        var grain = (IGrainBase)factory.Invoke(_serviceProvider, instances.ToArray());
         var participant = grain as ILifecycleParticipant<IGrainLifecycle>;
 
         participant?.Participate(context.ObservableLifecycle);
+
+        // Set the runtime and identity. This is equivalent to what Orleans' GrainCreator does when creating new grains.
+        // It is messier but easier than trying to wrangle the values in via a constructor which may or may exist on
+        // types inheriting from Grain.
+        if (grain is Grain)
+        {
+            var runtimeBackfield = _runtimeProperty.DeclaringType.GetField($"<{_runtimeProperty.Name}>k__BackingField",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            runtimeBackfield.SetValue(grain, _runtime);
+            _contextProperty.SetValue(grain, context);
+        }
+        else
+        {
+            var declaringType = GetIGranBaseDeclaringType(grain);
+            var contextBackfield = declaringType.GetField($"<{_contextPropertyBase.Name}>k__BackingField",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            contextBackfield.SetValue(grain, context);
+        }
 
         return grain;
     }
 
     /// <summary>
+    /// Gets type that directly inherits IGrainBase
+    /// </summary>
+    /// <param name="root"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    private static Type GetIGranBaseDeclaringType<T>(T root) where T : IGrainBase
+    {
+        var ret = root.GetType();
+        while (true)
+        {
+            if (ret.BaseType != null && !ret.IsInterface)
+            {
+                if (ret.BaseType.GetInterfaces().Any(f => f == typeof(IGrainBase)))
+                {
+                    ret = ret.BaseType;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return ret;
+    }
+
+    /// <summary>
     ///     https://github.com/dotnet/orleans/blob/10af0f4af588cd4aa45cb3e250dfbffa389d59c7/src/Orleans.Runtime/Facet/ConstructorArgumentFactory.cs.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection")]
-    private static Factory<IGrainContext, object> GetFactory<TMetadata>(IServiceProvider services, ParameterInfo parameter, IFacetMetadata metadata, Type type)
-         where TMetadata : IFacetMetadata
+    /// <typeparam name="TMetadata"></typeparam>
+    /// <param name="services"></param>
+    /// <param name="parameter"></param>
+    /// <param name="metadata"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    /// <exception cref="OrleansException"></exception>
+    private static Factory<IGrainContext, object> GetFactory<TMetadata>(
+        IServiceProvider services,
+        ParameterInfo parameter,
+        IFacetMetadata metadata,
+        Type type)
+        where TMetadata : IFacetMetadata
     {
         var factoryMapper = services.GetService<IAttributeToFactoryMapper<TMetadata>>()
             ?? throw new OrleansException($"Missing attribute mapper for attribute {metadata.GetType()} used in grain constructor for grain type {type}.");
@@ -145,6 +207,30 @@ public sealed class TestGrainCreator
                             continue;
                         }
                     }
+                }
+
+                if (parameter.ParameterType == typeof(IGrainFactory))
+                {
+                    instances.Add(_runtime.GrainFactory);
+                    types.Add(typeof(IGrainFactory));
+                }
+
+                if (parameter.ParameterType == typeof(ITimerRegistry))
+                {
+                    instances.Add(_runtime.TimerRegistry);
+                    types.Add(typeof(ITimerRegistry));
+                }
+
+                if (parameter.ParameterType == typeof(IReminderRegistry))
+                {
+                    instances.Add(_reminderRegistry);
+                    types.Add(typeof(IReminderRegistry));
+                }
+
+                if (parameter.ParameterType == typeof(IGrainRuntime))
+                {
+                    instances.Add(_runtime);
+                    types.Add(typeof(IGrainRuntime));
                 }
             }
         }
