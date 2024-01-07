@@ -45,8 +45,7 @@ public sealed class TestKitSilo
         StorageManager = new StorageManager(Options);
         TimerRegistry = new TestTimerRegistry();
         ReminderRegistry = new TestReminderRegistry();
-        StreamProviderManager = new TestStreamProviderManager(Options);
-        ServiceProvider.AddService<IKeyedServiceCollection<string, IStreamProvider>>(StreamProviderManager);
+        StreamProviderManager = new TestStreamProviderManager(ServiceProvider, Options);
         ServiceProvider.AddService<IReminderRegistry>(ReminderRegistry);
         GrainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
         ServiceProvider.AddService<IGrainRuntime>(GrainRuntime);
