@@ -3,7 +3,6 @@
 
   <PropertyGroup>
     <RootNamespace>Orleans.TestKit.Tests</RootNamespace>
-    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

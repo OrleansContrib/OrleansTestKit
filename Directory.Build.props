@@ -17,7 +17,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
   </PropertyGroup>
 
