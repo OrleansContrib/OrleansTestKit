@@ -12,9 +12,6 @@
 
 ## About
 
-> [!NOTE]
-> You are currently viewing Orleans TestKit 4 with support for Microsoft Orleans 7. See Orleans TestKit 8 with support for Microsoft Orleans 8 on the [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch.
-
 The Orleans TestKit is a community-maintained library providing [mock objects](https://wikipedia.org/wiki/Mock_object) that facilitate unit testing grains in applications built on the [Microsoft Orleans](https://learn.microsoft.com/dotnet/orleans/) framework. It provides a _simulated grain activation context_, leveraging [Moq](https://github.com/moq/moq4) to generate test doubles for dependencies such as persistent state, reminders, timers, and streams. By simulating a grain activation context, you focus on testing the behavior of a single grain in isolation.
 
 The official [integration testing approach](https://learn.microsoft.com/dotnet/orleans/implementation/testing) leverages the `TestCluster`. The `TestCluster` is a fully functional, in-memory cluster. It is faster to start than a regular cluster and provides a complete runtime. However, it may require complex configuration and custom-developed dependencies to test particular scenarios. That having been said, there are important caveats to the Orleans TestKit approach.
