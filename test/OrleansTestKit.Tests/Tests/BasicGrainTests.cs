@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Orleans.Runtime;
 using TestGrains;
 using TestInterfaces;
 using Xunit;
@@ -36,9 +37,12 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<GuidCompoundKeyGrain>(id, ext);
 
         var key = await grain.GetKey();
+        var keyGuid = grain.GetPrimaryKey(out var keyExt);
 
         key.Item1.Should().Be(id);
         key.Item2.Should().Be(ext);
+        keyGuid.Should().Be(id);
+        keyExt.Should().Be(ext);
     }
 
     [Fact]
@@ -49,8 +53,10 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<GuidKeyGrain>(id);
 
         var key = await grain.GetKey();
+        var keyGuid = grain.GetPrimaryKey();
 
         key.Should().Be(id);
+        keyGuid.Should().Be(id);
     }
 
     [Fact]
@@ -62,9 +68,12 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<IntegerCompoundKeyGrain>(id, ext);
 
         var key = await grain.GetKey();
+        var keyLong = grain.GetPrimaryKeyLong(out var keyExt);
 
         key.Item1.Should().Be(id);
         key.Item2.Should().Be(ext);
+        keyLong.Should().Be(id);
+        keyExt.Should().Be(ext);
     }
 
     [Fact]
@@ -75,8 +84,10 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<IntegerKeyGrain>(id);
 
         var key = await grain.GetKey();
+        var keyLong = grain.GetPrimaryKeyLong();
 
         key.Should().Be(id);
+        keyLong.Should().Be(id);
     }
 
     [Fact]
@@ -111,8 +122,10 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<StatefulGuidKeyGrain>(id);
 
         var key = await grain.GetKey();
+        var keyGuid = grain.GetPrimaryKey();
 
         key.Should().Be(id);
+        keyGuid.Should().Be(id);
     }
 
     [Fact]
@@ -123,8 +136,10 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<StatefulIntegerKeyGrain>(id);
 
         var key = await grain.GetKey();
+        var keyLong = grain.GetPrimaryKeyLong();
 
         key.Should().Be(id);
+        keyLong.Should().Be(id);
     }
 
     [Fact]
@@ -135,8 +150,10 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<StatefulStringKeyGrain>(id);
 
         var key = await grain.GetKey();
+        var keyString = grain.GetPrimaryKeyString();
 
         key.Should().Be(id);
+        keyString.Should().Be(id);
     }
 
     [Fact]
@@ -147,7 +164,9 @@ public class BasicGrainTests : TestKitBase
         var grain = await Silo.CreateGrainAsync<StringKeyGrain>(id);
 
         var key = await grain.GetKey();
+        var keyString = grain.GetPrimaryKeyString();
 
         key.Should().Be(id);
+        keyString.Should().Be(id);
     }
 }

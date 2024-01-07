@@ -16,7 +16,7 @@ public class TimerTests : TestKitBase
         await Silo.FireAllTimersAsync();
 
         // Assert
-        var state = Silo.State<HelloTimersState>();
+        var state = Silo.State<HelloTimers, HelloTimersState>();
         state.Timer0Fired.Should().BeTrue();
         state.Timer1Fired.Should().BeTrue();
     }
@@ -32,7 +32,7 @@ public class TimerTests : TestKitBase
         await Silo.FireAllTimersAsync();
 
         // Assert
-        var state = Silo.State<HelloTimersState>();
+        var state = Silo.State<HelloTimers, HelloTimersState>();
         state.Timer0Fired.Should().BeTrue();
         state.Timer1Fired.Should().BeTrue();
         state.Timer2Fired.Should().BeTrue();
@@ -49,7 +49,7 @@ public class TimerTests : TestKitBase
         await Silo.FireTimerAsync(0);
 
         // Assert
-        var state = Silo.State<HelloTimersState>();
+        var state = Silo.State<HelloTimers, HelloTimersState>();
         state.Timer0Fired.Should().BeTrue();
         state.Timer1Fired.Should().BeFalse();
     }
@@ -64,7 +64,7 @@ public class TimerTests : TestKitBase
         await Silo.FireTimerAsync(1);
 
         // Assert
-        var state = Silo.State<HelloTimersState>();
+        var state = Silo.State<HelloTimers, HelloTimersState>();
         state.Timer0Fired.Should().BeFalse();
         state.Timer1Fired.Should().BeTrue();
     }
