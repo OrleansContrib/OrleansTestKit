@@ -22,7 +22,7 @@ public class StrictGrainProbeTests : TestKitBase
         //This uses the wrong id for the IPong since this is hard coded within PingGrain
         var pong = Silo.AddProbe<IPong>(0);
 
-        await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
+        await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<InvalidOperationException>();
 
         pong.Verify(p => p.Pong(), Times.Never);
     }
@@ -35,7 +35,7 @@ public class StrictGrainProbeTests : TestKitBase
         //This uses the correct id, but the wrong grain type
         var pong = Silo.AddProbe<IPong2>(22);
 
-        await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
+        await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<InvalidOperationException>();
 
         pong.Verify(p => p.Pong2(), Times.Never);
     }
@@ -45,7 +45,7 @@ public class StrictGrainProbeTests : TestKitBase
     {
         IPing grain = await Silo.CreateGrainAsync<PingGrain>(1);
 
-        await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<Exception>();
+        await grain.Invoking(p => p.Ping()).Should().ThrowExactlyAsync<InvalidOperationException>();
     }
 
     [Fact]
