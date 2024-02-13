@@ -1,21 +1,26 @@
-﻿using Moq;
+﻿using System.Collections.Concurrent;
+using Moq;
 using Orleans.Runtime;
 
 namespace Orleans.TestKit;
 
+/// <summary>
+/// The test grain factory
+/// </summary>
+/// <remarks>
+/// Utilized to provide grains for both silos and the configured IClusterClient
+/// </remarks>
 public sealed class TestGrainFactory : IGrainFactory
 {
     private readonly TestKitOptions _options;
 
-    private readonly Dictionary<Type, Func<IdSpan, IGrain>> _probeFactories;
+    private readonly ConcurrentDictionary<Type, Func<IdSpan, IGrain>> _probeFactories = new();
 
-    private readonly Dictionary<string, IGrain> _probes;
+    private readonly ConcurrentDictionary<string, IGrain> _probes = new();
 
     internal TestGrainFactory(TestKitOptions options)
     {
         _options = options;
-        _probeFactories = new Dictionary<Type, Func<IdSpan, IGrain>>();
-        _probes = new Dictionary<string, IGrain>();
     }
 
     public TGrainObserverInterface CreateObjectReference<TGrainObserverInterface>(IGrainObserver obj)
@@ -75,13 +80,23 @@ public sealed class TestGrainFactory : IGrainFactory
     {
         var key = GetKey(identity, typeof(T), grainClassNamePrefix);
         var mock = new Mock<T>();
-        _probes.Add(key, mock.Object);
+        // we expect AddProbe to be called in a serialized fashion
+        if (!_probes.TryAdd(key, mock.Object))
+        {
+            throw new InvalidOperationException($"Probe Key: {key} already exists");
+        }
         return mock;
     }
 
     internal void AddProbe<T>(Func<IdSpan, T> factory)
-        where T : class, IGrain =>
-        _probeFactories.Add(typeof(T), factory);
+        where T : class, IGrain
+    {
+        // we expect AddProbe to be called in a serialized fashion
+        if (!_probeFactories.TryAdd(typeof(T), factory))
+        {
+            throw new InvalidOperationException($"Probe Factory for {typeof(T).Name} already exists");
+        }
+    }
 
     internal void AddProbe<T>(Func<IdSpan, IMock<T>> factory)
         where T : class, IGrain
@@ -105,19 +120,17 @@ public sealed class TestGrainFactory : IGrainFactory
     private IGrain GetProbe(Type grainType, IdSpan identity, string? grainClassNamePrefix)
     {
         var key = GetKey(identity, grainType, grainClassNamePrefix);
-        if (_probes.TryGetValue(key, out var grain))
+        return _probes.GetOrAdd(key, (key) =>
         {
-            return grain;
-        }
+            // If using strict grain probes, throw the exception
+            if (_options.StrictGrainProbes)
+            {
+                throw new InvalidOperationException($"Probe {identity} does not exist for type {grainType.Name}. " +
+                    "Ensure that it is added before the grain is tested.");
+            }
 
-        // If using strict grain probes, throw the exception
-        if (_options.StrictGrainProbes)
-        {
-            throw new Exception($"Probe {identity} does not exist for type {grainType.Name}. " +
-                "Ensure that it is added before the grain is tested.");
-        }
-        else
-        {
+            IGrain grain;
+
             if (_probeFactories.TryGetValue(grainType, out var factory))
             {
                 grain = factory(identity);
@@ -125,13 +138,11 @@ public sealed class TestGrainFactory : IGrainFactory
             else
             {
                 var mock = Activator.CreateInstance(typeof(Mock<>).MakeGenericType(grainType)) as IMock<IGrain>;
-                grain = mock?.Object;
+                grain = mock?.Object!;
             }
 
             // Save the newly created grain for the next call
-            _probes.Add(key, grain!);
-        }
-
-        return grain!;
+            return grain;
+        });
     }
 }
