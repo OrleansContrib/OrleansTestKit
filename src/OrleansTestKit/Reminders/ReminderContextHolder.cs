@@ -20,7 +20,9 @@ public sealed class ReminderContextHolder : IDisposable
         _slim = new SemaphoreSlim(1);
         var assembly = typeof(GrainId).Assembly;
         var contextType = assembly.GetType(RuntimeNamespace)!;
-        _runtimeContextMethod = contextType.GetMethod(RuntimeMethod, BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext) })!;
+        _runtimeContextMethod = contextType.GetMethod(RuntimeMethod,
+            BindingFlags.NonPublic | BindingFlags.Static,
+            new Type[] { typeof(IGrainContext), typeof(IGrainContext).MakeByRefType() })!;
     }
 
     public static ReminderContextHolder Instance =>
@@ -33,7 +35,7 @@ public sealed class ReminderContextHolder : IDisposable
     {
         try
         {
-            _runtimeContextMethod.Invoke(null, new object?[] { null });
+            _runtimeContextMethod.Invoke(null, new object?[] { null, null });
         }
         finally
         {
@@ -44,6 +46,6 @@ public sealed class ReminderContextHolder : IDisposable
     public async Task SetReminderContext(IGrainContext context, CancellationToken token = default)
     {
         await _slim.WaitAsync(token);
-        _runtimeContextMethod.Invoke(null, new object[] { context });
+        _runtimeContextMethod.Invoke(null, new object[] { context, null });
     }
 }
