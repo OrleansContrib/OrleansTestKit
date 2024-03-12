@@ -11,7 +11,7 @@ internal sealed class RuntimeContextManager
         var contextType = assembly.GetType("Orleans.Runtime.RuntimeContext")!;
 
         SetExecutionContext = contextType
-            .GetMethod("SetExecutionContext", BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext) })!
+            .GetMethod("SetExecutionContext", BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext), typeof(IGrainContext) })!
             .CreateDelegate<Action<IGrainContext?>>()
         ;
     }

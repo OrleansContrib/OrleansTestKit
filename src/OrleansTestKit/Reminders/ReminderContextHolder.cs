@@ -20,7 +20,7 @@ public sealed class ReminderContextHolder : IDisposable
         _slim = new SemaphoreSlim(1);
         var assembly = typeof(GrainId).Assembly;
         var contextType = assembly.GetType(RuntimeNamespace)!;
-        _runtimeContextMethod = contextType.GetMethod(RuntimeMethod, BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext) })!;
+        _runtimeContextMethod = contextType.GetMethod(RuntimeMethod, BindingFlags.NonPublic | BindingFlags.Static, new Type[] { typeof(IGrainContext), typeof(IGrainContext) })!;
     }
 
     public static ReminderContextHolder Instance =>
