@@ -27,6 +27,8 @@ public sealed class TestGrainActivationContext : IGrainContext
     /// <inheritdoc/>
     public object GrainInstance { get; set; } = default!;
 
+    public void Migrate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
+
     /// <inheritdoc/>
     public GrainReference GrainReference { get; set; } = default!;
 
@@ -61,6 +63,10 @@ public sealed class TestGrainActivationContext : IGrainContext
 
     /// <inheritdoc/>
     public void ReceiveMessage(object message) => throw new NotImplementedException();
+
+    public void Activate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
+
+    public void Deactivate(DeactivationReason deactivationReason, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public void Rehydrate(IRehydrationContext context) => throw new NotImplementedException();

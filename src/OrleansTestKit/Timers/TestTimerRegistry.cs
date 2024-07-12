@@ -53,4 +53,8 @@ public sealed class TestTimerRegistry : ITimerRegistry
         _timers.Add(timer);
         return timer;
     }
+
+    public IGrainTimer RegisterGrainTimer<TState>(IGrainContext grainContext, Func<TState, CancellationToken, Task> callback, TState state,
+        GrainTimerCreationOptions options) =>
+        throw new NotImplementedException();
 }
