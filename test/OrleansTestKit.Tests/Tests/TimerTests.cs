@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Orleans.TestKit.Timers;
 using TestGrains;
 using Xunit;
 
@@ -6,6 +7,53 @@ namespace Orleans.TestKit.Tests;
 
 public class TimerTests : TestKitBase
 {
+    [Fact]
+    public async Task ShouldFireFirstGrainTimerAsync()
+    {
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
+
+        // Act
+        await Silo.FireTimerAsync(HelloTimers.GrainTimer0);
+
+        // Assert
+        var state = Silo.State<HelloTimers, HelloTimersState>();
+        state.GrainTimer0Fired.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task ShouldFirstGrainTimerAsync()
+    {
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
+
+        // Act
+        await Silo.FireTimerAsync(HelloTimers.GrainTimer0);
+
+        // Assert
+        var state = Silo.State<HelloTimers, HelloTimersState>();
+        state.GrainTimer0Fired.Should().BeTrue();
+        state.GrainTimer0Cancelled.Should().BeFalse();
+    }
+
+    [Fact]
+        public async Task ShouldCancelFirstGrainTimerAsync()
+    {
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
+
+        // Act
+        _ = Silo.FireTimerAsync(HelloTimers.GrainTimer0);
+        await Task.Delay(100);
+        grain._grainTimer0.Dispose();
+        await Task.Delay(100);
+
+        // Assert
+        var state = Silo.State<HelloTimers, HelloTimersState>();
+        state.GrainTimer0Fired.Should().BeTrue();
+        state.GrainTimer0Cancelled.Should().BeTrue();
+    }
+
     [Fact]
     public async Task ShouldFireAllTimersAsync()
     {
@@ -19,6 +67,8 @@ public class TimerTests : TestKitBase
         var state = Silo.State<HelloTimers, HelloTimersState>();
         state.Timer0Fired.Should().BeTrue();
         state.Timer1Fired.Should().BeTrue();
+        state.Timer2Fired.Should().BeTrue();
+        state.GrainTimer0Fired.Should().BeTrue();
     }
 
     [Fact]
@@ -36,6 +86,7 @@ public class TimerTests : TestKitBase
         state.Timer0Fired.Should().BeTrue();
         state.Timer1Fired.Should().BeTrue();
         state.Timer2Fired.Should().BeTrue();
+        state.GrainTimer0Fired.Should().BeTrue();
 
     }
 
