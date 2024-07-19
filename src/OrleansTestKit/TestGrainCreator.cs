@@ -36,7 +36,7 @@ public sealed class TestGrainCreator
         _runtime = runtime ?? throw new ArgumentNullException(nameof(runtime));
         _reminderRegistry = reminderRegistry;
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(runtime));
-        _contextProperty = typeof(Grain).GetProperty(GRAINCONTEXT_PROPERTYNAME, BindingFlags.Instance | BindingFlags.NonPublic);
+        _contextProperty = typeof(Grain).GetProperty(GRAINCONTEXT_PROPERTYNAME, BindingFlags.Instance | BindingFlags.Public);
         _runtimeProperty = typeof(Grain).GetProperty(RUNTIME_PROPERTYNAME, BindingFlags.Instance | BindingFlags.NonPublic);
         _contextPropertyBase = typeof(IGrainBase).GetProperty(GRAINCONTEXT_PROPERTYNAME, BindingFlags.Instance | BindingFlags.Public);
     }

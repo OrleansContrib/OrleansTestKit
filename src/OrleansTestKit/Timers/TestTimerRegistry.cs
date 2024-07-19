@@ -1,5 +1,4 @@
 ﻿using Moq;
-using Orleans.Runtime;
 using Orleans.Timers;
 
 namespace Orleans.TestKit.Timers;
@@ -41,6 +40,7 @@ public sealed class TestTimerRegistry : ITimerRegistry
     public Task FireAsync(int index) => _timers[index].FireAsync();
 
     /// <inheritdoc/>
+    [Obsolete]
     public IDisposable RegisterTimer(IGrainContext grainContext, Func<object?, Task> asyncCallback, object? state, TimeSpan dueTime, TimeSpan period)
     {
         if (grainContext == null)
@@ -49,8 +49,28 @@ public sealed class TestTimerRegistry : ITimerRegistry
         }
 
         Mock.Object.RegisterTimer(grainContext, asyncCallback, state, dueTime, period);
-        var timer = new TestTimer(asyncCallback, state);
+
+        var timer = new TestTimer(asyncCallback, state!);
         _timers.Add(timer);
+
         return timer;
+    }
+
+    public IGrainTimer RegisterGrainTimer<TState>(IGrainContext grainContext, Func<TState, CancellationToken, Task> asyncCallback, TState state,
+        GrainTimerCreationOptions options)
+    {
+        if (grainContext == null)
+        {
+            throw new ArgumentNullException(nameof(grainContext));
+        }
+
+        var cb = new Func<object?, CancellationToken, Task>((s, ct) => asyncCallback(((TState?)s)!, ct));
+
+        Mock.Object.RegisterGrainTimer(grainContext, asyncCallback, state, options);
+
+        var grainTimer = new TestGrainTimer(cb, state!);
+        _timers.Add(grainTimer);
+
+        return grainTimer;
     }
 }
