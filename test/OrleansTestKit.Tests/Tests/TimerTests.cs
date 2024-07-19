@@ -8,20 +8,6 @@ namespace Orleans.TestKit.Tests;
 public class TimerTests : TestKitBase
 {
     [Fact]
-    public async Task ShouldFireFirstGrainTimerAsync()
-    {
-        // Arrange
-        var grain = await Silo.CreateGrainAsync<HelloTimers>(0);
-
-        // Act
-        await Silo.FireTimerAsync(HelloTimers.GrainTimer0);
-
-        // Assert
-        var state = Silo.State<HelloTimers, HelloTimersState>();
-        state.GrainTimer0Fired.Should().BeTrue();
-    }
-
-    [Fact]
     public async Task ShouldFirstGrainTimerAsync()
     {
         // Arrange
