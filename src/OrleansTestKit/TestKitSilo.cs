@@ -251,14 +251,10 @@ public sealed class TestKitSilo
             // Used to enable reminder context on during activate
             using var reminderContext =
                  await GetReminderActivationContext(grain, cancellation).ConfigureAwait(false);
-
-            await grain.OnActivateAsync(cancellation).ConfigureAwait(false);
-            _activatedGrains.Add(grain);
         }
 
         await grain.OnActivateAsync(cancellation).ConfigureAwait(false);
         _activatedGrains.Add(grain);
-
 
         return (T)grain;
     }
