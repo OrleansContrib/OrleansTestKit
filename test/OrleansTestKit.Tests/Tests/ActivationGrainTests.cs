@@ -32,4 +32,16 @@ public class ActivationGrainTests : TestKitBase
         await Assert.ThrowsAsync<NotSupportedException>(
             async () => await Silo.CreateGrainAsync<StatefulUnsupportedActivationGrain>(0));
     }
+
+    [Fact]
+    public async Task OnActivateAsyncShouldBeCalledOnceOnRemindable()
+    {
+        // Arrange
+
+        // Act
+        var grain = await Silo.CreateGrainAsync<ActivationCountWithReminder>(1);
+        var value = await grain.GetActivationCount();
+
+        Assert.Equal(1, value);
+    }
 }
