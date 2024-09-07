@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Build
         id: build
         run: |
           dotnet restore --verbosity minimal
-          dotnet build --configuration Release --no-restore --verbosity minimal
-          dotnet pack --configuration Release --no-restore --verbosity minimal
+          dotnet build --configuration Release --no-restore --verbosity minimal /p:ContinuousIntegrationBuild=true
+          dotnet pack --configuration Release --no-build --no-restore --verbosity minimal /p:ContinuousIntegrationBuild=true
           nupkg_files=(artifacts/Release/*.nupkg)
           echo "nupkg_name=$( basename ${nupkg_files[-1]} )" >> "${GITHUB_OUTPUT}"
           echo "nupkg_path=${nupkg_files[-1]}" >> "${GITHUB_OUTPUT}"

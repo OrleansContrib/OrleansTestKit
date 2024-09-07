@@ -2,6 +2,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <PackageDescription>A unit test toolkit for Microsoft Orleans that does not require a real silo. Instead, tests are run with a mock grain activation context.</PackageDescription>
@@ -9,10 +11,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageOutputPath Condition=" '$(PackageOutputPath)'=='' ">$(ProjectRoot)/artifacts/$(Configuration)</PackageOutputPath>
     <PackageProjectUrl>https://github.com/OrleansContrib/OrleansTestKit</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Version>8.2.0</Version>
+    <Version>8.2.1</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,9 +30,9 @@
     <PackageReference Include="Microsoft.Orleans.Reminders" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.2.0" />
     <PackageReference Include="Microsoft.Orleans.Runtime" Version="8.2.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
@@ -40,6 +43,7 @@
 
   <ItemGroup>
     <None Include="$(ProjectRoot)assets/logo_128.png" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="$(ProjectRoot)README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
 
 </Project>
