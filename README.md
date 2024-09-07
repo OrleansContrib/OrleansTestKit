@@ -9,6 +9,7 @@
     - [Visual Studio](#visual-studio)
     - [Visual Studio Code](#visual-studio-code)
   - [Community](#community)
+  - [License](#license)
 
 ## About
 

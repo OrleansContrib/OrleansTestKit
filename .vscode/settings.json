@@ -1,6 +1,7 @@
 {
   "dotnet-test-explorer.runInParallel": true,
   "dotnet-test-explorer.testProjectPath": "/test/*.Tests",
+  "dotnet.defaultSolution": "OrleansTestKit.sln",
   "editor.formatOnSave": true,
   "editor.minimap.maxColumn": 120,
   "editor.minimap.showSlider": "always",
@@ -14,8 +15,6 @@
     "**/bin": true,
     "**/obj": true
   },
-  "omnisharp.defaultLaunchSolution": "OrleansTestKit.sln",
   "omnisharp.enableEditorConfigSupport": true,
-  "omnisharp.enableRoslynAnalyzers": true,
   "omnisharp.useEditorFormattingSettings": false
 }
