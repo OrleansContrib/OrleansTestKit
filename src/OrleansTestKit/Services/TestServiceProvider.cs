@@ -43,15 +43,15 @@ public sealed class TestServiceProvider : IServiceProvider, IKeyedServiceProvide
     /// Adds or updates a keyed service to the provider
     /// </summary>
     /// <typeparam name="T">The service type</typeparam>
-    /// <param name="name">The service key</param>
+    /// <param name="serviceKey">The service key</param>
     /// <param name="instance">The instance to add</param>
     /// <returns>The instance</returns>
     /// <exception cref="ArgumentNullException">Instance must be not null</exception>
-    public T AddKeyedService<T>(string name, T instance)
+    public T AddKeyedService<T>(object? serviceKey, T instance)
     {
         ArgumentNullException.ThrowIfNull(instance);
 
-        _keyedServices[(name, typeof(T))] = instance;
+        _keyedServices[(serviceKey, typeof(T))] = instance;
         return instance;
     }
 
