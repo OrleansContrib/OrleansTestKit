@@ -16,7 +16,6 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Version>8.2.1</Version>
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
   <PropertyGroup>
