@@ -15,7 +15,7 @@
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Version>8.2.1</Version>
+    <Version>8.2.2</Version>
   </PropertyGroup>
 
   <PropertyGroup>
