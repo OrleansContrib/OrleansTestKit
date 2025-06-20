@@ -1,4 +1,5 @@
-﻿using Orleans.Runtime;
+﻿using Moq;
+using Orleans.Runtime;
 
 namespace Orleans.TestKit;
 
@@ -7,6 +8,8 @@ namespace Orleans.TestKit;
 /// </summary>
 public sealed class TestGrainActivationContext : IGrainContext
 {
+    public readonly Mock<IGrainContext> Mock = new Mock<IGrainContext>();
+
     /// <inheritdoc/>
     public ActivationId ActivationId { get; set; }
 
@@ -47,7 +50,10 @@ public sealed class TestGrainActivationContext : IGrainContext
     public void Activate(Dictionary<string, object> requestContext, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
 
     /// <inheritdoc/>
-    public void Deactivate(DeactivationReason deactivationReason, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
+    public void Deactivate(DeactivationReason deactivationReason, CancellationToken? cancellationToken = null)
+    {
+        Mock.Object.Deactivate(deactivationReason);
+    }
 
     /// <inheritdoc/>
     public bool Equals(IGrainContext? other) => ReferenceEquals(this, other);
@@ -66,7 +72,10 @@ public sealed class TestGrainActivationContext : IGrainContext
 
     public void Activate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
 
-    public void Deactivate(DeactivationReason deactivationReason, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
+    public void Deactivate(DeactivationReason deactivationReason, CancellationToken cancellationToken = new CancellationToken())
+    {
+        Mock.Object.Deactivate(deactivationReason, cancellationToken);
+    }
 
     /// <inheritdoc/>
     public void Rehydrate(IRehydrationContext context) => throw new NotImplementedException();

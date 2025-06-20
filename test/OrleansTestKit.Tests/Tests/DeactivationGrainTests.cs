@@ -37,5 +37,21 @@ public class DeactivationGrainTests : TestKitBase
         // Assert
         Silo.VerifyRuntime(i => i.DelayDeactivation(context, timeSpan), Times.Once);
     }
+
+    [Fact]
+    public async Task ShouldCallDeactivateOnIdleOnPoco()
+    {
+        // Arrange
+        var grain = await Silo.CreateGrainAsync<DeactivationGrainPoco>(0);
+
+        // Act
+        await grain.DeactivateOnIdle();
+
+        var context = Silo.GetContextFromGrain(grain);
+
+        // Assert
+        var reason = new DeactivationReason(DeactivationReasonCode.ApplicationRequested, $"{nameof(GrainBaseExtensions.DeactivateOnIdle)} was called.");
+        ((TestGrainActivationContext) context).Mock.Verify(i => i.Deactivate(reason, default), Times.Once);
+    }
 }
 #pragma warning restore CS0618 // Type or member is obsolete
