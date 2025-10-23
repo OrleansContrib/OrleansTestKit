@@ -15,7 +15,7 @@
     <PackageTags>Orleans Cloud-Computing Actor-Model Actors Distributed-Systems C# .NET Test Testing</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Version>8.2.2</Version>
+    <Version>9.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,9 +27,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Orleans.Reminders" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.2.0" />
-    <PackageReference Include="Microsoft.Orleans.Runtime" Version="8.2.0" />
+    <PackageReference Include="Microsoft.Orleans.Reminders" Version="9.2.1" />
+    <PackageReference Include="Microsoft.Orleans.Streaming" Version="9.2.1" />
+    <PackageReference Include="Microsoft.Orleans.Runtime" Version="9.2.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
