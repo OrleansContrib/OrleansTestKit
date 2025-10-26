@@ -10,6 +10,12 @@ jobs:
     name: Publish to NuGet
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
       - name: Download NuGet Packages
         id: download_nuget_packages
         env:

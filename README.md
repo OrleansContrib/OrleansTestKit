@@ -25,12 +25,18 @@ It is recommended that you consider developing a mixture of tests based on both 
 
 ## Getting Started
 
-There are three branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 8, a stable version supporting Orleans 8. The [`4.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/4.x) branch provides Orleans TestKit 4, a stable version supporting Microsoft Orleans 7 (during development, it was known as Orlean 4). The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
+There are four branches and major versions of the Orleans TestKit. The [`main`](https://github.com/OrleansContrib/OrleansTestKit/tree/main) branch provides Orleans TestKit 9, a stable version supporting Orleans 9. The [`8.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/8.x) branch provides Orleans TestKit 8, a stable version supporting Microsoft Orleans 8. The [`4.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/4.x) branch provides Orleans TestKit 4, a stable version supporting Microsoft Orleans 7 (during development, it was known as Orlean 4). The [`3.x`](https://github.com/OrleansContrib/OrleansTestKit/tree/3.x) branch provides Orleans TestKit 3, a stable version supporting Microsoft Orleans 3.
 
-If you are using Microsoft Orleans 8, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
+If you are using Microsoft Orleans 9, install the latest, stable [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console:
 
 ```pwsh
 Install-Package OrleansTestKit
+```
+
+If you are using Microsoft Orleans 8, install the latest, stable version less than 9.0 of the [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console, replacing `8.x.x` with the latest version of the NuGet package less than 9.0:
+
+```pwsh
+Install-Package OrleansTestKit -Version 8.x.x
 ```
 
 If you are using Microsoft Orleans 7, install the latest, stable version less than 8.0 of the [`OrleansTestKit`](https://www.nuget.org/packages/OrleansTestKit) NuGet package in your test project. For example, run the following command in your Visual Studio Package Manager Console, replacing `4.x.x` with the latest version of the NuGet package less than 8.0:
