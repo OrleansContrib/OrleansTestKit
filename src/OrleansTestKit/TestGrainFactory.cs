@@ -1,5 +1,4 @@
 ﻿using Moq;
-using Orleans.Runtime;
 
 namespace Orleans.TestKit;
 
@@ -70,8 +69,14 @@ public sealed class TestGrainFactory : IGrainFactory
     public IGrain GetGrain(Type grainInterfaceType, long grainPrimaryKey, string keyExtension) =>
         GetProbe(grainInterfaceType, GrainIdKeyExtensions.CreateIntegerKey(grainPrimaryKey, keyExtension), null);
 
+    public IAddressable GetGrain(Type interfaceType, IdSpan grainKey, string grainClassNamePrefix) =>
+        GetProbe(interfaceType, grainKey, grainClassNamePrefix);
+
+    public IAddressable GetGrain(Type interfaceType, IdSpan grainKey) =>
+        GetProbe(interfaceType, grainKey, null);
+
     internal Mock<T> AddProbe<T>(IdSpan identity, string? grainClassNamePrefix = null)
-        where T : class, IGrain
+                where T : class, IGrain
     {
         var key = GetKey(identity, typeof(T), grainClassNamePrefix);
         var mock = new Mock<T>();
