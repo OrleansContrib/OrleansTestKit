@@ -1,10 +1,6 @@
-﻿using Orleans.Runtime;
+﻿namespace Orleans.TestKit;
 
-namespace Orleans.TestKit;
-
-/// <summary>
-/// Grain context used for tests.
-/// </summary>
+/// <summary>Grain context used for tests.</summary>
 public sealed class TestGrainActivationContext : IGrainContext
 {
     /// <inheritdoc/>
@@ -27,14 +23,10 @@ public sealed class TestGrainActivationContext : IGrainContext
     /// <inheritdoc/>
     public object GrainInstance { get; set; } = default!;
 
-    public void Migrate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
-
     /// <inheritdoc/>
     public GrainReference GrainReference { get; set; } = default!;
 
-    /// <summary>
-    /// Gets or sets the grain type used for this test context.
-    /// </summary>
+    /// <summary>Gets or sets the grain type used for this test context.</summary>
     public Type GrainType { get; set; } = default!;
 
     /// <inheritdoc/>
@@ -46,8 +38,12 @@ public sealed class TestGrainActivationContext : IGrainContext
     /// <inheritdoc/>
     public void Activate(Dictionary<string, object> requestContext, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
 
+    public void Activate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
+
     /// <inheritdoc/>
     public void Deactivate(DeactivationReason deactivationReason, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
+
+    public void Deactivate(DeactivationReason deactivationReason, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public bool Equals(IGrainContext? other) => ReferenceEquals(this, other);
@@ -56,17 +52,21 @@ public sealed class TestGrainActivationContext : IGrainContext
     public TComponent GetComponent<TComponent>() where TComponent : class => throw new NotImplementedException();
 
     /// <inheritdoc/>
+    public object? GetComponent(Type componentType) => throw new NotImplementedException();
+
+    /// <inheritdoc/>
     public TTarget GetTarget<TTarget>() where TTarget : class => throw new NotImplementedException();
+
+    /// <inheritdoc/>
+    public object? GetTarget() => throw new NotImplementedException();
+
+    public void Migrate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public void Migrate(Dictionary<string, object> requestContext, CancellationToken? cancellationToken = null) => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public void ReceiveMessage(object message) => throw new NotImplementedException();
-
-    public void Activate(Dictionary<string, object>? requestContext, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
-
-    public void Deactivate(DeactivationReason deactivationReason, CancellationToken cancellationToken = new CancellationToken()) => throw new NotImplementedException();
 
     /// <inheritdoc/>
     public void Rehydrate(IRehydrationContext context) => throw new NotImplementedException();
