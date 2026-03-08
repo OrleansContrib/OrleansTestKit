@@ -8,7 +8,7 @@
   <PropertyGroup>
     <Authors>dsarfati,seniorquico</Authors>
     <Product>Orleans TestKit</Product>
-    <Copyright>Copyright © 2017-2021 Daniel Sarfati. 2021-2025 Kyle Dodson. All rights reserved.</Copyright>
+    <Copyright>Copyright © 2017-2021 Daniel Sarfati. 2021-2026 Kyle Dodson. All rights reserved.</Copyright>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +17,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <AnalysisLevel>latest-Recommended</AnalysisLevel>
   </PropertyGroup>
 
