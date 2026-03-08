@@ -2,7 +2,6 @@
 using TestGrains;
 using TestInterfaces;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Orleans.TestKit.Tests;
 

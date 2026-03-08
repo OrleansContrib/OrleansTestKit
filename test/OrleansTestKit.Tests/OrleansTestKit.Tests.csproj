@@ -2,24 +2,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Orleans.TestKit.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="6.0.4">
+    <PackageReference Include="coverlet.msbuild" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="FakeItEasy" Version="8.3.0" />
-    <PackageReference Include="FluentAssertions" Version="7.2.0" />
-    <PackageReference Include="Microsoft.CodeCoverage" Version="17.14.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="Microsoft.Orleans.Sdk" Version="10.0.0" />
+    <PackageReference Include="FakeItEasy" Version="9.0.1" />
+    <PackageReference Include="FluentAssertions" Version="7.2.1" />
+    <PackageReference Include="Microsoft.CodeCoverage" Version="18.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" Version="10.0.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.10" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.analyzers" Version="1.24.0">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.3" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.analyzers" Version="1.27.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
