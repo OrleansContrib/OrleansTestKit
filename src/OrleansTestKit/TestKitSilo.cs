@@ -19,6 +19,14 @@ namespace Orleans.TestKit;
 /// </summary>
 public sealed class TestKitSilo
 {
+    private static readonly Lazy<GrainTypeResolver> SharedGrainTypeResolver = new(() =>
+        new ServiceCollection()
+            .AddSingleton<GrainTypeResolver>()
+            .AddSingleton<IGrainTypeProvider, AttributeGrainTypeProvider>()
+            .AddSerializer()
+            .BuildServiceProvider()
+            .GetRequiredService<GrainTypeResolver>());
+
     private readonly List<IGrainBase> _activatedGrains = new();
 
     private readonly TestGrainCreator _grainCreator;
@@ -50,16 +58,8 @@ public sealed class TestKitSilo
         GrainRuntime = new TestGrainRuntime(GrainFactory, TimerRegistry, ReminderRegistry, ServiceProvider, StorageManager);
         ServiceProvider.AddService<IGrainRuntime>(GrainRuntime);
 		_grainCreator = new TestGrainCreator(GrainRuntime, ReminderRegistry, ServiceProvider);
-
-
-        var provider = new ServiceCollection()
-            .AddSingleton<GrainTypeResolver>()
-            .AddSingleton<IGrainTypeProvider, AttributeGrainTypeProvider>()
-            .AddSerializer()
-            .BuildServiceProvider();
-
-        _grainTypeResolver = provider.GetRequiredService<GrainTypeResolver>();
-            }
+        _grainTypeResolver = SharedGrainTypeResolver.Value;
+    }
 
     /// <summary>
     /// Gets the silo's grain runtime instance that is injected into the created grain
